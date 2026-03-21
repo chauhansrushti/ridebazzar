@@ -65,6 +65,78 @@ const initializeDatabase = async () => {
   }
 };
 
+// Seed test data if database is empty
+const seedTestData = async () => {
+  try {
+    const [cars] = await db.execute('SELECT COUNT(*) as count FROM cars');
+    
+    if (cars[0].count > 0) {
+      console.log(`✅ Database already has ${cars[0].count} cars`);
+      return; // Data already exists
+    }
+
+    console.log('📊 Seeding test data...');
+    
+    // Check if admin user exists
+    const [adminUsers] = await db.execute('SELECT id FROM users WHERE username = ?', ['admin']);
+    let adminId = 1;
+    
+    if (adminUsers.length === 0) {
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const [result] = await db.execute(
+        'INSERT INTO users (username, email, password, full_name, is_verified, is_active) VALUES (?, ?, ?, ?, ?, ?)',
+        ['admin', 'admin@ridebazzar.com', hashedPassword, 'Admin User', true, true]
+      );
+      adminId = result.insertId;
+      console.log('  ✓ Admin user created');
+    } else {
+      adminId = adminUsers[0].id;
+    }
+
+    // Insert test cars
+    const testCars = [
+      { make: 'Maruti', model: 'Swift', year: 2022, price: 650000, status: 'available', description: 'Well maintained Swift' },
+      { make: 'Hyundai', model: 'Creta', year: 2021, price: 1200000, status: 'sold', description: 'Excellent Creta with low mileage' },
+      { make: 'Honda', model: 'City', year: 2023, price: 1100000, status: 'available', description: 'Brand new Honda City' },
+      { make: 'Tata', model: 'Nexon', year: 2020, price: 950000, status: 'available', description: 'Reliable Nexon' },
+      { make: 'Mahindra', model: 'XUV700', year: 2022, price: 1700000, status: 'sold', description: 'Premium XUV700' },
+    ];
+
+    const carIds = [];
+    for (const car of testCars) {
+      const [result] = await db.execute(
+        'INSERT INTO cars (make, model, year, price, status, seller_id, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
+        [car.make, car.model, car.year, car.price, car.status, adminId, car.description]
+      );
+      carIds.push(result.insertId);
+      console.log(`  ✓ Added ${car.make} ${car.model}`);
+    }
+
+    // Add test bookings
+    if (carIds.length >= 2) {
+      await db.execute(
+        'INSERT INTO bookings (car_id, buyer_id, seller_id, booking_amount, total_amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+        [carIds[1], adminId, adminId, 100000, testCars[1].price, 'confirmed']
+      );
+      console.log('  ✓ Booking 1 created');
+
+      if (carIds.length >= 5) {
+        await db.execute(
+          'INSERT INTO bookings (car_id, buyer_id, seller_id, booking_amount, total_amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+          [carIds[4], adminId, adminId, 100000, testCars[4].price, 'confirmed']
+        );
+        console.log('  ✓ Booking 2 created');
+      }
+    }
+
+    console.log('✅ Test data seeded successfully\n');
+
+  } catch (error) {
+    console.warn('⚠️  Could not seed test data:', error.message);
+  }
+};
+
 // Initialize database before starting server
 initializeDatabase().catch(err => {
   console.error('Failed to initialize database:', err);
@@ -164,6 +236,16 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0'; // Bind to all interfaces
+
+// Start initialization and seeding
+(async () => {
+  try {
+    await initializeDatabase();
+    await seedTestData();
+  } catch (err) {
+    console.error('Setup error:', err);
+  }
+})();
 
 app.listen(PORT, HOST, () => {
   console.log(`🚗 RideBazzar Server running on port ${PORT}`);
