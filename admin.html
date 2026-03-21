@@ -1794,60 +1794,44 @@
     
     
     async function loadTestDrives() {
-      const allTestDrives = JSON.parse(localStorage.getItem('ridebazzar_testdrives') || '[]');
-      const testDrivesTable = document.getElementById('testDrivesTable');
-      
-      console.log('Admin - Loading test drives:', allTestDrives.length);
-      console.log('Sample test drive data:', allTestDrives[0]);
-      
-      if (!testDrivesTable) return;
-      
-      if (allTestDrives.length === 0) {
-        testDrivesTable.innerHTML = '<p style="color: #666; padding: 20px; text-align: center;">No test drive sessions found</p>';
-        return;
-      }
-      
-      // Fetch car details from API for each test drive to get seller info
-      const token = localStorage.getItem('authToken');
-      const enrichedTestDrives = await Promise.all(allTestDrives.map(async (td) => {
-        let sellerName = td.seller;
+      try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
+        const token = localStorage.getItem('authToken');
         
-        // If seller is not in test drive data, try to fetch from API
-        if (!sellerName || sellerName === 'Unknown') {
-          try {
-            const response = await fetch(`http://localhost:5000/api/cars/${td.carId}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (response.ok) {
-              const result = await response.json();
-              if (result.success && result.data) {
-                sellerName = result.data.seller_username || result.data.seller_name || td.seller;
-              }
-            }
-          } catch (error) {
-            console.error('Error fetching car details:', error);
-          }
+        // Try to fetch test drives from backend
+        const response = await fetch(`${config.API_BASE_URL}/inquiries`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const testDrivesTable = document.getElementById('testDrivesTable');
+        if (!testDrivesTable) return;
+        
+        if (!response.ok) {
+          testDrivesTable.innerHTML = '<p style="color: #666; padding: 20px; text-align: center;">No test drive sessions found</p>';
+          return;
         }
         
-        return {
-          ...td,
-          sellerName: sellerName || 'N/A'
-        };
-      }));
-      
-      console.log('Enriched test drives with seller names:', enrichedTestDrives);
-      
-      // Sort by created date (most recent first)
-      enrichedTestDrives.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      
-      testDrivesTable.innerHTML = `
-        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; gap: 15px;">
-            <div style="background: #fff3cd; padding: 10px 20px; border-radius: 8px; border-left: 4px solid #ff9800;">
-              <strong>Pending:</strong> ${enrichedTestDrives.filter(td => td.status === 'pending').length}
-            </div>
-            <div style="background: #d4edda; padding: 10px 20px; border-radius: 8px; border-left: 4px solid #28a745;">
-              <strong>Confirmed:</strong> ${enrichedTestDrives.filter(td => td.status === 'confirmed').length}
+        const result = await response.json();
+        const allTestDrives = result.success && Array.isArray(result.data) ? result.data : [];
+        
+        console.log('Admin - Loading test drives:', allTestDrives.length);
+        
+        if (allTestDrives.length === 0) {
+          testDrivesTable.innerHTML = '<p style="color: #666; padding: 20px; text-align: center;">No test drive sessions found</p>';
+          return;
+        }
+        
+        // Sort by created date (most recent first)
+        allTestDrives.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
+        testDrivesTable.innerHTML = `
+          <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 15px;">
+              <div style="background: #fff3cd; padding: 10px 20px; border-radius: 8px; border-left: 4px solid #ff9800;">
+                <strong>Pending:</strong> ${allTestDrives.filter(td => td.status === 'pending').length}
+              </div>
+              <div style="background: #d4edda; padding: 10px 20px; border-radius: 8px; border-left: 4px solid #28a745;">
+                <strong>Confirmed:</strong> ${allTestDrives.filter(td => td.status === 'responded').length}
             </div>
             <div style="background: #d1ecf1; padding: 10px 20px; border-radius: 8px; border-left: 4px solid #17a2b8;">
               <strong>Completed:</strong> ${enrichedTestDrives.filter(td => td.status === 'completed').length}
