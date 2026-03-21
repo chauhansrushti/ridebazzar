@@ -13,6 +13,7 @@ const messagesRoutes = require('./routes/messages');
 const db = require('./config/database');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const app = express();
 
@@ -314,6 +315,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Ultra-simple test endpoint (minimal response)
+app.get('/api/test', (req, res) => {
+  res.json({ ok: true });
+});
+
 // Simple status endpoint (no database required)
 app.get('/api/status', (req, res) => {
   try {
@@ -337,33 +343,46 @@ app.get('/api/status', (req, res) => {
 
 // Configuration check endpoint - shows what's configured
 app.get('/api/config-check', (req, res) => {
+  console.log('🔍 Config check requested...');
   try {
-    const jwtSecret = process.env.JWT_SECRET;
-    const dbHost = process.env.DB_HOST;
-    const dbUser = process.env.DB_USER;
-    const dbName = process.env.DB_NAME;
+    const jwtSecret = process.env.JWT_SECRET || '';
+    const dbHost = process.env.DB_HOST || '';
+    const dbUser = process.env.DB_USER || '';
+    const dbName = process.env.DB_NAME || '';
     
-    res.json({
+    let jwtSecretHash = 'NOT_CONFIGURED';
+    if (jwtSecret) {
+      try {
+        jwtSecretHash = crypto.createHash('sha256').update(jwtSecret).digest('hex').substring(0, 16);
+      } catch (e) {
+        jwtSecretHash = 'ERROR_HASHING';
+      }
+    }
+    
+    const response = {
       success: true,
       config: {
         nodeEnv: process.env.NODE_ENV,
         port: process.env.PORT,
         jwtSecretConfigured: !!jwtSecret,
         jwtSecretLength: jwtSecret ? jwtSecret.length : 0,
-        // Hash the secret to verify it matches on both ends
-        jwtSecretHash: jwtSecret ? require('crypto').createHash('sha256').update(jwtSecret).digest('hex').substring(0, 16) : 'NOT_CONFIGURED',
+        jwtSecretHash: jwtSecretHash,
         dbHostConfigured: !!dbHost,
         dbHost: dbHost || 'NOT_CONFIGURED',
         dbUserConfigured: !!dbUser,
         dbNameConfigured: !!dbName,
-        timestamp: new Date().toISOString(),
-        hint: 'If jwtSecretLength != expected, JWT tokens will fail verification'
+        timestamp: new Date().toISOString()
       }
-    });
+    };
+    
+    console.log('✅ Config check response:', response);
+    res.json(response);
   } catch (error) {
+    console.error('❌ Config check error:', error.message);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
+      errorType: error.name
     });
   }
 });
