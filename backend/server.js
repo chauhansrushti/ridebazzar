@@ -321,10 +321,34 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Simple status endpoint (no database required)
+app.get('/api/status', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      status: 'Backend is running',
+      environment: process.env.NODE_ENV,
+      port: process.env.PORT,
+      jwtConfigured: !!process.env.JWT_SECRET,
+      dbConfigured: !!process.env.DB_HOST,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
+
 // Diagnostics endpoint - check admin user and JWT config
 app.get('/api/diagnostics', async (req, res) => {
   try {
     console.log('📋 Diagnostics requested...');
+    console.log('   JWT_SECRET exists:', !!process.env.JWT_SECRET);
+    console.log('   DB_HOST:', process.env.DB_HOST);
+    console.log('   NODE_ENV:', process.env.NODE_ENV);
     
     // Check if admin user exists
     const [adminUsers] = await db.execute('SELECT id, username, email FROM users WHERE username = ?', ['admin']);
@@ -342,6 +366,8 @@ app.get('/api/diagnostics', async (req, res) => {
     const [carCount] = await db.execute('SELECT COUNT(*) as count FROM cars');
     const totalCars = carCount[0].count;
     
+    console.log('✅ Diagnostics successful');
+    
     res.json({
       success: true,
       diagnostics: {
@@ -356,11 +382,14 @@ app.get('/api/diagnostics', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Diagnostics error:', error);
+    console.error('❌ Diagnostics error:', error.message);
+    console.error('   Stack:', error.stack);
     res.status(500).json({
       success: false,
       message: 'Diagnostics check failed',
-      error: error.message
+      error: error.message,
+      errorType: error.name,
+      hint: error.message.includes('ENOTFOUND') ? 'Database connection failed' : 'Database query error'
     });
   }
 });
@@ -416,8 +445,14 @@ app.post('/api/admin-login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Admin login error:', error);
-    res.status(500).json({ success: false, message: 'Admin login failed' });
+    console.error('❌ Admin login error:', error.message);
+    console.error('   Error type:', error.name);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Admin login failed',
+      error: error.message,
+      errorType: error.name
+    });
   }
 });
 
@@ -437,8 +472,17 @@ app.post('/api/verify-token', (req, res) => {
     console.log('🔐 Testing token verification...');
     console.log('   Token length:', token.length);
     console.log('   Token preview:', token.substring(0, 30) + '...');
+    console.log('   JWT_SECRET exists:', !!process.env.JWT_SECRET);
     console.log('   JWT_SECRET length:', process.env.JWT_SECRET?.length || 0);
-    console.log('   JWT_SECRET preview:', process.env.JWT_SECRET?.substring(0, 10) + '...');
+    
+    if (!process.env.JWT_SECRET) {
+      console.error('❌ JWT_SECRET not configured!');
+      return res.status(500).json({
+        success: false,
+        message: 'JWT_SECRET not configured on server',
+        error: 'Missing JWT_SECRET environment variable'
+      });
+    }
     
     const jwt = require('jsonwebtoken');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
