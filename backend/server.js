@@ -215,13 +215,13 @@ const seedTestData = async () => {
     console.log(`  📊 Found ${allUsers.length} existing users in database`);
     console.log(`     Users: ${allUsers.map(u => u.username).join(', ')}`);
 
-    // Insert test cars
+    // Insert test cars with placeholder images
     const testCars = [
-      { make: 'Maruti', model: 'Swift', year: 2022, price: 650000, status: 'available', description: 'Well maintained Swift', fuel_type: 'Petrol', transmission: 'Manual', condition_status: 'Excellent', mileage: 25000, color: 'Red', contact: '9999999999', location: 'Mumbai' },
-      { make: 'Hyundai', model: 'Creta', year: 2021, price: 1200000, status: 'available', description: 'Excellent Creta with low mileage', fuel_type: 'Diesel', transmission: 'Automatic', condition_status: 'Excellent', mileage: 15000, color: 'Blue', contact: '9999999998', location: 'Delhi' },
-      { make: 'Honda', model: 'City', year: 2023, price: 1100000, status: 'available', description: 'Brand new Honda City', fuel_type: 'Petrol', transmission: 'Automatic', condition_status: 'Excellent', mileage: 5000, color: 'White', contact: '9999999997', location: 'Bangalore' },
-      { make: 'Tata', model: 'Nexon', year: 2020, price: 950000, status: 'available', description: 'Reliable Nexon', fuel_type: 'Petrol', transmission: 'Manual', condition_status: 'Good', mileage: 45000, color: 'Black', contact: '9999999996', location: 'Mumbai' },
-      { make: 'Mahindra', model: 'XUV700', year: 2022, price: 1700000, status: 'available', description: 'Premium XUV700', fuel_type: 'Diesel', transmission: 'Automatic', condition_status: 'Excellent', mileage: 20000, color: 'Silver', contact: '9999999995', location: 'Hyderabad' },
+      { make: 'Maruti', model: 'Swift', year: 2022, price: 650000, status: 'available', description: 'Well maintained Swift', fuel_type: 'Petrol', transmission: 'Manual', condition_status: 'Excellent', mileage: 25000, color: 'Red', contact: '9999999999', location: 'Mumbai', images: ['https://images.unsplash.com/photo-1552820728-8ac41f1ce891?w=400'] },
+      { make: 'Hyundai', model: 'Creta', year: 2021, price: 1200000, status: 'available', description: 'Excellent Creta with low mileage', fuel_type: 'Diesel', transmission: 'Automatic', condition_status: 'Excellent', mileage: 15000, color: 'Blue', contact: '9999999998', location: 'Delhi', images: ['https://images.unsplash.com/photo-1606611092475-5eb50e25f35a?w=400'] },
+      { make: 'Honda', model: 'City', year: 2023, price: 1100000, status: 'available', description: 'Brand new Honda City', fuel_type: 'Petrol', transmission: 'Automatic', condition_status: 'Excellent', mileage: 5000, color: 'White', contact: '9999999997', location: 'Bangalore', images: ['https://images.unsplash.com/photo-1606611126006-e27a038c15c8?w=400'] },
+      { make: 'Tata', model: 'Nexon', year: 2020, price: 950000, status: 'available', description: 'Reliable Nexon', fuel_type: 'Petrol', transmission: 'Manual', condition_status: 'Good', mileage: 45000, color: 'Black', contact: '9999999996', location: 'Mumbai', images: ['https://images.unsplash.com/photo-1606611128516-35bc2709bb3b?w=400'] },
+      { make: 'Mahindra', model: 'XUV700', year: 2022, price: 1700000, status: 'available', description: 'Premium XUV700', fuel_type: 'Diesel', transmission: 'Automatic', condition_status: 'Excellent', mileage: 20000, color: 'Silver', contact: '9999999995', location: 'Hyderabad', images: ['https://images.unsplash.com/photo-1606611093613-efb2defeb499?w=400'] },
     ];
 
     console.log(`  🚗 Inserting ${testCars.length} test cars...`);
@@ -229,8 +229,8 @@ const seedTestData = async () => {
     for (const car of testCars) {
       try {
         const [result] = await db.execute(
-          'INSERT INTO cars (make, model, year, price, status, seller_id, description, fuel_type, transmission, condition_status, mileage, color, contact, location, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
-          [car.make, car.model, car.year, car.price, car.status, adminId, car.description, car.fuel_type, car.transmission, car.condition_status, car.mileage, car.color, car.contact, car.location]
+          'INSERT INTO cars (make, model, year, price, status, seller_id, description, fuel_type, transmission, condition_status, mileage, color, contact, location, images, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+          [car.make, car.model, car.year, car.price, car.status, adminId, car.description, car.fuel_type, car.transmission, car.condition_status, car.mileage, car.color, car.contact, car.location, JSON.stringify(car.images || [])]
         );
         carIds.push(result.insertId);
         console.log(`    ✓ Added ${car.make} ${car.model}`);
