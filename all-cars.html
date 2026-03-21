@@ -565,7 +565,18 @@
       
       cars.forEach((car, idx) => {
         const card = document.createElement('div');
-        card.style = 'border:1px solid #eee; border-radius:16px; padding:0; width:320px; background:#fff; box-shadow:0 4px 20px rgba(0,0,0,0.08); cursor:pointer; transition:all 0.3s ease; overflow:hidden;';
+        
+        // Responsive width based on screen size
+        let cardWidth = '320px';
+        if (window.innerWidth <= 600) {
+          cardWidth = '100%';
+        } else if (window.innerWidth <= 1000) {
+          cardWidth = 'calc(50% - 8px)';
+        } else if (window.innerWidth <= 1400) {
+          cardWidth = 'calc(33.333% - 10px)';
+        }
+        
+        card.style = `border:1px solid #eee; border-radius:16px; padding:0; width:${cardWidth}; background:#fff; box-shadow:0 4px 20px rgba(0,0,0,0.08); cursor:pointer; transition:all 0.3s ease; overflow:hidden;`;
         
         // Add hover effects with continuous zoom animation
         card.onmouseenter = () => {
@@ -1033,6 +1044,28 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 15px !important;
       justify-content: center;
+    }
+
+    /* Mobile responsive grid */
+    @media (max-width: 1400px) {
+      #allCarsList {
+        grid-template-columns: repeat(3, 1fr) !important;
+      }
+    }
+
+    @media (max-width: 1000px) {
+      #allCarsList {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+
+    @media (max-width: 600px) {
+      #allCarsList {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+      }
     }
     
     /* Login Modal Styles */
