@@ -10,13 +10,31 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="js/config.js"></script>
   <script>
+    // Ensure URLs always have /api prefix
+    function ensureApiPrefix(url) {
+      if (!url.includes('/api')) {
+        if (url.startsWith('http')) {
+          // Add /api before any path
+          const urlObj = new URL(url);
+          if (!urlObj.pathname.startsWith('/api')) {
+            urlObj.pathname = '/api' + urlObj.pathname;
+            return urlObj.toString();
+          }
+        }
+      }
+      return url;
+    }
+    
     // Fallback config if config.js doesn't load
     if (typeof CONFIG === 'undefined') {
       function getRideBazzarConfig() {
         const isProduction = window.location.hostname !== 'localhost';
-        const API_BASE_URL = isProduction 
-          ? window.location.origin + '/api'
-          : 'http://localhost:5000/api';
+        const baseUrl = isProduction 
+          ? window.location.origin
+          : 'http://localhost:5000';
+        
+        const API_BASE_URL = ensureApiPrefix(baseUrl + '/api');
+        
         return {
           API_BASE_URL,
           AUTH_API: API_BASE_URL + '/auth',
@@ -28,6 +46,12 @@
         };
       }
       CONFIG = getRideBazzarConfig();
+    }
+    
+    // Verify config has /api
+    if (CONFIG && !CONFIG.API_BASE_URL.includes('/api')) {
+      console.warn('⚠️  WARNING: CONFIG.API_BASE_URL missing /api prefix, fixing...');
+      CONFIG.API_BASE_URL = ensureApiPrefix(CONFIG.API_BASE_URL);
     }
   </script>
   <style>
@@ -1003,8 +1027,16 @@
           origin: window.location.origin
         });
         
+        // Ensure API_BASE_URL has /api prefix
+        let apiBase = config.API_BASE_URL;
+        if (!apiBase.includes('/api')) {
+          console.warn('⚠️  API_BASE_URL missing /api, adding it...');
+          apiBase = ensureApiPrefix(apiBase);
+          console.log('✅ Fixed API_BASE_URL:', apiBase);
+        }
+        
         // Use public endpoint (no auth required)
-        const statsUrl = addCacheBuster(`${config.API_BASE_URL}/public/stats`);
+        const statsUrl = addCacheBuster(`${apiBase}/public/stats`);
         console.log('📊 Fetching stats from:', statsUrl);
         
         const response = await fetch(statsUrl);
@@ -1062,9 +1094,15 @@
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const activities = [];
         
+        // Ensure API_BASE_URL has /api prefix
+        let apiBase = config.API_BASE_URL;
+        if (!apiBase.includes('/api')) {
+          apiBase = ensureApiPrefix(apiBase);
+        }
+        
         // 1. Get cars from public endpoint
         try {
-          const carsUrl = addCacheBuster(`${config.API_BASE_URL}/public/cars`);
+          const carsUrl = addCacheBuster(`${apiBase}/public/cars`);
           const carsResponse = await fetch(carsUrl);
           
           if (carsResponse.ok) {
@@ -1089,7 +1127,7 @@
         
         // 2. Get bookings from public endpoint
         try {
-          const bookingsUrl = addCacheBuster(`${config.API_BASE_URL}/public/bookings`);
+          const bookingsUrl = addCacheBuster(`${apiBase}/public/bookings`);
           const bookingsResponse = await fetch(bookingsUrl);
           
           if (bookingsResponse.ok) {
@@ -1159,8 +1197,14 @@
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         
+        // Ensure API_BASE_URL has /api prefix
+        let apiBase = config.API_BASE_URL;
+        if (!apiBase.includes('/api')) {
+          apiBase = ensureApiPrefix(apiBase);
+        }
+        
         // Use public endpoint (no auth required)
-        const usersUrl = addCacheBuster(`${config.API_BASE_URL}/public/users`);
+        const usersUrl = addCacheBuster(`${apiBase}/public/users`);
         console.log('🔍 Fetching users from:', usersUrl);
         
         const response = await fetch(usersUrl);
@@ -1244,8 +1288,14 @@
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         
+        // Ensure API_BASE_URL has /api prefix
+        let apiBase = config.API_BASE_URL;
+        if (!apiBase.includes('/api')) {
+          apiBase = ensureApiPrefix(apiBase);
+        }
+        
         // Use public endpoint (no auth required)
-        const carsUrl = addCacheBuster(`${config.API_BASE_URL}/public/cars`);
+        const carsUrl = addCacheBuster(`${apiBase}/public/cars`);
         console.log('🔍 Fetching cars from:', carsUrl);
         
         const response = await fetch(carsUrl);
@@ -1363,8 +1413,14 @@
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         
+        // Ensure API_BASE_URL has /api prefix
+        let apiBase = config.API_BASE_URL;
+        if (!apiBase.includes('/api')) {
+          apiBase = ensureApiPrefix(apiBase);
+        }
+        
         // Fetch cars from public endpoint (no auth required)
-        const carsUrl = addCacheBuster(`${config.API_BASE_URL}/public/cars`);
+        const carsUrl = addCacheBuster(`${apiBase}/public/cars`);
         const carsResponse = await fetch(carsUrl);
         const carsData = await carsResponse.json();
         const cars = carsData.success ? (carsData.data || []) : [];
@@ -1372,7 +1428,7 @@
         // Fetch bookings from public endpoint (no auth required)
         let bookings = [];
         try {
-          const bookingsUrl = addCacheBuster(`${config.API_BASE_URL}/public/bookings`);
+          const bookingsUrl = addCacheBuster(`${apiBase}/public/bookings`);
           const bookingsResponse = await fetch(bookingsUrl);
           const bookingsData = await bookingsResponse.json();
           bookings = (bookingsData.success && Array.isArray(bookingsData.data)) ? bookingsData.data : [];
@@ -1823,8 +1879,14 @@
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         
+        // Ensure API_BASE_URL has /api prefix
+        let apiBase = config.API_BASE_URL;
+        if (!apiBase.includes('/api')) {
+          apiBase = ensureApiPrefix(apiBase);
+        }
+        
         // Use public endpoint (no auth required)
-        const bookingsUrl = addCacheBuster(`${config.API_BASE_URL}/public/bookings`);
+        const bookingsUrl = addCacheBuster(`${apiBase}/public/bookings`);
         console.log('🔍 Fetching bookings from:', bookingsUrl);
         
         const response = await fetch(bookingsUrl);

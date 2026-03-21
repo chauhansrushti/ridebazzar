@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test All Endpoints</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        .test { margin: 10px 0; padding: 15px; border: 1px solid #444; border-radius: 5px; }
+        .success { background: #1e3a1f; border-left: 4px solid #4ec9b0; }
+        .error { background: #3a1e1e; border-left: 4px solid #f48771; }
+        .pending { background: #3a2a1e; border-left: 4px solid #dcdcaa; }
+        h1 { color: #4ec9b0; }
+        .response { margin-top: 10px; padding: 10px; background: #252526; border-radius: 3px; max-height: 200px; overflow-y: auto; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 RideBazzar Endpoints Test</h1>
+    <p>Testing all public API endpoints...</p>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        const endpoints = [
+            { name: 'Health Check', url: `${API_BASE}/health` },
+            { name: 'Status', url: `${API_BASE}/status` },
+            { name: 'Config Check', url: `${API_BASE}/config-check` },
+            { name: 'Public Users', url: `${API_BASE}/public/users` },
+            { name: 'Public Cars', url: `${API_BASE}/public/cars` },
+            { name: 'Public Bookings', url: `${API_BASE}/public/bookings` },
+            { name: 'Public Stats', url: `${API_BASE}/public/stats` }
+        ];
+
+        async function testEndpoint(endpoint) {
+            const resultsDiv = document.getElementById('results');
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test pending';
+            testDiv.innerHTML = `<strong>Testing:</strong> ${endpoint.name}<br><strong>URL:</strong> ${endpoint.url}`;
+            resultsDiv.appendChild(testDiv);
+
+            try {
+                const response = await fetch(endpoint.url);
+                const data = await response.json();
+                
+                testDiv.className = response.ok ? 'test success' : 'test error';
+                testDiv.innerHTML = `
+                    <strong>✅ ${endpoint.name}</strong><br>
+                    <strong>Status:</strong> ${response.status}<br>
+                    <div class="response"><pre>${JSON.stringify(data, null, 2).substring(0, 500)}</pre></div>
+                `;
+            } catch (error) {
+                testDiv.className = 'test error';
+                testDiv.innerHTML = `
+                    <strong>❌ ${endpoint.name}</strong><br>
+                    <strong>Error:</strong> ${error.message}
+                `;
+            }
+        }
+
+        // Test all endpoints sequentially
+        (async function() {
+            for (const endpoint of endpoints) {
+                await testEndpoint(endpoint);
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        })();
+    </script>
+</body>
+</html>
