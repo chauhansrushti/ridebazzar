@@ -100,7 +100,10 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Static file serving
+// Static file serving - Serve frontend files from parent directory
+app.use(express.static(path.join(__dirname, '..')));
+
+// Static file serving - Serve uploads
 app.use('/uploads', express.static('uploads'));
 
 // Routes
