@@ -132,9 +132,28 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
+// 404 handler - serve home.html for any unknown routes (SPA fallback)
 app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+  const filePath = path.join(__dirname, '..', req.path);
+  
+  // Try to serve the file first
+  if (req.path.includes('.')) {
+    // If it has a file extension, return 404
+    return res.status(404).json({ error: 'Route not found' });
+  }
+  
+  // For requests without extension, try to serve as HTML file with .html extension
+  const htmlPath = path.join(__dirname, '..', req.path + '.html');
+  res.sendFile(htmlPath, (err) => {
+    if (err) {
+      // If that fails, serve home.html as fallback
+      res.sendFile(path.join(__dirname, '..', 'home.html'), (homeErr) => {
+        if (homeErr) {
+          res.status(404).json({ error: 'Route not found' });
+        }
+      });
+    }
+  });
 });
 
 const PORT = process.env.PORT || 5000;
