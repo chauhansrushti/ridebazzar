@@ -719,6 +719,7 @@
         <div style="margin-bottom: 20px;">
           <h3>🧪 API Endpoint Tests</h3>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <button class="admin-btn" onclick="testAPI()" style="background: #dc3545;">Test API</button>
             <button class="admin-btn" onclick="testStatusEndpoint()" style="background: #28a745;">Test Status</button>
             <button class="admin-btn" onclick="testConfigCheck()" style="background: #17a2b8;">Test Config</button>
             <button class="admin-btn" onclick="testDiagnosticsEndpoint()">Test Diagnostics</button>
@@ -2695,6 +2696,37 @@
       document.getElementById('configApiUrl').textContent = config.API_BASE_URL;
       document.getElementById('configAuthUrl').textContent = config.AUTH_API;
       document.getElementById('configEnv').textContent = window.location.hostname === 'localhost' ? 'Development' : 'Production';
+    }
+
+    async function testAPI() {
+      const resultsDiv = document.getElementById('debugResults');
+      resultsDiv.innerHTML = '<p>Testing /api/test (ultra-simple healthcheck)...</p>';
+
+      try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
+        const testUrl = addCacheBuster(`${config.API_BASE_URL}/test`);
+        console.log('🧪 Testing API with URL:', testUrl);
+
+        const response = await fetch(testUrl);
+        console.log('   Response status:', response.status);
+
+        if (!response.ok) {
+          resultsDiv.innerHTML = `<p>❌ Error, HTTP Status: ${response.status}</p>`;
+          return;
+        }
+
+        const result = await response.json();
+        console.log('   Test result:', result);
+
+        if (result.ok) {
+          resultsDiv.innerHTML = `<p>✅ Success! API is working: ${JSON.stringify(result)}</p>`;
+        } else {
+          resultsDiv.innerHTML = `<p>⚠️ API returned non-ok status: ${JSON.stringify(result)}</p>`;
+        }
+      } catch (error) {
+        console.error('❌ Test API error:', error.message);
+        resultsDiv.innerHTML = `<p>❌ Network Error: ${error.message}</p>`;
+      }
     }
 
     async function testStatusEndpoint() {
