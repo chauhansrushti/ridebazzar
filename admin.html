@@ -996,11 +996,32 @@
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         
+        // Debug: Log config to understand production URL issue
+        console.log('📊 Config:', {
+          API_BASE_URL: config.API_BASE_URL,
+          hostname: window.location.hostname,
+          origin: window.location.origin
+        });
+        
         // Use public endpoint (no auth required)
         const statsUrl = addCacheBuster(`${config.API_BASE_URL}/public/stats`);
         console.log('📊 Fetching stats from:', statsUrl);
         
         const response = await fetch(statsUrl);
+        
+        // Handle non-JSON responses
+        if (!response.ok) {
+          console.error('Failed to fetch stats, status:', response.status);
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.error('Non-JSON response:', text.substring(0, 100));
+          throw new Error('API returned non-JSON response');
+        }
+        
         const result = await response.json();
         
         console.log('📊 Stats response:', result);
@@ -1143,8 +1164,19 @@
         console.log('🔍 Fetching users from:', usersUrl);
         
         const response = await fetch(usersUrl);
-        const result = await response.json();
         
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.error('Non-JSON response:', text.substring(0, 100));
+          throw new Error('API returned non-JSON response');
+        }
+        
+        const result = await response.json();
         console.log('📊 Users response:', result);
         
         if (!result.success) {
@@ -1217,8 +1249,19 @@
         console.log('🔍 Fetching cars from:', carsUrl);
         
         const response = await fetch(carsUrl);
-        const result = await response.json();
         
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.error('Non-JSON response:', text.substring(0, 100));
+          throw new Error('API returned non-JSON response');
+        }
+        
+        const result = await response.json();
         console.log('📊 Cars response:', result);
         
         if (!result.success) {
