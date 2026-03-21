@@ -5,6 +5,15 @@ WORKDIR /app
 # Copy root package.json
 COPY package.json ./
 
+# Copy all HTML files and static assets from root
+COPY *.html ./
+COPY css/ ./css/
+COPY js/ ./js/
+COPY images/ ./images/
+COPY aboutus/ ./aboutus/
+COPY carfinance/ ./carfinance/
+COPY hub/ ./hub/
+
 # Copy backend
 COPY backend ./backend
 
