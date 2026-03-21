@@ -285,6 +285,9 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
+// Trust proxy - needed for Railway and other reverse proxies to send X-Forwarded-For header
+app.set('trust proxy', 1);
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
