@@ -34,11 +34,23 @@ const initializeDatabase = async () => {
       const statements = schema
         .split(';')
         .map(stmt => stmt.trim())
-        .filter(stmt => stmt && !stmt.startsWith('--')); // Remove empty and comment lines
+        .filter(stmt => {
+          // Remove empty, comment lines, USE statements, and CREATE DATABASE statements
+          const isValid = stmt && 
+                         !stmt.startsWith('--') && 
+                         !stmt.toUpperCase().startsWith('USE ') &&
+                         !stmt.toUpperCase().startsWith('CREATE DATABASE');
+          return isValid;
+        });
       
       for (const statement of statements) {
         if (statement) {
-          await db.execute(statement);
+          try {
+            await db.execute(statement);
+          } catch (err) {
+            // Log but continue with other statements
+            console.warn(`⚠️ Statement skipped: ${err.message.substring(0, 80)}`);
+          }
         }
       }
       
