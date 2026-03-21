@@ -17,7 +17,15 @@
         const API_BASE_URL = isProduction 
           ? window.location.origin + '/api'
           : 'http://localhost:5000/api';
-        return { API_BASE_URL };
+        return {
+          API_BASE_URL,
+          AUTH_API: API_BASE_URL + '/auth',
+          CARS_API: API_BASE_URL + '/cars',
+          BOOKINGS_API: API_BASE_URL + '/bookings',
+          PAYMENTS_API: API_BASE_URL + '/payments',
+          INQUIRIES_API: API_BASE_URL + '/inquiries',
+          MESSAGES_API: API_BASE_URL + '/messages'
+        };
       }
       var CONFIG = getRideBazzarConfig();
     }
