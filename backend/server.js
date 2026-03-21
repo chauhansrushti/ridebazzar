@@ -185,7 +185,40 @@ const seedTestData = async () => {
     }
     
     if (carCount > 0) {
-      console.log(`✅ Database already has ${carCount} cars. Skipping seed.`);
+      console.log(`✅ Database already has ${carCount} cars. Checking for missing images...`);
+      
+      // Update existing test cars with images if they don't have them
+      try {
+        const testCarsWithImages = [
+          { make: 'Maruti', model: 'Swift', images: ['https://images.unsplash.com/photo-1552820728-8ac41f1ce891?w=400'] },
+          { make: 'Hyundai', model: 'Creta', images: ['https://images.unsplash.com/photo-1606611092475-5eb50e25f35a?w=400'] },
+          { make: 'Honda', model: 'City', images: ['https://images.unsplash.com/photo-1606611126006-e27a038c15c8?w=400'] },
+          { make: 'Tata', model: 'Nexon', images: ['https://images.unsplash.com/photo-1606611128516-35bc2709bb3b?w=400'] },
+          { make: 'Mahindra', model: 'XUV700', images: ['https://images.unsplash.com/photo-1606611093613-efb2defeb499?w=400'] },
+        ];
+        
+        for (const testCar of testCarsWithImages) {
+          const [existingCars] = await db.execute(
+            'SELECT id, images FROM cars WHERE make = ? AND model = ?',
+            [testCar.make, testCar.model]
+          );
+          
+          if (existingCars.length > 0) {
+            const car = existingCars[0];
+            // Only update if car has no images or empty images
+            if (!car.images || car.images === '[]' || car.images === '') {
+              await db.execute(
+                'UPDATE cars SET images = ? WHERE id = ?',
+                [JSON.stringify(testCar.images), car.id]
+              );
+              console.log(`  📸 Added images to ${testCar.make} ${testCar.model}`);
+            }
+          }
+        }
+      } catch (updateErr) {
+        console.warn('  ⚠️  Could not update car images:', updateErr.message);
+      }
+      
       return; // Data already exists
     }
 
