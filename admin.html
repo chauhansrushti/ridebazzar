@@ -8,6 +8,20 @@
   <link rel="stylesheet" href="css/index.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    // Fallback config if config.js doesn't load
+    if (typeof CONFIG === 'undefined') {
+      function getRideBazzarConfig() {
+        const isProduction = window.location.hostname !== 'localhost';
+        const API_BASE_URL = isProduction 
+          ? window.location.origin + '/api'
+          : 'http://localhost:5000/api';
+        return { API_BASE_URL };
+      }
+      var CONFIG = getRideBazzarConfig();
+    }
+  </script>
   <style>
     body {
       background: #f8f9fa;
@@ -890,17 +904,18 @@
 
     async function loadStatistics() {
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
         // Fetch users count from backend
-        const usersResponse = await fetch('http://localhost:5000/api/auth/users', {
+        const usersResponse = await fetch(`${config.API_BASE_URL}/auth/users`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const usersData = await usersResponse.json();
         const userCount = usersData.success ? (usersData.data || []).length : 0;
         
         // Fetch cars from backend API
-        const carsResponse = await fetch('http://localhost:5000/api/cars?limit=1000', {
+        const carsResponse = await fetch(`${config.API_BASE_URL}/cars?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
@@ -909,7 +924,7 @@
         // Fetch bookings from backend API (use my-bookings and my-sales)
         let bookings = [];
         try {
-          const myBookingsResponse = await fetch('http://localhost:5000/api/bookings/my-bookings', {
+          const myBookingsResponse = await fetch(`${config.API_BASE_URL}/bookings/my-bookings`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const myBookingsData = await myBookingsResponse.json();
@@ -959,7 +974,7 @@
         
         // 1. Transactions from backend
         try {
-          const transResponse = await fetch('http://localhost:5000/api/payments/admin/all', {
+          const transResponse = await fetch(`${config.API_BASE_URL}/payments/admin/all`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           
@@ -2777,10 +2792,11 @@
     
     async function generateSalesReport() {
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
         // Fetch cars from backend
-        const carsResponse = await fetch('http://localhost:5000/api/cars?limit=1000', {
+        const carsResponse = await fetch(`${config.API_BASE_URL}/cars?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
@@ -2789,7 +2805,7 @@
         // Fetch bookings from backend
         let bookings = [];
         try {
-          const bookingsResponse = await fetch('http://localhost:5000/api/bookings/admin/all-bookings', {
+          const bookingsResponse = await fetch(`${config.API_BASE_URL}/bookings/admin/all-bookings`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const bookingsData = await bookingsResponse.json();
@@ -2857,10 +2873,11 @@
     
     async function generateUserReport() {
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
         // Fetch users from backend
-        const usersResponse = await fetch('http://localhost:5000/api/auth/users', {
+        const usersResponse = await fetch(`${config.API_BASE_URL}/auth/users`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const usersData = await usersResponse.json();
@@ -2869,7 +2886,7 @@
         // Fetch bookings from backend
         let bookings = [];
         try {
-          const bookingsResponse = await fetch('http://localhost:5000/api/bookings/admin/all-bookings', {
+          const bookingsResponse = await fetch(`${config.API_BASE_URL}/bookings/admin/all-bookings`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const bookingsData = await bookingsResponse.json();
@@ -2939,10 +2956,11 @@
     
     async function generateInventoryReport() {
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
         // Fetch cars from backend
-        const carsResponse = await fetch('http://localhost:5000/api/cars?limit=1000', {
+        const carsResponse = await fetch(`${config.API_BASE_URL}/cars?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
