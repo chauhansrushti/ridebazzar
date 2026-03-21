@@ -519,6 +519,7 @@
       <li><button class="admin-menu-item" onclick="managePayments()"><span><i class="material-icons">credit_card</i></span> Payments</button></li>
       <li><button class="admin-menu-item" onclick="viewReports()"><span>📑</span> Reports</button></li>
       <li><button class="admin-menu-item" onclick="manageSettings()"><span><i class="material-icons">settings</i></span> Settings</button></li>
+      <li><button class="admin-menu-item" onclick="showDebugPanel()"><span>🔧</span> Debug</button></li>
       <li style="margin-top: 30px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.2);">
         <button class="admin-menu-item" onclick="logout()"><span>🚪</span> Logout</button>
       </li>
@@ -700,6 +701,47 @@
         <div style="margin-top: 20px;">
           <p>Settings management coming soon...</p>
         </div>
+      </div>
+    </div>
+
+    <!-- Debug Section -->
+    <div id="debugSection" class="admin-section" style="display: none;">
+      <h2 style="margin-bottom: 20px;"><i class="material-icons">bug_report</i> Debug Panel</h2>
+      <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        
+        <div style="margin-bottom: 20px;">
+          <h3>🔑 Token Information</h3>
+          <div id="tokenInfo" style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto;">
+            Loading token info...
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <h3>🧪 API Endpoint Tests</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <button class="admin-btn" onclick="testDiagnosticsEndpoint()">Test Diagnostics</button>
+            <button class="admin-btn" onclick="testTokenVerification()">Test Token</button>
+            <button class="admin-btn" onclick="testUsersEndpoint()">Test /users</button>
+            <button class="admin-btn" onclick="loginAdmin()">Re-login Admin</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <h3>📋 Test Results</h3>
+          <div id="debugResults" style="background: #f8f9fa; padding: 15px; border-radius: 8px; max-height: 400px; overflow-y: auto;">
+            Click a test button above to see results...
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+          <h3>🔍 Configuration</h3>
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px;">
+            <p>API Base URL: <strong id="configApiUrl">Loading...</strong></p>
+            <p>Auth API: <strong id="configAuthUrl">Loading...</strong></p>
+            <p>Environment: <strong id="configEnv">Loading...</strong></p>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -920,7 +962,8 @@
         'testdrives': 'testDrivesSection',
         'payments': 'paymentsSection',
         'reports': 'reportsSection',
-        'settings': 'settingsSection'
+        'settings': 'settingsSection',
+        'debug': 'debugSection'
       };
       
       const section = document.getElementById(sectionMap[sectionName]);
@@ -2592,6 +2635,181 @@
     
     function manageSettings() {
       showSection('settings');
+    }
+
+    function showDebugPanel() {
+      showSection('debug');
+      updateTokenInfo();
+      updateConfigInfo();
+    }
+
+    function updateTokenInfo() {
+      const token = localStorage.getItem('authToken');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      const tokenInfo = document.getElementById('tokenInfo');
+      if (!token) {
+        tokenInfo.innerHTML = '<p style="color: red;">❌ No token found in localStorage</p>';
+        return;
+      }
+
+      try {
+        // Decode JWT without verification (just to show payload)
+        const parts = token.split('.');
+        const payload = JSON.parse(atob(parts[1]));
+        const expiresAt = new Date(payload.exp * 1000);
+        const isExpired = expiresAt < new Date();
+
+        tokenInfo.innerHTML = `
+          <p><strong style="color: ${isExpired ? 'red' : 'green'};">Token Status:</strong> ${isExpired ? '❌ EXPIRED' : '✅ VALID'}</p>
+          <p><strong>User:</strong> ${payload.username} (ID: ${payload.userId})</p>
+          <p><strong>Role:</strong> ${payload.role}</p>
+          <p><strong>Expires At:</strong> ${expiresAt.toLocaleString()}</p>
+          <p><strong>Token Length:</strong> ${token.length} chars</p>
+          <p><strong>Token Preview:</strong> ${token.substring(0, 40)}...</p>
+        `;
+      } catch (error) {
+        tokenInfo.innerHTML = `<p style="color: red;">❌ Error decoding token: ${error.message}</p>`;
+      }
+    }
+
+    function updateConfigInfo() {
+      const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
+      document.getElementById('configApiUrl').textContent = config.API_BASE_URL;
+      document.getElementById('configAuthUrl').textContent = config.AUTH_API;
+      document.getElementById('configEnv').textContent = window.location.hostname === 'localhost' ? 'Development' : 'Production';
+    }
+
+    async function testDiagnosticsEndpoint() {
+      const resultsDiv = document.getElementById('debugResults');
+      resultsDiv.innerHTML = '<p>Testing /api/diagnostics...</p>';
+
+      try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
+        const response = await fetch(`${config.API_BASE_URL}/diagnostics`);
+        const result = await response.json();
+
+        if (result.success) {
+          resultsDiv.innerHTML = `
+            <h4>✅ Diagnostics Success</h4>
+            <pre style="background: #e8f5e9; padding: 10px; border-radius: 5px;">${JSON.stringify(result.diagnostics, null, 2)}</pre>
+          `;
+        } else {
+          resultsDiv.innerHTML = `<h4 style="color: red;">❌ Error: ${result.message}</h4>`;
+        }
+      } catch (error) {
+        resultsDiv.innerHTML = `<h4 style="color: red;">❌ Network Error: ${error.message}</h4>`;
+      }
+    }
+
+    async function testTokenVerification() {
+      const resultsDiv = document.getElementById('debugResults');
+      const token = localStorage.getItem('authToken');
+
+      if (!token) {
+        resultsDiv.innerHTML = '<p style="color: red;">❌ No token found in localStorage</p>';
+        return;
+      }
+
+      resultsDiv.innerHTML = '<p>Testing token verification...</p>';
+
+      try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
+        const response = await fetch(`${config.API_BASE_URL}/verify-token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          resultsDiv.innerHTML = `
+            <h4>✅ Token is Valid</h4>
+            <pre style="background: #e8f5e9; padding: 10px; border-radius: 5px;">${JSON.stringify(result.decoded, null, 2)}</pre>
+            <p><strong>Expires At:</strong> ${result.expiresAt}</p>
+          `;
+        } else {
+          resultsDiv.innerHTML = `
+            <h4 style="color: red;">❌ Token Verification Failed</h4>
+            <p><strong>Error:</strong> ${result.error}</p>
+            <p><strong>Details:</strong> ${result.details}</p>
+          `;
+        }
+      } catch (error) {
+        resultsDiv.innerHTML = `<h4 style="color: red;">❌ Network Error: ${error.message}</h4>`;
+      }
+    }
+
+    async function testUsersEndpoint() {
+      const resultsDiv = document.getElementById('debugResults');
+      const token = localStorage.getItem('authToken');
+
+      if (!token) {
+        resultsDiv.innerHTML = '<p style="color: red;">❌ No token found in localStorage</p>';
+        return;
+      }
+
+      resultsDiv.innerHTML = '<p>Testing /api/auth/users endpoint...</p>';
+
+      try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
+        const response = await fetch(`${config.AUTH_API}/users`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          resultsDiv.innerHTML = `
+            <h4>✅ Users Endpoint Success</h4>
+            <p><strong>Users Found:</strong> ${result.data.length}</p>
+            <pre style="background: #e8f5e9; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto;">${JSON.stringify(result.data, null, 2)}</pre>
+          `;
+        } else {
+          resultsDiv.innerHTML = `
+            <h4 style="color: red;">❌ Error</h4>
+            <p><strong>Message:</strong> ${result.message}</p>
+            <p><strong>Response:</strong> ${response.status} ${response.statusText}</p>
+          `;
+        }
+      } catch (error) {
+        resultsDiv.innerHTML = `<h4 style="color: red;">❌ Network Error: ${error.message}</h4>`;
+      }
+    }
+
+    async function loginAdmin() {
+      const resultsDiv = document.getElementById('debugResults');
+      resultsDiv.innerHTML = '<p>Attempting admin login...</p>';
+
+      try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
+        const response = await fetch(`${config.API_BASE_URL}/admin-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: 'admin', password: 'admin123' })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          // Save new token
+          localStorage.setItem('authToken', result.data.token);
+          localStorage.setItem('user', JSON.stringify(result.data.user));
+          resultsDiv.innerHTML = `
+            <h4>✅ Admin Login Successful</h4>
+            <p><strong>User:</strong> ${result.data.user.username}</p>
+            <p><strong>Token saved to localStorage</strong></p>
+            <pre style="background: #e8f5e9; padding: 10px; border-radius: 5px;">${JSON.stringify(result.data.user, null, 2)}</pre>
+          `;
+          setTimeout(() => updateTokenInfo(), 500);
+        } else {
+          resultsDiv.innerHTML = `<h4 style="color: red;">❌ Login Failed: ${result.message}</h4>`;
+        }
+      } catch (error) {
+        resultsDiv.innerHTML = `<h4 style="color: red;">❌ Network Error: ${error.message}</h4>`;
+      }
     }
     
     function refreshUsers() {
