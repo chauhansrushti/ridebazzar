@@ -1,2 +1,10 @@
 [providers]
 nodejs = "18"
+
+[build]
+cmds = [
+  "npm install --prefix backend"
+]
+
+[start]
+cmd = "npm start"
