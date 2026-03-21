@@ -539,14 +539,14 @@
 
                 <form id="loginForm">
                     <div class="form-group">
-                        <label for="email">Email</label>
+                        <label for="email">Email or Username</label>
                         <input 
-                            type="email" 
+                            type="text" 
                             id="email" 
                             name="email" 
-                            placeholder="anna@gmail.com"
+                            placeholder="admin"
                             required
-                            autocomplete="email">
+                            autocomplete="username">
                     </div>
 
                     <div class="form-group">
@@ -563,6 +563,14 @@
                         </div>
                     </div>
 
+                    <div style="background: #e8f5e9; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; display: none;" id="testCredsInfo">
+                        <strong>📝 Test Credentials:</strong>
+                        <div style="margin-top: 8px; color: #2e7d32;">
+                            • Username: <strong>admin</strong> | Password: <strong>admin123</strong><br>
+                            • Username: <strong>srushti</strong> | Password: <strong>(check DB)</strong>
+                        </div>
+                    </div>
+
                     <div class="form-options">
                         <div class="remember-me">
                             <input type="checkbox" id="remember" name="remember">
@@ -572,6 +580,10 @@
                     </div>
 
                     <button type="submit" class="login-btn">Log in</button>
+
+                    <button type="button" class="google-login" onclick="testConnection(); event.preventDefault();" style="background: #f0f0f0; color: #333; margin-bottom: 15px;">
+                        🔧 Test Connection
+                    </button>
 
                     <button type="button" class="google-login" onclick="alert('Google login coming soon!')">
                         <svg class="google-icon" viewBox="0 0 24 24">
@@ -667,22 +679,25 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
+            const username = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const messageDiv = document.getElementById('message');
 
             try {
                 const apiUrl = getApiBaseUrl() + '/auth/login';
-                console.log('Logging in to:', apiUrl);
+                console.log('🔐 Login attempt');
+                console.log('API URL:', apiUrl);
+                console.log('Username:', username);
                 
                 // Using proper API URL
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: email, password: password })
+                    body: JSON.stringify({ username: username, password: password })
                 })
 
                 const data = await response.json();
+                console.log('Response:', data);
 
                 if (data.success) {
                     // Store token and user data
@@ -706,7 +721,7 @@
             } catch (error) {
                 console.error('Login error:', error);
                 messageDiv.className = 'message error';
-                messageDiv.textContent = '❌ Error connecting to server. Check browser console for details.';
+                messageDiv.textContent = '❌ Connection error. Check console (F12) for details or try again.';
                 messageDiv.style.display = 'block';
             }
         });
@@ -714,6 +729,46 @@
         function switchToRegister() {
             window.location.href = 'home.html#register';
         }
+
+        // Test connection to backend
+        async function testConnection() {
+            const messageDiv = document.getElementById('message');
+            const apiUrl = getApiBaseUrl();
+            
+            messageDiv.className = 'message';
+            messageDiv.textContent = '🔄 Testing connection...';
+            messageDiv.style.display = 'block';
+            
+            try {
+                console.log('Testing API URL:', apiUrl);
+                const response = await fetch(apiUrl + '/public/users', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = `✅ Connection OK! Backend is working (${data.count} users found)`;
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = `⚠️ Backend responded with error: ${data.message || 'Unknown error'}`;
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = `❌ Cannot connect to backend at: ${apiUrl}. Make sure backend is running.`;
+                console.error('Connection test failed:', error);
+            }
+        }
+
+        // Show test credentials on page load if not production
+        window.addEventListener('load', function() {
+            const config = getRideBazzarConfig && getRideBazzarConfig();
+            if (!config || !config.isProduction) {
+                document.getElementById('testCredsInfo').style.display = 'block';
+            }
+        });
 
         // Add subtle animation to shapes
         const shapes = document.querySelectorAll('.shape');
