@@ -995,57 +995,29 @@
     async function loadStatistics() {
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
-        const token = localStorage.getItem('authToken');
         
-        console.log('📊 loadStatistics - CONFIG:', config);
-        console.log('📊 loadStatistics - Token exists:', !!token);
+        // Use public endpoint (no auth required)
+        const statsUrl = addCacheBuster(`${config.API_BASE_URL}/public/stats`);
+        console.log('📊 Fetching stats from:', statsUrl);
         
-        // Fetch users count from backend with cache-busting
-        const usersUrl = addCacheBuster(`${config.AUTH_API}/users`);
-        const usersResponse = await fetch(usersUrl, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const usersData = await usersResponse.json();
-        console.log('📊 Users API Response:', usersData);
-        const userCount = usersData.success ? (usersData.data || []).length : 0;
+        const response = await fetch(statsUrl);
+        const result = await response.json();
         
-        // Fetch cars from backend API with cache-busting
-        const carsUrl = addCacheBuster(`${config.CARS_API}?limit=1000`);
-        const carsResponse = await fetch(carsUrl, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const carsData = await carsResponse.json();
-        console.log('📊 Cars API Response:', carsData);
-        const cars = carsData.success && carsData.data ? (carsData.data.cars || []) : [];
+        console.log('📊 Stats response:', result);
         
-        // Fetch bookings from backend API with cache-busting (use my-bookings and my-sales)
-        let bookings = [];
-        try {
-          const myBookingsUrl = addCacheBuster(`${config.BOOKINGS_API}/my-bookings`);
-          const myBookingsResponse = await fetch(myBookingsUrl, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          const myBookingsData = await myBookingsResponse.json();
-          if (myBookingsData.success) {
-            bookings = myBookingsData.data || [];
-          }
-        } catch (error) {
-          console.warn('Could not fetch bookings:', error);
+        if (!result.success) {
+          console.error('Failed to fetch stats');
+          return;
         }
         
-        // Get test drives from localStorage
-        const testDrives = JSON.parse(localStorage.getItem('ridebazzar_testdrives') || '[]');
-        
-        // Calculate stats
-        const soldCars = cars.filter(car => car.status === 'sold');
-        const availableCars = cars.filter(car => car.status === 'available');
+        const stats = result.stats || {};
         
         // Update dashboard stats
-        document.getElementById('totalUsers').textContent = userCount;
-        document.getElementById('totalCars').textContent = cars.length;
-        document.getElementById('availableCars').textContent = availableCars.length;
+        document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+        document.getElementById('totalCars').textContent = stats.totalCars || 0;
+        document.getElementById('availableCars').textContent = stats.availableCars || 0;
         
-        console.log('Statistics updated:', { users: userCount, cars: cars.length, available: availableCars.length });
+        console.log('Statistics updated:', stats);
       } catch (error) {
         console.error('Error loading statistics:', error);
         // Show 0 if API fails
@@ -1283,22 +1255,23 @@
       
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
-        const token = localStorage.getItem('authToken');
         
-        // Fetch cars from backend API with cache-busting
-        const carsUrl = addCacheBuster(`${config.CARS_API}?limit=1000`);
-        const response = await fetch(carsUrl, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        // Use public endpoint (no auth required)
+        const carsUrl = addCacheBuster(`${config.API_BASE_URL}/public/cars`);
+        console.log('🔍 Fetching cars from:', carsUrl);
         
+        const response = await fetch(carsUrl);
         const result = await response.json();
         
+        console.log('📊 Cars response:', result);
+        
         if (!result.success) {
-          carsDiv.innerHTML = `<p style="color: #dc3545; padding: 20px;">Error: ${result.message}</p>`;
+          console.error('❌ API Error:', result.error);
+          carsDiv.innerHTML = `<p style="color: #dc3545; padding: 20px;">Error: ${result.error || 'Failed to load cars'}</p>`;
           return;
         }
         
-        let cars = (result.data && result.data.cars) ? result.data.cars : [];
+        let cars = result.data || [];
         
         // Apply status filter
         if (statusFilter && statusFilter !== 'all') {
@@ -1325,26 +1298,21 @@
           <table style="width: 100%; border-collapse: collapse;">
             <thead style="background: #f8f9fa;">
               <tr>
+                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">ID</th>
                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Car</th>
-                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Seller</th>
                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Price</th>
                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Status</th>
                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Posted</th>
-                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Actions</th>
               </tr>
             </thead>
             <tbody>
               ${cars.map(car => `
                 <tr>
-                  <td style="padding: 12px; border-bottom: 1px solid #dee2e6;"><strong>${car.make} ${car.model}</strong><br><small>${car.year}</small></td>
-                  <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${car.seller_username || car.seller_name || 'N/A'}</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #dee2e6;"><strong>${car.id}</strong></td>
+                  <td style="padding: 12px; border-bottom: 1px solid #dee2e6;"><strong>${car.make} ${car.model}</strong><br><small>${car.year} • ${car.fuel_type || 'N/A'}</small></td>
                   <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">₹${parseFloat(car.price).toLocaleString()}</td>
                   <td style="padding: 12px; border-bottom: 1px solid #dee2e6;"><span style="background: ${car.status === 'sold' ? '#28a745' : car.status === 'available' ? '#007bff' : '#f9b233'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${car.status}</span></td>
                   <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${new Date(car.created_at).toLocaleDateString()}</td>
-                  <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">
-                    <button onclick="window.open('car-details.html?id=${car.id}', '_blank')" style="padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">View</button>
-                    <button onclick="deleteCarFromDB(${car.id})" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
-                  </td>
                 </tr>
               `).join('')}
             </tbody>
@@ -1395,23 +1363,18 @@
       
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
-        const token = localStorage.getItem('authToken');
         
-        // Fetch cars from backend with cache-busting
-        const carsUrl = addCacheBuster(`${config.CARS_API}?limit=1000`);
-        const carsResponse = await fetch(carsUrl, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        // Fetch cars from public endpoint (no auth required)
+        const carsUrl = addCacheBuster(`${config.API_BASE_URL}/public/cars`);
+        const carsResponse = await fetch(carsUrl);
         const carsData = await carsResponse.json();
-        const cars = carsData.success && carsData.data ? (carsData.data.cars || []) : [];
+        const cars = carsData.success ? (carsData.data || []) : [];
         
-        // Fetch bookings from backend with cache-busting (all bookings for admin)
+        // Fetch bookings from public endpoint (no auth required)
         let bookings = [];
         try {
-          const bookingsUrl = addCacheBuster(`${config.BOOKINGS_API}/admin/all-bookings`);
-          const bookingsResponse = await fetch(bookingsUrl, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const bookingsUrl = addCacheBuster(`${config.API_BASE_URL}/public/bookings`);
+          const bookingsResponse = await fetch(bookingsUrl);
           const bookingsData = await bookingsResponse.json();
           bookings = (bookingsData.success && Array.isArray(bookingsData.data)) ? bookingsData.data : [];
         } catch (error) {
@@ -1860,24 +1823,25 @@
     async function loadTestDrives() {
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
-        const token = localStorage.getItem('authToken');
         
-        // Try to fetch test drives from backend with cache-busting
-        const inquiriesUrl = addCacheBuster(`${config.API_BASE_URL}/inquiries`);
-        const response = await fetch(inquiriesUrl, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        // Use public endpoint (no auth required)
+        const bookingsUrl = addCacheBuster(`${config.API_BASE_URL}/public/bookings`);
+        console.log('🔍 Fetching bookings from:', bookingsUrl);
+        
+        const response = await fetch(bookingsUrl);
+        const result = await response.json();
+        
+        console.log('📊 Bookings response:', result);
         
         const testDrivesTable = document.getElementById('testDrivesTable');
         if (!testDrivesTable) return;
         
-        if (!response.ok) {
+        if (!result.success) {
           testDrivesTable.innerHTML = '<p style="color: #666; padding: 20px; text-align: center;">No test drive sessions found</p>';
           return;
         }
         
-        const result = await response.json();
-        const allTestDrives = result.success && Array.isArray(result.data) ? result.data : [];
+        const allTestDrives = result.data || [];
         
         console.log('Admin - Loading test drives:', allTestDrives.length);
         

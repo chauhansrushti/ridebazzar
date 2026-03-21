@@ -409,6 +409,78 @@ app.get('/api/config-check', (req, res) => {
   }
 });
 
+// Public endpoint for all cars (no auth required)
+app.get('/api/public/cars', async (req, res) => {
+  try {
+    console.log('📊 Fetching all cars from database...');
+    const [cars] = await db.execute('SELECT * FROM cars ORDER BY id');
+    console.log(`✅ Retrieved ${cars.length} cars`);
+    res.json({
+      success: true,
+      count: cars.length,
+      data: cars
+    });
+  } catch (error) {
+    console.error('❌ Error fetching cars:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      count: 0,
+      data: []
+    });
+  }
+});
+
+// Public endpoint for all bookings/test drives (no auth required)
+app.get('/api/public/bookings', async (req, res) => {
+  try {
+    console.log('📊 Fetching all bookings from database...');
+    const [bookings] = await db.execute('SELECT * FROM bookings ORDER BY id DESC');
+    console.log(`✅ Retrieved ${bookings.length} bookings`);
+    res.json({
+      success: true,
+      count: bookings.length,
+      data: bookings
+    });
+  } catch (error) {
+    console.error('❌ Error fetching bookings:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      count: 0,
+      data: []
+    });
+  }
+});
+
+// Public endpoint for stats/analytics (no auth required)
+app.get('/api/public/stats', async (req, res) => {
+  try {
+    console.log('📊 Fetching statistics...');
+    const [userCount] = await db.execute('SELECT COUNT(*) as count FROM users');
+    const [carCount] = await db.execute('SELECT COUNT(*) as count FROM cars');
+    const [bookingCount] = await db.execute('SELECT COUNT(*) as count FROM bookings');
+    const [availableCars] = await db.execute("SELECT COUNT(*) as count FROM cars WHERE status = 'available'");
+    
+    res.json({
+      success: true,
+      stats: {
+        totalUsers: userCount[0].count,
+        totalCars: carCount[0].count,
+        totalBookings: bookingCount[0].count,
+        availableCars: availableCars[0].count,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching stats:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Routes - Register AFTER custom endpoints
 app.use('/api/auth', authRoutes);
 app.use('/api/cars', carRoutes);
