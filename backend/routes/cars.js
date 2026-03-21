@@ -4,6 +4,32 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// DEBUG: Simple test endpoint
+router.get('/test/debug', async (req, res) => {
+    try {
+        const [result] = await db.execute('SELECT COUNT(*) as count FROM cars');
+        const carCount = result[0].count;
+        
+        const [userResult] = await db.execute('SELECT COUNT(*) as count FROM users');
+        const userCount = userResult[0].count;
+        
+        res.json({
+            success: true,
+            debug: {
+                cars_count: carCount,
+                users_count: userCount,
+                message: 'Database is connected'
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            code: error.code
+        });
+    }
+});
+
 // Get all cars with filters
 router.get('/', async (req, res) => {
     try {
