@@ -1209,45 +1209,19 @@
       
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
-        // Fetch users from backend API
-        const token = localStorage.getItem('authToken');
         
-        if (!token) {
-          console.error('❌ No token found in localStorage');
-          usersDiv.innerHTML = '<p style="color: #dc3545; padding: 20px;">Error: Not authenticated. Attempting to re-login...</p>';
-          const reloginSuccess = await autoLoginAdmin();
-          if (reloginSuccess) {
-            return loadUsers(searchTerm); // Retry after re-login
-          }
-          return;
-        }
+        // Use public endpoint (no auth required)
+        const usersUrl = addCacheBuster(`${config.API_BASE_URL}/public/users`);
+        console.log('🔍 Fetching users from:', usersUrl);
         
-        console.log('🔑 Token found:', token.substring(0, 20) + '...');
-        
-        const usersUrl = addCacheBuster(`${config.AUTH_API}/users`);
-        const response = await fetch(usersUrl, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
+        const response = await fetch(usersUrl);
         const result = await response.json();
         
+        console.log('📊 Users response:', result);
+        
         if (!result.success) {
-          console.error('❌ API Error:', result.message);
-          
-          // If token is invalid, try to re-login
-          if (result.message === 'Invalid token' || result.message === 'Token expired') {
-            usersDiv.innerHTML = '<p style="color: #ffc107; padding: 20px;">Token expired. Re-authenticating...</p>';
-            const reloginSuccess = await autoLoginAdmin();
-            if (reloginSuccess) {
-              return loadUsers(searchTerm); // Retry after re-login
-            }
-          }
-          
-          usersDiv.innerHTML = `<p style="color: #dc3545; padding: 20px;">Error: ${result.message}</p>`;
+          console.error('❌ API Error:', result.error);
+          usersDiv.innerHTML = `<p style="color: #dc3545; padding: 20px;">Error: ${result.error || 'Failed to load users'}</p>`;
           return;
         }
         
@@ -1259,8 +1233,7 @@
           users = users.filter(user => 
             user.username?.toLowerCase().includes(search) ||
             user.email?.toLowerCase().includes(search) ||
-            user.phone?.toLowerCase().includes(search) ||
-            user.role?.toLowerCase().includes(search)
+            user.phone?.toLowerCase().includes(search)
           );
         }
         
@@ -1273,37 +1246,33 @@
           <table style="width: 100%; border-collapse: collapse;">
             <thead style="background: #f8f9fa;">
               <tr>
+                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">ID</th>
                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Username</th>
                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Email</th>
                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Phone</th>
-                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Role</th>
-                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Registered</th>
-                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Actions</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Status</th>
               </tr>
             </thead>
             <tbody>
               ${users.map(user => `
                 <tr>
+                  <td style="padding: 12px; border-bottom: 1px solid #dee2e6;"><strong>${user.id}</strong></td>
                   <td style="padding: 12px; border-bottom: 1px solid #dee2e6;"><strong>${user.username}</strong></td>
                   <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${user.email || 'N/A'}</td>
                   <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${user.phone || 'N/A'}</td>
                   <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">
-                    <span style="background: ${user.role === 'admin' ? '#dc3545' : '#28a745'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-                      ${user.role || 'user'}
+                    <span style="background: ${user.is_active ? '#28a745' : '#dc3545'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                      ${user.is_active ? 'Active' : 'Inactive'}
                     </span>
-                  </td>
-                  <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</td>
-                  <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">
-                    <button onclick="viewUserDashboard('${user.username}')" style="padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">View</button>
-                    ${user.role !== 'admin' ? `<button onclick="deleteUser(${user.id}, '${user.username}')" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>` : ''}
                   </td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
+          <p style="color: #666; margin-top: 15px; padding: 0 0 0 0; text-align: right;">Total Users: <strong>${users.length}</strong></p>
         `;
       } catch (error) {
-        console.error('Error loading users:', error);
+        console.error('❌ Load users error:', error.message);
         usersDiv.innerHTML = '<p style="color: #dc3545; padding: 20px;">Failed to load users. Make sure the backend server is running.</p>';
       }
     }

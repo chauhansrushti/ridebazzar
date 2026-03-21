@@ -320,6 +320,28 @@ app.get('/api/test', (req, res) => {
   res.json({ ok: true });
 });
 
+// Public endpoint to get all users (no auth required)
+app.get('/api/public/users', async (req, res) => {
+  try {
+    console.log('📊 Fetching all users from database...');
+    const [users] = await db.execute('SELECT id, username, email, phone, is_active, created_at FROM users ORDER BY id');
+    console.log(`✅ Retrieved ${users.length} users`);
+    res.json({
+      success: true,
+      count: users.length,
+      data: users
+    });
+  } catch (error) {
+    console.error('❌ Error fetching users:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      count: 0,
+      data: []
+    });
+  }
+});
+
 // Simple status endpoint (no database required)
 app.get('/api/status', (req, res) => {
   try {
