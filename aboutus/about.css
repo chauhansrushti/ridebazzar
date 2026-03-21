@@ -1,0 +1,150 @@
+
+
+/* Hero Section */
+.hero-section {
+    width: 100%;
+      height: 600px;
+      background: url('background-image.avif') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: #040000;
+      text-align: center;
+      position: relative;
+}
+
+ body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f9fd;
+    }
+
+
+    .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .overlay h1 {
+      font-size: 3rem;
+    }
+
+    .overlay p {
+      margin-top: 10px;
+      font-size: 1.2rem;
+    }
+
+    .cta-button {
+      margin-top: 30px;
+      padding: 12px 25px;
+      font-size: 1rem;
+      background-color: #26045f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .cta-button:hover {
+      background-color: #3e2187;
+    }
+
+    .vision-section {
+      padding: 10px 10px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .vision-card {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      max-width: 1200px;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .vision-image {
+      flex: 1;
+      min-width: 280px;
+      text-align: center;
+    }
+
+    .vision-image img {
+      width: 100%;
+      border-radius: 20px;
+      max-width: 400px;
+    }
+
+    .vision-image h2 {
+      margin-bottom: 15px;
+    }
+
+    .vision-text {
+      flex: 2;
+      min-width: 300px;
+    }
+
+    .vision-text h3 {
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+    }
+
+    .vision-text p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      color: #333;
+    }
+      .values-section {
+      padding: 60px 20px;
+      background-color: #fff;
+      text-align: center;
+    }
+
+    .values-grid {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    .value-card {
+      background: #f5f5f5;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+      max-width: 300px;
+      flex: 1;
+    }
+
+    .value-card img {
+      height: 100px;
+     
+      margin-top: 0px;
+    }
+
+    .value-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+
+    .value-card p {
+      font-size: 1rem;
+      line-height: 1.5;
+       color: #403b3b;
+    }
+
+*,::after,::before {
+    box-sizing: border-box
+}

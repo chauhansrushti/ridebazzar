@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/auth-api.js"></script>
+  <meta charset="UTF-8">
+  <title>My Profile - RideBazzar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/index.css" />
+</head>
+<body>
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <div class="navbar-right">
+      <a href="home.html">Home</a>
+      <a href="all-cars.html">Buy Car</a>
+      <a href="#" class="active">My Profile</a>
+      <a href="#" onclick="logoutUser()">Logout</a>
+    </div>
+  </nav>
+  <div class="container" style="max-width:900px; margin:40px auto 0;">
+    <h2 style="text-align:center;">My Profile</h2>
+    <div id="profileInfo" style="margin-bottom:32px; text-align:center;"></div>
+    <h3 style="text-align:center;">My Posted Cars</h3>
+  <div id="myCarsList" style="display:block;"></div>
+  </div>
+  <script>
+    function getPostedCars() {
+      return JSON.parse(localStorage.getItem('ridebazzar_cars') || '[]');
+    }
+    function getLoggedInUser() {
+      return localStorage.getItem('ridebazzar_user') || '';
+    }
+    function logoutUser() {
+      localStorage.removeItem('ridebazzar_user');
+      window.location.href = 'home.html';
+    }
+    function renderProfile() {
+      const user = getLoggedInUser();
+      const info = document.getElementById('profileInfo');
+      if (!user) {
+        info.innerHTML = '<div style="color:#888;">You are not logged in.</div>';
+        document.getElementById('myCarsList').innerHTML = '';
+        return;
+      }
+      info.innerHTML = `<div style="font-size:1.2em; font-weight:bold;">Username: ${user}</div>`;
+      renderMyCars();
+    }
+    function renderMyCars() {
+      const username = localStorage.getItem('ridebazzar_user') || '';
+      const cars = JSON.parse(localStorage.getItem('ridebazzar_cars') || '[]');
+      const myCars = cars.filter(car => car.user === username);
+      const list = document.getElementById('myCarsList');
+      list.innerHTML = '';
+      if (myCars.length === 0) {
+        list.innerHTML = '<div style="color:#888;">You have not posted any cars yet.</div>';
+        return;
+      }
+      let table = `<h2 style='margin-bottom:10px;'>Posted Cars</h2><table style="width:100%;border-collapse:collapse;margin-top:20px;">
+        <thead>
+          <tr style="background:#f8f8f8;border-bottom:2px solid #ddd;">
+            <th style='padding:10px 8px;text-align:left;border-bottom:1px solid #ddd;'>Id Car</th>
+            <th style='padding:10px 8px;text-align:left;border-bottom:1px solid #ddd;'>Make</th>
+            <th style='padding:10px 8px;text-align:left;border-bottom:1px solid #ddd;'>Model</th>
+            <th style='padding:10px 8px;text-align:left;border-bottom:1px solid #ddd;'>Year</th>
+            <th style='padding:10px 8px;text-align:left;border-bottom:1px solid #ddd;'>Price</th>
+            <th style='padding:10px 8px;text-align:left;border-bottom:1px solid #ddd;'>Status</th>
+            <th style='padding:10px 8px;text-align:left;border-bottom:1px solid #ddd;'></th>
+          </tr>
+        </thead>
+        <tbody>`;
+      myCars.forEach((car, idx) => {
+        table += `<tr style="background:${idx%2===0?'#fff':'#f4f4f4'};">
+          <td style='padding:10px 8px;'>${idx+1}</td>
+          <td style='padding:10px 8px;'>${car.make}</td>
+          <td style='padding:10px 8px;'>${car.model}</td>
+          <td style='padding:10px 8px;'>${car.year}</td>
+          <td style='padding:10px 8px;'>$${car.price}</td>
+          <td style='padding:10px 8px;'><span style='color:#1976f6;font-weight:bold;'>ACTIVE</span></td>
+          <td style='padding:10px 8px;position:relative;'>
+            <button class='action-btn' data-idx='${idx}' style='background:#ffc107;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;position:relative;'>
+              <i class="fa fa-pen"></i> <i class="fa fa-caret-down"></i>
+            </button>
+            <div class='action-dropdown' id='dropdown-${idx}' style='display:none;position:absolute;top:40px;right:0;background:#fff;border:1px solid #eee;border-radius:6px;box-shadow:0 2px 8px #0002;z-index:10;min-width:100px;'>
+              <a href='#' onclick='editCar(${idx});return false;' style='display:block;padding:10px 18px;color:#222;text-decoration:none;'>Edit</a>
+              <a href='#' onclick='deleteCar(${idx});return false;' style='display:block;padding:10px 18px;color:#c00;text-decoration:none;'>Delete</a>
+            </div>
+          </td>
+        </tr>`;
+      });
+      table += '</tbody></table>';
+      list.innerHTML = table;
+      // Add event listeners for action buttons
+      document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          const idx = btn.getAttribute('data-idx');
+          const dd = document.getElementById('dropdown-' + idx);
+          // Hide all other dropdowns
+          document.querySelectorAll('.action-dropdown').forEach(d => { if (d !== dd) d.style.display = 'none'; });
+          dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+        };
+      });
+      // Hide dropdowns when clicking outside
+      document.addEventListener('click', function hideDropdowns(e) {
+        document.querySelectorAll('.action-dropdown').forEach(d => d.style.display = 'none');
+        document.removeEventListener('click', hideDropdowns);
+      });
+    }
+    // Add dummy edit/delete handlers
+    function editCar(idx) {
+      alert('Edit car #' + (idx+1));
+    }
+    function deleteCar(idx) {
+      if (confirm('Are you sure you want to delete this car?')) {
+        const username = localStorage.getItem('ridebazzar_user') || '';
+        let cars = JSON.parse(localStorage.getItem('ridebazzar_cars') || '[]');
+        // Only remove from user's cars
+        let myCars = cars.filter(car => car.user === username);
+        const carToDelete = myCars[idx];
+        // Remove from all cars
+        cars = cars.filter(car => !(car.user === username && car.make === carToDelete.make && car.model === carToDelete.model && car.year === carToDelete.year && car.price === carToDelete.price));
+        localStorage.setItem('ridebazzar_cars', JSON.stringify(cars));
+        renderMyCars();
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProfile();
+    });
+  </script>
+</body>
+</html>

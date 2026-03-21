@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RideBazzar - Compare Cars Setup</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+    .status-box {
+      background: #f9f9f9;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+    .status-item {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    .status-icon {
+      margin-right: 10px;
+      font-size: 20px;
+      width: 30px;
+    }
+    .status-item.success .status-icon {
+      color: #28a745;
+    }
+    .status-item.warning .status-icon {
+      color: #ffc107;
+    }
+    .status-item.error .status-icon {
+      color: #dc3545;
+    }
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 15px 25px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .btn-primary {
+      background: #f9b233;
+      color: #fff;
+      grid-column: 1 / -1;
+      padding: 18px;
+      font-size: 18px;
+    }
+    .btn-primary:hover {
+      background: #e8a119;
+    }
+    .btn-secondary {
+      background: #667eea;
+      color: #fff;
+    }
+    .btn-secondary:hover {
+      background: #5568d3;
+    }
+    .btn-success {
+      background: #28a745;
+      color: #fff;
+    }
+    .btn-success:hover {
+      background: #218838;
+    }
+    .btn-info {
+      background: #17a2b8;
+      color: #fff;
+    }
+    .btn-info:hover {
+      background: #138496;
+    }
+    .info-text {
+      color: #666;
+      font-size: 14px;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+    .hidden {
+      display: none;
+    }
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #f9b233;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚗 RideBazzar</h1>
+    <p class="subtitle">Compare Cars Feature - Setup & Test</p>
+    
+    <div class="status-box">
+      <div class="status-item success">
+        <div class="status-icon">✅</div>
+        <div>Backend Server: Running on port 5000</div>
+      </div>
+      <div class="status-item success" id="dbStatus">
+        <div class="status-icon">⏳</div>
+        <div>Database: Checking...</div>
+      </div>
+      <div class="status-item" id="carsStatus">
+        <div class="status-icon">⏳</div>
+        <div>Database Cars: Checking...</div>
+      </div>
+      <div class="status-item" id="localStatus">
+        <div class="status-icon">⏳</div>
+        <div>LocalStorage Cars: Checking...</div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-secondary" onclick="addSampleCars()">➕ Add Sample Cars</button>
+      <button class="btn-info" onclick="openDebugDashboard()">🔧 Debug Dashboard</button>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-success" onclick="openComparePage()">🔗 Open Compare</button>
+      <button class="btn-secondary" onclick="clearAllData()">🗑️ Clear All Data</button>
+    </div>
+
+    <button class="btn-primary" onclick="quickStart()">⚡ Quick Start</button>
+
+    <p class="info-text">
+      The comparison feature supports cars from both the database and local storage. 
+      Use the buttons above to set up and test the feature.
+    </p>
+  </div>
+
+  <script>
+    // Check system status
+    async function checkStatus() {
+      checkLocalStorage();
+      await checkDatabase();
+    }
+
+    function checkLocalStorage() {
+      const cars = JSON.parse(localStorage.getItem('ridebazzar_cars') || '[]');
+      const statusDiv = document.getElementById('localStatus');
+      
+      if (cars.length > 0) {
+        statusDiv.className = 'status-item success';
+        statusDiv.innerHTML = `
+          <div class="status-icon">✅</div>
+          <div>LocalStorage Cars: ${cars.length} cars</div>
+        `;
+      } else {
+        statusDiv.className = 'status-item warning';
+        statusDiv.innerHTML = `
+          <div class="status-icon">⚠️</div>
+          <div>LocalStorage Cars: Empty</div>
+        `;
+      }
+    }
+
+    async function checkDatabase() {
+      try {
+        const response = await fetch('http://localhost:5000/api/cars?limit=1');
+        const data = await response.json();
+        
+        const dbStatus = document.getElementById('dbStatus');
+        const carsStatus = document.getElementById('carsStatus');
+        
+        if (data.success) {
+          dbStatus.className = 'status-item success';
+          dbStatus.innerHTML = `
+            <div class="status-icon">✅</div>
+            <div>Database: Connected</div>
+          `;
+          
+          // Get count
+          const countResponse = await fetch('http://localhost:5000/api/cars?limit=100');
+          const countData = await countResponse.json();
+          const carCount = countData.data?.cars?.length || 0;
+          
+          carsStatus.className = carCount > 0 ? 'status-item success' : 'status-item warning';
+          carsStatus.innerHTML = `
+            <div class="status-icon">${carCount > 0 ? '✅' : '⚠️'}</div>
+            <div>Database Cars: ${carCount} cars available</div>
+          `;
+        } else {
+          throw new Error('Invalid response');
+        }
+      } catch (error) {
+        document.getElementById('dbStatus').className = 'status-item error';
+        document.getElementById('dbStatus').innerHTML = `
+          <div class="status-icon">❌</div>
+          <div>Database: Connection Error</div>
+        `;
+      }
+    }
+
+    function addSampleCars() {
+      const sampleCars = [
+        {
+          id: 'sample-001',
+          make: 'Toyota',
+          model: 'Fortuner',
+          year: 2022,
+          price: 2500000,
+          fuelType: 'Diesel',
+          transmission: 'Manual',
+          mileage: 15000,
+          condition: 'Good',
+          location: 'Mumbai',
+          status: 'available',
+          images: ['images/toyota.avif'],
+          seller: 'John Doe',
+          postedAt: new Date().toISOString(),
+          views: 45,
+          inquiries: 3
+        },
+        {
+          id: 'sample-002',
+          make: 'Mahindra',
+          model: 'XUV500',
+          year: 2021,
+          price: 1800000,
+          fuelType: 'Petrol',
+          transmission: 'Automatic',
+          mileage: 25000,
+          condition: 'Excellent',
+          location: 'Delhi',
+          status: 'available',
+          images: ['images/mumbai1.avif'],
+          seller: 'Jane Smith',
+          postedAt: new Date().toISOString(),
+          views: 78,
+          inquiries: 5
+        }
+      ];
+      
+      const existing = JSON.parse(localStorage.getItem('ridebazzar_cars') || '[]');
+      const merged = [...existing];
+      
+      sampleCars.forEach(newCar => {
+        if (!merged.find(c => c.id === newCar.id)) {
+          merged.push(newCar);
+        }
+      });
+      
+      localStorage.setItem('ridebazzar_cars', JSON.stringify(merged));
+      checkLocalStorage();
+      alert('✅ Added 2 sample cars to localStorage');
+    }
+
+    function openDebugDashboard() {
+      window.location.href = 'debug-compare.html';
+    }
+
+    function openComparePage() {
+      window.location.href = 'compare.html';
+    }
+
+    function clearAllData() {
+      if (confirm('Are you sure? This will clear all local car data.')) {
+        localStorage.removeItem('ridebazzar_cars');
+        checkLocalStorage();
+        alert('✅ Cleared local data');
+      }
+    }
+
+    function quickStart() {
+      addSampleCars();
+      setTimeout(() => {
+        openComparePage();
+      }, 500);
+    }
+
+    // Check status on page load
+    window.addEventListener('DOMContentLoaded', checkStatus);
+  </script>
+</body>
+</html>

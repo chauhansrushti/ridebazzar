@@ -1,0 +1,11 @@
+{
+  "build": {
+    "builder": "nixpacks",
+    "buildCommand": "cd backend && npm install"
+  },
+  "start": "cd backend && node server.js",
+  "environment": {
+    "PORT": "3000",
+    "NODE_ENV": "production"
+  }
+}

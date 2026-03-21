@@ -1,0 +1,635 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Post Car - RideBazzar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <link rel="icon" type="image/png" href="images/logotab.png" sizes="16x16" />  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">  <link rel="stylesheet" href="css/index.css" />
+  <script src="js/auth-api.js"></script>
+  <script src="js/carManager-api.js"></script>
+  <script src="js/messaging.js"></script>
+  <script>
+    function toggleNavbar() {
+      const nav = document.getElementById("navbarLinks");
+      if (nav) nav.classList.toggle("show");
+    }
+  </script>
+  <style>
+    body {
+      background: url('images/mustang.jpg') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .post-car-container {
+      background: rgba(40,40,40,0.95);
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px #0005;
+      color: #ffffff;
+      position: relative;
+    }
+    .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+    .form-row > div {
+      flex: 1;
+    }
+    .form-section {
+      margin-bottom: 30px;
+      border-bottom: 1px solid #666;
+      padding-bottom: 25px;
+    }
+    .form-section:last-child {
+      border-bottom: none;
+    }
+    .form-section h3 {
+      color: #f9b233;
+      margin-bottom: 20px;
+      font-size: 1.4em;
+    }
+    .post-car-container h2 {
+      text-align: left;
+      margin-bottom: 28px;
+      font-size: 2.2em;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    .post-car-container label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      font-size: 1.1em;
+      color: #ffffff;
+    }
+    .post-car-container input[type="text"],
+    .post-car-container input[type="number"],
+    .post-car-container input[type="email"],
+    .post-car-container input[type="tel"],
+    .post-car-container input[type="file"],
+    .post-car-container select,
+    .post-car-container textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1em;
+      background: #ffffff;
+      color: #222222;
+      font-family: inherit;
+    }
+    
+    .post-car-container input::placeholder,
+    .post-car-container textarea::placeholder {
+      color: #666666;
+    }
+    .post-car-container textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .post-car-container input[type="file"] {
+      background: #fff;
+      color: #222;
+      padding: 8px 12px;
+    }
+    .post-car-container button {
+      width: 100%;
+      padding: 14px 0;
+      background: #1976f6;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .post-car-container button:hover {
+      background: #1256b8;
+    }
+    .car-image-preview {
+      display: block;
+      margin: 0 auto 18px auto;
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px #0003;
+    }
+    @media (max-width: 600px) {
+      .post-car-container {
+        padding: 18px 4vw;
+        max-width: 98vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hamburger icon -->
+  <div class="hamburger" onclick="toggleNavbar()">☰</div>
+  <!-- Navigation -->
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <div class="navbar-right" id="navbarLinks">
+      <a href="home.html">Home</a>
+      <a href="all-cars.html">Buy Car</a>
+      <a href="post-car.html" class="active">Sell Car</a>
+      <a href="compare.html" id="compareNavBtn">Compare</a>
+      
+      <a href="#" id="loginNavBtn" onclick="showLoginModal()">Login/Register</a>
+      <a href="#" id="logoutNavBtn" onclick="logoutUser()" style="display:none;">Logout</a>
+    </div>
+  </nav>
+
+  <div class="post-car-container">
+    <h2>Post Your Car</h2>
+    <form id="postCarForm" autocomplete="off" onsubmit="event.preventDefault(); handleEnhancedPostCar();">
+      
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3><i class="material-icons">directions_car</i> Basic Information</h3>
+        <div class="form-row">
+          <div style="position:relative;">
+            <label for="carMake">Make *</label>
+            <input type="text" id="carMake" required placeholder="Type to search car make..." oninput="filterMakes(this.value)" onfocus="showMakeDropdown()" autocomplete="off">
+            <div id="makeDropdown" style="display:none; position:absolute; z-index:1000; background:white; border:1px solid #ddd; border-radius:6px; max-height:200px; overflow-y:auto; width:100%; margin-top:2px; box-shadow:0 4px 8px rgba(0,0,0,0.1);"></div>
+          </div>
+          <div style="position:relative;">
+            <label for="carModel">Model *</label>
+            <input type="text" id="carModel" required placeholder="Type to search model..." oninput="filterModels(this.value)" onfocus="showModelDropdown()" autocomplete="off">
+            <div id="modelDropdown" style="display:none; position:absolute; z-index:1000; background:white; border:1px solid #ddd; border-radius:6px; max-height:200px; overflow-y:auto; width:100%; margin-top:2px; box-shadow:0 4px 8px rgba(0,0,0,0.1);"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="carYear">Year *</label>
+            <input type="number" id="carYear" required min="1990" max="2025">
+          </div>
+          <div>
+            <label for="carPrice">Price (₹) *</label>
+            <input type="number" id="carPrice" required min="50000" placeholder="e.g. 850000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="bookingAmount">Booking Amount (₹)</label>
+            <input type="number" id="bookingAmount" min="0" placeholder="e.g. 50000">
+          </div>
+          <div>
+            <label for="emiAmount">EMI Amount (₹/month)</label>
+            <input type="number" id="emiAmount" min="0" placeholder="e.g. 15000">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Technical Details -->
+      <div class="form-section">
+        <h3><i class="material-icons">settings</i> Technical Details</h3>
+        <div class="form-row">
+          <div>
+            <label for="carMileage">Mileage (km) *</label>
+            <input type="number" id="carMileage" required min="0" placeholder="e.g. 45000">
+          </div>
+          <div>
+            <label for="carFuelType">Fuel Type *</label>
+            <select id="carFuelType" required>
+              <option value="">Select Fuel Type</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="CNG">CNG</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="carTransmission">Transmission *</label>
+            <select id="carTransmission" required>
+              <option value="">Select Transmission</option>
+              <option value="Manual">Manual</option>
+              <option value="Automatic">Automatic</option>
+              <option value="CVT">CVT</option>
+            </select>
+          </div>
+          <div>
+            <label for="carCondition">Condition *</label>
+            <select id="carCondition" required>
+              <option value="">Select Condition</option>
+              <option value="Excellent">Excellent</option>
+              <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
+              <option value="Needs Work">Needs Work</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Location & Contact -->
+      <div class="form-section">
+        <h3>📍 Location & Contact</h3>
+        <div class="form-row">
+          <div>
+            <label for="carLocation">Location *</label>
+            <input type="text" id="carLocation" required placeholder="City, State">
+          </div>
+          <div>
+            <label for="contactPhone">Contact Phone</label>
+            <input type="tel" id="contactPhone" placeholder="Your phone number">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Description -->
+      <div class="form-section">
+        <h3>📝 Description</h3>
+        <label for="carDescription">Description</label>
+        <textarea id="carDescription" placeholder="Describe your car's features, condition, service history, etc. (optional)" rows="4"></textarea>
+      </div>
+      
+      <!-- Images -->
+      <div class="form-section">
+        <h3>📸 Car Images</h3>
+        <label for="carImages">Upload Images (up to 5)</label>
+        <p style="color:#aaa; font-size:0.9em; margin:5px 0 10px 0;">💡 Tip: Hold <strong>Ctrl</strong> and click multiple images to select them all at once</p>
+        <input type="file" id="carImages" accept="image/*" multiple onchange="previewCarImages(event)" style="margin-bottom:10px;">
+        <div id="fileCountInfo" style="color:#f9b233; font-size:0.95em; margin:8px 0; font-weight:500;"></div>
+        <div id="imagePreviewContainer" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;"></div>
+      </div>
+      
+      <button type="submit" style="width:100%; padding:16px; background:#f9b233; border:none; color:#222; font-weight:bold; font-size:18px; border-radius:8px; margin-top:20px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.2);" onmouseover="this.style.background='#e6a429'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 15px rgba(249,178,51,0.4)';" onmouseout="this.style.background='#f9b233'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.2)';">Post Car</button>
+    </form>
+  </div>
+  <script>
+    // Initialize auth manager
+    const authManager = new AuthManager();
+    
+    // Car brands database for autocomplete
+    const carBrands = {
+      'Maruti Suzuki': ['Swift', 'Baleno', 'Vitara Brezza', 'Ertiga', 'Dzire', 'Alto', 'WagonR', 'Celerio', 'S-Cross', 'Ciaz', 'Ignis'],
+      'Hyundai': ['Creta', 'Verna', 'i20', 'Venue', 'Elantra', 'Tucson', 'Santa Fe', 'Grand i10', 'Aura', 'Alcazar'],
+      'Tata': ['Nexon', 'Harrier', 'Safari', 'Tigor', 'Altroz', 'Punch', 'Tiago', 'Hexa', 'Bolt'],
+      'Mahindra': ['XUV700', 'Scorpio', 'Thar', 'Bolero', 'XUV300', 'Marazzo', 'TUV300', 'KUV100'],
+      'Honda': ['City', 'Amaze', 'Jazz', 'WR-V', 'CR-V', 'Civic', 'Accord', 'BR-V'],
+      'Toyota': ['Fortuner', 'Innova', 'Camry', 'Corolla', 'Glanza', 'Urban Cruiser', 'Vellfire', 'Land Cruiser'],
+      'Ford': ['EcoSport', 'Endeavour', 'Figo', 'Aspire', 'Freestyle', 'Mustang'],
+      'Volkswagen': ['Polo', 'Vento', 'Tiguan', 'Passat', 'T-Roc', 'Virtus'],
+      'Renault': ['Duster', 'Kwid', 'Captur', 'Triber', 'Kiger', 'Lodgy'],
+      'Nissan': ['Magnite', 'Kicks', 'Terrano', 'Sunny', 'GT-R', 'Micra'],
+      'Skoda': ['Octavia', 'Superb', 'Rapid', 'Kodiaq', 'Kushaq', 'Slavia'],
+      'Kia': ['Seltos', 'Sonet', 'Carnival', 'Carens', 'EV6'],
+      'MG': ['Hector', 'Astor', 'ZS EV', 'Gloster'],
+      'Jeep': ['Compass', 'Wrangler', 'Grand Cherokee', 'Meridian'],
+      'Audi': ['A4', 'A6', 'Q3', 'Q5', 'Q7', 'A8', 'Q8'],
+      'BMW': ['3 Series', '5 Series', '7 Series', 'X1', 'X3', 'X5', 'X7', 'Z4'],
+      'Mercedes-Benz': ['C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE', 'GLS', 'A-Class'],
+      'Chevrolet': ['Beat', 'Cruze', 'Trailblazer', 'Enjoy', 'Sail'],
+      'Fiat': ['Punto', 'Linea', 'Avventura', 'Urban Cross'],
+      'Datsun': ['GO', 'GO+', 'redi-GO']
+    };
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if user is logged in using token
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      
+      if (!token || !userData) {
+        alert('You must be logged in to post a car.');
+        window.location.href = 'home.html';
+        return;
+      }
+    });
+    
+    // Autocomplete functions
+    function filterMakes(query) {
+      const dropdown = document.getElementById('makeDropdown');
+      const brands = Object.keys(carBrands);
+      
+      if (!query || query.trim() === '') {
+        dropdown.style.display = 'none';
+        return;
+      }
+      
+      const filtered = brands.filter(brand => 
+        brand.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      if (filtered.length === 0) {
+        dropdown.style.display = 'none';
+        document.getElementById('carModel').value = '';
+        return;
+      }
+      
+      dropdown.innerHTML = filtered.map(brand => 
+        `<div style="padding:10px; cursor:pointer; border-bottom:1px solid #f0f0f0; color:#222; background:white;" 
+              onmouseover="this.style.background='#f9b233'; this.style.color='white';" 
+              onmouseout="this.style.background='white'; this.style.color='#222';" 
+              onclick="selectMake('${brand}')">${brand}</div>`
+      ).join('');
+      
+      dropdown.style.display = 'block';
+    }
+    
+    function selectMake(brand) {
+      document.getElementById('carMake').value = brand;
+      document.getElementById('makeDropdown').style.display = 'none';
+      document.getElementById('carModel').value = '';
+      document.getElementById('carModel').focus();
+    }
+    
+    function showMakeDropdown() {
+      const query = document.getElementById('carMake').value;
+      if (query && query.trim() !== '') {
+        filterMakes(query);
+      }
+    }
+    
+    function filterModels(query) {
+      const dropdown = document.getElementById('modelDropdown');
+      const make = document.getElementById('carMake').value;
+      
+      if (!make || !carBrands[make]) {
+        dropdown.style.display = 'none';
+        return;
+      }
+      
+      const models = carBrands[make];
+      
+      // If no query, show all models for the selected make
+      if (!query || query.trim() === '') {
+        dropdown.innerHTML = models.map(model => 
+          `<div style="padding:10px; cursor:pointer; border-bottom:1px solid #f0f0f0; color:#222; background:white;" 
+                onmouseover="this.style.background='#f9b233'; this.style.color='white';" 
+                onmouseout="this.style.background='white'; this.style.color='#222';" 
+                onclick="selectModel('${model}')">${model}</div>`
+        ).join('');
+        dropdown.style.display = 'block';
+        return;
+      }
+      
+      const filtered = models.filter(model => 
+        model.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      if (filtered.length === 0) {
+        dropdown.style.display = 'none';
+        return;
+      }
+      
+      dropdown.innerHTML = filtered.map(model => 
+        `<div style="padding:10px; cursor:pointer; border-bottom:1px solid #f0f0f0; color:#222; background:white;" 
+              onmouseover="this.style.background='#f9b233'; this.style.color='white';" 
+              onmouseout="this.style.background='white'; this.style.color='#222';" 
+              onclick="selectModel('${model}')">${model}</div>`
+      ).join('');
+      
+      dropdown.style.display = 'block';
+    }
+    
+    function selectModel(model) {
+      document.getElementById('carModel').value = model;
+      document.getElementById('modelDropdown').style.display = 'none';
+    }
+    
+    function showModelDropdown() {
+      const make = document.getElementById('carMake').value;
+      const query = document.getElementById('carModel').value;
+      
+      // Show all models if make is selected
+      if (make && carBrands[make]) {
+        filterModels(query);
+      }
+    }
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#carMake') && !e.target.closest('#makeDropdown')) {
+        document.getElementById('makeDropdown').style.display = 'none';
+      }
+      if (!e.target.closest('#carModel') && !e.target.closest('#modelDropdown')) {
+        document.getElementById('modelDropdown').style.display = 'none';
+      }
+    });
+
+    function previewCarImages(event) {
+      const files = Array.from(event.target.files);
+      const container = document.getElementById('imagePreviewContainer');
+      const countInfo = document.getElementById('fileCountInfo');
+      container.innerHTML = '';
+      
+      // Show file count
+      if (files.length > 0) {
+        countInfo.textContent = `✓ ${files.length} image${files.length > 1 ? 's' : ''} selected`;
+        countInfo.style.color = '#4caf50';
+      } else {
+        countInfo.textContent = '';
+      }
+      
+      if (files.length > 5) {
+        alert('You can upload maximum 5 images');
+        event.target.value = '';
+        countInfo.textContent = '';
+        return;
+      }
+      
+      if (files.length === 0) {
+        return;
+      }
+      
+      console.log('Processing ' + files.length + ' files:', files.map(f => f.name));
+      
+      files.forEach((file, index) => {
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const imgDiv = document.createElement('div');
+            imgDiv.setAttribute('data-index', index);
+            imgDiv.style.cssText = 'position:relative; width:120px; height:90px; border-radius:8px; overflow:hidden; background:#eee; flex-shrink:0;';
+            imgDiv.innerHTML = `
+              <img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;" alt="Preview ${index + 1}">
+              <button type="button" onclick="removeImage(${index})" style="position:absolute; top:5px; right:5px; width:25px; height:25px; border-radius:50%; border:none; background:rgba(255,0,0,0.8); color:white; cursor:pointer; font-size:16px; line-height:1;">&times;</button>
+              <div style="position:absolute; bottom:5px; left:5px; background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:4px; font-size:11px;">${index + 1}</div>
+            `;
+            container.appendChild(imgDiv);
+            console.log('Added preview for image ' + (index + 1) + ':', file.name);
+          };
+          reader.onerror = function() {
+            console.error('Error reading file:', file.name);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+    
+    function removeImage(index) {
+      const input = document.getElementById('carImages');
+      const dt = new DataTransfer();
+      const files = Array.from(input.files);
+      
+      files.forEach((file, i) => {
+        if (i !== index) dt.items.add(file);
+      });
+      
+      input.files = dt.files;
+      previewCarImages({ target: input });
+    }
+
+    function handleEnhancedPostCar() {
+      try {
+        const form = document.getElementById('postCarForm');
+        const formData = new FormData(form);
+        
+        // Get and validate form values
+        const make = document.getElementById('carMake').value.trim();
+        const model = document.getElementById('carModel').value.trim();
+        const year = document.getElementById('carYear').value;
+        const price = document.getElementById('carPrice').value;
+        const fuelType = document.getElementById('carFuelType').value;
+        const transmission = document.getElementById('carTransmission').value;
+        const condition = document.getElementById('carCondition').value;
+        
+        // Validate required fields
+        if (!make) {
+          alert('Please enter car make');
+          document.getElementById('carMake').focus();
+          return;
+        }
+        if (!model) {
+          alert('Please enter car model');
+          document.getElementById('carModel').focus();
+          return;
+        }
+        if (!year) {
+          alert('Please enter car year');
+          document.getElementById('carYear').focus();
+          return;
+        }
+        if (!price) {
+          alert('Please enter car price');
+          document.getElementById('carPrice').focus();
+          return;
+        }
+        if (!fuelType) {
+          alert('Please select fuel type');
+          document.getElementById('carFuelType').focus();
+          return;
+        }
+        if (!transmission) {
+          alert('Please select transmission');
+          document.getElementById('carTransmission').focus();
+          return;
+        }
+        if (!condition) {
+          alert('Please select condition');
+          document.getElementById('carCondition').focus();
+          return;
+        }
+        
+        // Collect form data
+        const carData = {
+          make: make,
+          model: model,
+          year: parseInt(year),
+          price: parseFloat(price),
+          bookingAmount: parseFloat(document.getElementById('bookingAmount').value) || 0,
+          emiAmount: parseFloat(document.getElementById('emiAmount').value) || 0,
+          mileage: parseInt(document.getElementById('carMileage').value),
+          fuelType: fuelType,
+          transmission: transmission,
+          conditionStatus: condition,
+          location: document.getElementById('carLocation').value,
+          description: document.getElementById('carDescription').value,
+          contact: document.getElementById('contactPhone').value,
+          images: []
+        };
+        
+        // Handle image files
+        const imageFiles = document.getElementById('carImages').files;
+        if (imageFiles.length > 0) {
+          handleImageUpload(imageFiles, carData);
+        } else {
+          postCarToSystem(carData);
+        }
+        
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+    
+    function handleImageUpload(files, carData) {
+      let processedImages = 0;
+      const totalImages = files.length;
+      
+      Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          carData.images.push(e.target.result);
+          processedImages++;
+          
+          if (processedImages === totalImages) {
+            postCarToSystem(carData);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    
+    async function postCarToSystem(carData) {
+      try {
+        const result = await carManager.postCar(carData);
+        if (result.success) {
+          alert('Car posted successfully!');
+          window.location.href = 'all-cars.html';
+        } else {
+          alert('Error posting car: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        alert('Error posting car: ' + error.message);
+      }
+    }
+
+    // Authentication functions
+    function showLoginModal() {
+      // Redirect to home page with login modal
+      window.location.href = 'home.html#login';
+    }
+
+    function logoutUser() {
+      if (window.authManager && window.authManager.logoutUser) {
+        window.authManager.logoutUser();
+      } else {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        window.location.href = 'home.html';
+      }
+    }
+
+    // Update navbar on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('authToken');
+      const loginBtn = document.getElementById('loginNavBtn');
+      const logoutBtn = document.getElementById('logoutNavBtn');
+      const profileBtn = document.getElementById('profileNavBtn');
+
+      if (token) {
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        if (profileBtn) profileBtn.style.display = 'inline-block';
+      } else {
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (profileBtn) profileBtn.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
+

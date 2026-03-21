@@ -1,0 +1,14 @@
+{
+  "name": "ridebazzar-init",
+  "version": "1.0.0",
+  "description": "Database initialization script for RideBazzar",
+  "main": "init-db.js",
+  "scripts": {
+    "init": "node init-db.js"
+  },
+  "dependencies": {
+    "mysql2": "^3.6.5",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.3.1"
+  }
+}

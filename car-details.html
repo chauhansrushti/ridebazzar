@@ -1,0 +1,1973 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Car Details - RideBazzar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="images/logotab.png" sizes="16x16" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="css/index.css" />
+<script src="js/auth-api.js"></script>
+  <script src="js/carManager-api.js"></script>
+  <script src="js/chatbot.js"></script>
+  <script src="js/paymentSystem-api.js"></script>
+  <script src="js/messaging.js"></script>
+  <script>
+    function toggleNavbar() {
+      const nav = document.getElementById("navbarLinks");
+      if (nav) nav.classList.toggle("show");
+    }
+  </script>
+  <style>
+    body {
+      background: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .car-details-container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+    .car-header {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .car-title {
+      font-size: 2.5em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .car-price {
+      font-size: 2em;
+      color: #e74c3c;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .car-meta {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      color: #666;
+      font-size: 14px;
+    }
+    .car-main {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .car-gallery {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .main-image {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      overflow: hidden;
+    }
+    .main-image:hover {
+      transform: scale(1.02);
+    }
+    @keyframes slowZoom {
+      0% {
+        transform: scale(1);
+      }
+      100% {
+        transform: scale(1.05);
+      }
+    }
+    .main-image.zoom-effect {
+      animation: slowZoom 3s ease-in-out infinite alternate;
+    }
+    .thumbnail-gallery {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 5px 0;
+    }
+    .thumbnail {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+    .thumbnail.active {
+      border-color: #f9b233;
+    }
+    /* Fullscreen Gallery Modal */
+    .gallery-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.95);
+      z-index: 2000;
+      animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .gallery-modal-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gallery-modal img {
+      max-width: 90%;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .gallery-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 40px;
+      color: #fff;
+      cursor: pointer;
+      z-index: 2001;
+      transition: color 0.3s;
+    }
+    .gallery-close:hover {
+      color: #f9b233;
+    }
+    .gallery-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 50px;
+      color: #fff;
+      cursor: pointer;
+      padding: 20px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      user-select: none;
+      z-index: 2001;
+    }
+    .gallery-arrow:hover {
+      background: rgba(249,178,51,0.9);
+      transform: translateY(-50%) scale(1.1);
+    }
+    .gallery-arrow-left {
+      left: 30px;
+    }
+    .gallery-arrow-right {
+      right: 30px;
+    }
+    .gallery-counter {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: bold;
+      z-index: 2001;
+    }
+    @media (max-width: 768px) {
+      .gallery-arrow {
+        font-size: 35px;
+        width: 50px;
+        height: 50px;
+        padding: 10px;
+      }
+      .gallery-arrow-left {
+        left: 10px;
+      }
+      .gallery-arrow-right {
+        right: 10px;
+      }
+    }
+    .car-info {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      height: fit-content;
+    }
+    .info-section {
+      margin-bottom: 25px;
+    }
+    .info-section h3 {
+      color: #333;
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #f9b233;
+      padding-bottom: 8px;
+    }
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .info-item:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      font-weight: 600;
+      color: #555;
+    }
+    .info-value {
+      color: #333;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s;
+      flex: 1;
+    }
+    .btn-primary {
+      background: #f9b233;
+      color: #fff;
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: #fff;
+    }
+    .btn-success {
+      background: #28a745;
+      color: #fff;
+    }
+    .btn-danger {
+      background: #dc3545;
+      color: #fff;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .seller-info {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .description-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .favorite-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.9);
+      cursor: pointer;
+      font-size: 24px;
+      transition: all 0.3s;
+    }
+    .favorite-btn.active {
+      color: #e74c3c;
+      background: rgba(255,255,255,1);
+    }
+    @media (max-width: 768px) {
+      .car-main {
+        grid-template-columns: 1fr;
+      }
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hamburger icon -->
+  <div class="hamburger" onclick="toggleNavbar()">☰</div>
+  <!-- Navigation -->
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <div class="navbar-right" id="navbarLinks">
+      <a href="home.html">Home</a>
+      <a href="all-cars.html">Buy Car</a>
+      <a href="#" onclick="handleSellCarClick()">Sell Car</a>
+      <a href="compare.html">Compare</a>
+      <a href="dashboard.html" id="profileNavBtn" style="display:none;">Dashboard</a>
+      <a href="#" id="loginNavBtn" onclick="showLoginModal()">Login/Register</a>
+      <a href="#" id="logoutNavBtn" onclick="logoutUser()" style="display:none;">Logout</a>
+    </div>
+  </nav>
+
+  <div class="car-details-container">
+    <!-- Car Header -->
+    <div class="car-header">
+      <button class="favorite-btn" id="favoriteBtn" onclick="toggleCarFavorite()"><i class="material-icons">favorite_border</i></button>
+      <div class="car-title" id="carTitle">Loading...</div>
+      <div class="car-price" id="carPrice">Loading...</div>
+      <div class="car-meta" id="carMeta">Loading...</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="car-main">
+      <!-- Gallery Section -->
+      <div class="car-gallery">
+        <img id="mainImage" class="main-image" src="images/default-car.jpg" alt="Car Image" onclick="openGalleryModal()">
+        <div class="thumbnail-gallery" id="thumbnailGallery"></div>
+      </div>
+
+      <!-- Info & Actions Section -->
+      <div class="car-info">
+        <!-- Action Buttons -->
+<div class="action-buttons">
+          <button class="btn btn-primary" onclick="showInquiryModal(); console.log('Contact Seller clicked');"><i class="material-icons">phone</i> Contact Seller</button>
+          <button class="btn btn-success" onclick="showBookingModal()"><i class="material-icons">lock</i> Book Now</button>
+          <button class="btn btn-secondary" onclick="showTestDriveModal()"><i class="material-icons">lock</i> Take Drive</button>
+        </div>
+
+        <!-- Car Details -->
+        <div class="info-section">
+          <h3><i class="material-icons">directions_car</i> Car Details</h3>
+          <div id="carDetailsInfo">Loading...</div>
+        </div>
+
+        <!-- Seller Info -->
+        <div class="seller-info">
+          <h4 style="margin-bottom:15px; color:#333;"><i class="material-icons">person</i> Seller Information</h4>
+          <div id="sellerInfo">Loading...</div>
+        </div>
+
+        <!-- EMI Calculator -->
+        <div class="info-section">
+          <h3 style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="toggleEMICalculator()">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="4" width="20" height="16" rx="2" stroke="#007bff" stroke-width="2" fill="#e3f2fd"/>
+                <rect x="2" y="8" width="20" height="3" fill="#007bff"/>
+                <line x1="4" y1="15" x2="8" y2="15" stroke="#007bff" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="10" y1="15" x2="14" y2="15" stroke="#007bff" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              EMI Calculator
+            </div>
+            <svg id="emiArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transition: transform 0.3s;">
+              <path d="M6 9L12 15L18 9" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </h3>
+          <div id="emiCalculatorContent" style="display: none; margin-top: 15px;">
+            <div style="margin-bottom:15px;">
+              <label style="display:block; margin-bottom:5px; font-weight:600;">Loan Amount (₹)</label>
+              <input type="number" id="loanAmount" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px;" onchange="calculateEMIDisplay()">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label style="display:block; margin-bottom:5px; font-weight:600;">Select Tenure</label>
+              <select id="loanTenure" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px;" onchange="calculateEMIDisplay()">
+                <option value="6" data-rate="9.50">6 Months @ 9.50% Interest</option>
+                <option value="12" data-rate="10.25">1 Year @ 10.25% Interest</option>
+                <option value="24" data-rate="11.99">2 Years @ 11.99% Interest</option>
+                <option value="36" data-rate="13.50">3 Years @ 13.50% Interest</option>
+                <option value="48" data-rate="14.75">4 Years @ 14.75% Interest</option>
+                <option value="60" data-rate="15.50" selected>5 Years @ 15.50% Interest</option>
+              </select>
+            </div>
+            <div id="emiResult" style="background:#f8f9fa; padding:15px; border-radius:8px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description Section -->
+    <div class="description-section">
+      <h3>📝 Description</h3>
+      <div id="carDescription">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Inquiry Modal -->
+  <div id="inquiryModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+    <div style="background:#fff; max-width:500px; margin:60px auto; padding:30px; border-radius:12px; position:relative;">
+      <span onclick="hideInquiryModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999;">&times;</span>
+      <h2 style="margin-bottom:20px; color:#333;">Contact Seller</h2>
+      <form id="inquiryForm" onsubmit="event.preventDefault(); submitInquiry();">
+        <div style="margin-bottom:15px;">
+          <label style="display:block; margin-bottom:5px; font-weight:600;">Your Message</label>
+          <textarea id="inquiryMessage" required placeholder="I'm interested in this car..." style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px; min-height:80px; resize:vertical;"></textarea>
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:5px; font-weight:600;">Your Phone</label>
+          <input type="tel" id="inquiryPhone" required placeholder="Your contact number" style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px;">
+        </div>
+        <button type="submit" style="width:100%; padding:12px; background:#f9b233; border:none; color:#fff; font-weight:bold; border-radius:8px;">Send Inquiry</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div id="bookingModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+    <div style="background:#fff; max-width:600px; margin:40px auto; padding:30px; border-radius:12px; position:relative; max-height:90vh; overflow-y:auto;">
+      <span onclick="hideBookingModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999;">&times;</span>
+      <h2 style="margin-bottom:20px; color:#333;">Book This Car</h2>
+      <form id="bookingForm" onsubmit="event.preventDefault(); processBooking();">
+        <!-- Car Summary -->
+        <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin-bottom:20px;">
+          <div id="bookingCarSummary"></div>
+        </div>
+        
+        <!-- Buyer Information -->
+        <h4 style="margin-bottom:15px;">Your Information</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Full Name</label>
+            <input type="text" id="buyerName" name="buyerName" required style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px;">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Phone</label>
+            <input type="tel" id="buyerPhone" name="buyerPhone" required style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px;">
+          </div>
+        </div>
+        <div style="margin-bottom:15px;">
+          <label style="display:block; margin-bottom:5px; font-weight:600;">Email</label>
+          <input type="email" id="buyerEmail" name="buyerEmail" required style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px;">
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:5px; font-weight:600;">Address</label>
+          <textarea id="buyerAddress" name="buyerAddress" required placeholder="Your complete address" style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px; min-height:60px; resize:vertical;"></textarea>
+        </div>
+        
+        <!-- Booking Details -->
+        <h4 style="margin-bottom:15px;">Booking Details</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Booking Amount (₹)</label>
+            <input type="text" id="bookingAmount" name="bookingAmount" required readonly style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px; background:#f8f9fa; cursor:not-allowed; color:#333; font-weight:600;">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Inspection Date</label>
+            <input type="date" id="inspectionDate" name="inspectionDate" style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px;">
+          </div>
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:5px; font-weight:600;">Notes (Optional)</label>
+          <textarea id="bookingNotes" name="notes" placeholder="Any special requirements or notes" style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px; min-height:60px; resize:vertical;"></textarea>
+        </div>
+        
+        <button type="submit" style="width:100%; padding:14px; background:#28a745; border:none; color:#fff; font-weight:bold; border-radius:8px; font-size:16px;">Proceed to Payment</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Test Drive Modal -->
+  <div id="testDriveModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000; overflow-y:auto;">
+    <div style="background:#fff; max-width:600px; margin:40px auto; padding:30px; border-radius:12px; position:relative; max-height:90vh; overflow-y:auto;">
+      <span onclick="hideTestDriveModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999; z-index:1;">&times;</span>
+      <h2 style="margin-bottom:20px; color:#333; display:flex; align-items:center; gap:10px;">
+        <span style="background:#f9b233; color:white; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px;">TD</span>
+        <span>Schedule Test Drive</span>
+      </h2>
+      <form id="testDriveForm" onsubmit="event.preventDefault(); submitTestDrive();">
+        <!-- Car Summary -->
+        <div style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px;">
+          <div id="testDriveCarSummary"></div>
+        </div>
+        
+        <!-- Date Selection -->
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Preferred Date</label>
+          <input type="date" id="testDriveDate" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:14px;">
+        </div>
+
+        <!-- Time Slot Selection -->
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Preferred Time Slot</label>
+          <select id="testDriveTime" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:14px;">
+            <option value="">Select a time slot</option>
+            <option value="09:00">09:00 AM - 10:00 AM</option>
+            <option value="10:00">10:00 AM - 11:00 AM</option>
+            <option value="11:00">11:00 AM - 12:00 PM</option>
+            <option value="12:00">12:00 PM - 01:00 PM</option>
+            <option value="14:00">02:00 PM - 03:00 PM</option>
+            <option value="15:00">03:00 PM - 04:00 PM</option>
+            <option value="16:00">04:00 PM - 05:00 PM</option>
+            <option value="17:00">05:00 PM - 06:00 PM</option>
+          </select>
+        </div>
+
+        <!-- Meeting Point -->
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Preferred Meeting Point</label>
+          <select id="testDriveMeetingPoint" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:14px;">
+            <option value="">Select meeting point</option>
+            <option value="seller-location">Seller's Location</option>
+            <option value="public-parking">Public Parking Area</option>
+            <option value="dealership">Dealership</option>
+            <option value="custom">Custom Location</option>
+          </select>
+        </div>
+
+        <!-- Custom Location (shown if custom selected) -->
+        <div id="customLocationDiv" style="display:none; margin-bottom:20px;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Custom Location</label>
+          <input type="text" id="customLocation" placeholder="Enter your preferred location" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:14px;">
+        </div>
+
+        <!-- Contact Number -->
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Your Contact Number</label>
+          <input type="tel" id="testDrivePhone" required placeholder="Your phone number" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:14px;">
+        </div>
+
+        <!-- Additional Notes -->
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Additional Notes (Optional)</label>
+          <textarea id="testDriveNotes" placeholder="Any specific requirements or questions..." style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; min-height:80px; resize:vertical; font-size:14px;"></textarea>
+        </div>
+
+        <!-- Terms Checkbox -->
+        <div style="margin-bottom:20px;">
+          <label style="display:flex; align-items:flex-start; cursor:pointer;">
+            <input type="checkbox" id="testDriveTerms" required style="margin-top:4px; margin-right:10px;">
+            <span style="font-size:13px; color:#666;">I agree to bring a valid driver's license and understand that the test drive is subject to seller's approval.</span>
+          </label>
+        </div>
+
+        <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; border-radius:8px; font-size:16px; cursor:pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(249, 178, 51, 0.4)'; this.style.background='#f7a61b';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.background='#f9b233';">Schedule Test Drive</button>
+        
+        <!-- Direct Call Button Toggle -->
+        <div style="margin-top:15px; padding-top:15px; border-top:1px solid #e0e0e0;">
+          <p onclick="toggleContactButton()" style="text-align:center; color:#007bff; font-size:14px; margin-bottom:10px; cursor:pointer; text-decoration:underline;">
+            Or contact the seller directly?
+          </p>
+          <button type="button" onclick="callSeller()" id="contactSellerBtn" style="display:none; width:100%; padding:14px; background:#25D366; border:none; color:#fff; font-weight:bold; border-radius:8px; font-size:16px; cursor:pointer; align-items:center; justify-content:center; gap:8px; margin-top:10px;">
+            <svg id="contactIcon" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"/>
+            </svg>
+            <span id="contactBtnText">Call Seller Now</span>
+          </button>
+        </div>
+        
+        <script>
+          // Toggle contact button visibility
+          function toggleContactButton() {
+            const btn = document.getElementById('contactSellerBtn');
+            if (btn.style.display === 'none') {
+              btn.style.display = 'flex';
+            } else {
+              btn.style.display = 'none';
+            }
+          }
+          
+          // Update button based on device
+          (function() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const btn = document.getElementById('contactSellerBtn');
+            const btnText = document.getElementById('contactBtnText');
+            const icon = document.getElementById('contactIcon');
+            
+            if (!isMobile) {
+              // Desktop: WhatsApp button
+              btnText.textContent = 'Chat on WhatsApp';
+              btn.style.background = '#25D366';
+              icon.innerHTML = '<path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>';
+            }
+          })();
+        </script>
+      </form>
+    </div>
+  </div>
+
+  <!-- Message Display -->
+  <div id="messageDisplay" style="display:none; position:fixed; top:20px; right:20px; padding:15px 20px; border-radius:8px; color:#fff; font-weight:bold; z-index:1001;"></div>
+
+  <!-- Fullscreen Gallery Modal -->
+  <div id="galleryModal" class="gallery-modal">
+    <span class="gallery-close" onclick="closeGalleryModal()">&times;</span>
+    <div class="gallery-arrow gallery-arrow-left" onclick="previousImage()">&#10094;</div>
+    <div class="gallery-modal-content">
+      <img id="galleryImage" src="" alt="Car Image">
+    </div>
+    <div class="gallery-arrow gallery-arrow-right" onclick="nextImage()">&#10095;</div>
+    <div class="gallery-counter" id="galleryCounter">1 / 1</div>
+  </div>
+
+  <script>
+    let currentCar = null;
+    let currentImageIndex = 0;
+
+    // Helper function for formatting currency
+    function formatCurrency(amount) {
+      if (!amount) return '₹0';
+      // Convert to integer to remove decimals, then format with Indian locale
+      const numericAmount = parseInt(amount) || 0;
+      return '₹' + numericAmount.toLocaleString('en-IN');
+    }
+
+    // EMI calculation function
+    function calculateEMI(principal, annualRate, months) {
+      const monthlyRate = annualRate / 12 / 100;
+      const emi = principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+      const totalAmount = emi * months;
+      const totalInterest = totalAmount - principal;
+      
+      return {
+        emi: Math.round(emi),
+        totalAmount: Math.round(totalAmount),
+        totalInterest: Math.round(totalInterest)
+      };
+    }
+
+    // Message template for inquiries
+    function getMessageTemplate(type, car) {
+      if (type === 'interest' && car) {
+        return `Hi, I am interested in your ${car.make} ${car.model} ${car.year} listed for ${formatCurrency(car.price)}. Please share more details.`;
+      }
+      return '';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const carId = urlParams.get('id');
+      
+      if (carId) {
+        loadCarDetails(carId);
+      } else {
+        window.location.href = 'all-cars.html';
+      }
+    });
+
+    async function loadCarDetails(carId) {
+      try {
+        console.log('Loading car with ID:', carId);
+        currentCar = await carManager.getCarById(carId);
+        console.log('Car data received:', currentCar);
+        
+        if (!currentCar) {
+          alert('Car not found');
+          window.location.href = 'all-cars.html';
+          return;
+        }
+
+        displayCarDetails(currentCar);
+        updateFavoriteButton();
+        setupEMICalculator();
+      } catch (error) {
+        console.error('Error loading car details:', error);
+        alert('Error loading car details: ' + error.message);
+      }
+    }
+
+    function displayCarDetails(car) {
+      try {
+        console.log('Displaying car details:', car);
+        
+        // Header
+        document.getElementById('carTitle').textContent = `${car.make} ${car.model} ${car.year}`;
+        document.getElementById('carPrice').textContent = carManager.formatPrice(car.price);
+        document.getElementById('carMeta').innerHTML = `
+          <span>📍 ${car.location || 'Location not specified'}</span>
+          <span>⏰ Posted ${carManager.formatDate(car.created_at || car.postedAt)}</span>
+          <span>👁️ ${car.views || 0} views</span>
+          <span>💬 ${car.inquiries || 0} inquiries</span>
+        `;
+
+        // Gallery - handle JSON string from database
+        let images = car.images;
+        if (typeof images === 'string') {
+          try {
+            images = JSON.parse(images);
+          } catch (e) {
+            console.warn('Failed to parse images:', e);
+            images = [];
+          }
+        }
+        if (!Array.isArray(images) || images.length === 0) {
+          images = ['images/logo.png']; // Use logo as placeholder
+        }
+        car.images = images; // Update car object with parsed images
+        displayCarGallery(car);
+
+        // Car details - handle both field name formats (fuel_type and fuelType)
+        document.getElementById('carDetailsInfo').innerHTML = `
+        <div class="info-item">
+          <span class="info-label">Year</span>
+          <span class="info-value">${car.year}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Mileage</span>
+          <span class="info-value">${car.mileage ? car.mileage.toLocaleString() + ' km' : 'Not specified'}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Fuel Type</span>
+          <span class="info-value">${car.fuel_type || car.fuelType || 'Not specified'}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Transmission</span>
+          <span class="info-value">${car.transmission || 'Not specified'}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Condition</span>
+          <span class="info-value">${car.condition_status || car.condition || 'Not specified'}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Status</span>
+          <span class="info-value" style="color:${car.status === 'available' ? '#28a745' : '#dc3545'}">${(car.status || '').toUpperCase()}</span>
+        </div>
+        ${(car.booking_amount || car.bookingAmount) && (car.booking_amount || car.bookingAmount) > 0 ? `
+        <div class="info-item">
+          <span class="info-label">Booking Amount</span>
+          <span class="info-value" style="color:#f9b233; font-weight:600;">${formatCurrency(car.booking_amount || car.bookingAmount)}</span>
+        </div>` : ''}
+        ${(car.emi_amount || car.emiAmount) && (car.emi_amount || car.emiAmount) > 0 ? `
+        <div class="info-item">
+          <span class="info-label">EMI/Month</span>
+          <span class="info-value" style="color:#007bff; font-weight:600;">${formatCurrency(car.emi_amount || car.emiAmount)}</span>
+        </div>` : ''}
+      `;
+
+      // Seller info - handle API response format
+      const sellerName = car.seller_name || car.seller_username || car.seller || 'Unknown';
+      const sellerPhone = car.seller_phone || car.contact || 'Contact via inquiry';
+      document.getElementById('sellerInfo').innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <span><strong>Seller:</strong> ${sellerName}</span>
+        </div>
+        <div><i class="material-icons">phone_android</i> ${sellerPhone}</div>
+      `;
+
+      // Description
+      document.getElementById('carDescription').innerHTML = car.description || 
+        '<em style="color:#999;">No description provided by the seller.</em>';
+        
+      console.log('Car details displayed successfully');
+      } catch (error) {
+        console.error('Error displaying car details:', error);
+        alert('Error displaying car details: ' + error.message);
+      }
+    }
+
+    function displayCarGallery(car) {
+      const images = car.images && car.images.length > 0 ? car.images : ['images/default-car.jpg'];
+      const mainImage = document.getElementById('mainImage');
+      const thumbnailGallery = document.getElementById('thumbnailGallery');
+
+      // Set main image
+      mainImage.src = images[0];
+      currentImageIndex = 0;
+
+      // Add hover effect for zoom animation
+      mainImage.addEventListener('mouseenter', () => {
+        mainImage.classList.add('zoom-effect');
+      });
+      mainImage.addEventListener('mouseleave', () => {
+        mainImage.classList.remove('zoom-effect');
+      });
+
+      // Create thumbnails
+      thumbnailGallery.innerHTML = '';
+      if (images.length > 1) {
+        images.forEach((image, index) => {
+          const thumbnail = document.createElement('img');
+          thumbnail.src = image;
+          thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
+          thumbnail.onclick = () => switchMainImage(index);
+          thumbnailGallery.appendChild(thumbnail);
+        });
+      }
+    }
+
+    function switchMainImage(index) {
+      const images = currentCar.images && currentCar.images.length > 0 ? 
+        currentCar.images : ['images/default-car.jpg'];
+      
+      document.getElementById('mainImage').src = images[index];
+      currentImageIndex = index;
+
+      // Update thumbnail active state
+      document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+      });
+    }
+
+    // Gallery Modal Functions
+    function openGalleryModal() {
+      const modal = document.getElementById('galleryModal');
+      const galleryImage = document.getElementById('galleryImage');
+      const images = currentCar.images && currentCar.images.length > 0 ? 
+        currentCar.images : ['images/default-car.jpg'];
+      
+      galleryImage.src = images[currentImageIndex];
+      updateGalleryCounter();
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    function closeGalleryModal() {
+      const modal = document.getElementById('galleryModal');
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto'; // Restore scrolling
+    }
+
+    function nextImage() {
+      const images = currentCar.images && currentCar.images.length > 0 ? 
+        currentCar.images : ['images/default-car.jpg'];
+      
+      currentImageIndex = (currentImageIndex + 1) % images.length;
+      document.getElementById('galleryImage').src = images[currentImageIndex];
+      updateGalleryCounter();
+      switchMainImage(currentImageIndex);
+    }
+
+    function previousImage() {
+      const images = currentCar.images && currentCar.images.length > 0 ? 
+        currentCar.images : ['images/default-car.jpg'];
+      
+      currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+      document.getElementById('galleryImage').src = images[currentImageIndex];
+      updateGalleryCounter();
+      switchMainImage(currentImageIndex);
+    }
+
+    function updateGalleryCounter() {
+      const images = currentCar.images && currentCar.images.length > 0 ? 
+        currentCar.images : ['images/default-car.jpg'];
+      
+      document.getElementById('galleryCounter').textContent = 
+        `${currentImageIndex + 1} / ${images.length}`;
+    }
+
+    // Keyboard navigation for gallery
+    document.addEventListener('keydown', function(e) {
+      const modal = document.getElementById('galleryModal');
+      if (modal.style.display === 'block') {
+        if (e.key === 'ArrowRight') {
+          nextImage();
+        } else if (e.key === 'ArrowLeft') {
+          previousImage();
+        } else if (e.key === 'Escape') {
+          closeGalleryModal();
+        }
+      }
+    });
+
+    function updateFavoriteButton() {
+      const btn = document.getElementById('favoriteBtn');
+      const isFavorite = carManager.isCarInFavorites(currentCar.id);
+      btn.innerHTML = isFavorite ? '<i class="material-icons">favorite</i>' : '<i class="material-icons">favorite_border</i>';
+      btn.classList.toggle('active', isFavorite);
+    }
+
+    function toggleCarFavorite() {
+      if (!localStorage.getItem('authToken')) {
+        showMessage('Please login to add favorites', 'error');
+        return;
+      }
+
+      try {
+        const isFavorite = carManager.toggleFavorite(currentCar.id);
+        updateFavoriteButton();
+        showMessage(isFavorite ? 'Added to favorites' : 'Removed from favorites', 'success');
+      } catch (error) {
+        showMessage(error.message, 'error');
+      }
+    }
+
+    function showInquiryModal() {
+      const authToken = localStorage.getItem('authToken');
+      const ridebazzarUser = localStorage.getItem('ridebazzar_user');
+      
+      if (!authToken && !ridebazzarUser) {
+        showMessage('Please login to contact the seller', 'error');
+        return;
+      }
+
+      // Get current user - handle both old (ridebazzar_user) and new (authToken) formats
+      let currentUser = null;
+      if (ridebazzarUser) {
+        currentUser = ridebazzarUser;
+      } else if (authToken) {
+        try {
+          const userData = localStorage.getItem('userData');
+          if (userData) {
+            const parsedData = JSON.parse(userData);
+            currentUser = parsedData.username || parsedData.email;
+          }
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+        }
+      }
+      
+      if (!currentUser) {
+        showMessage('Please login to contact the seller', 'error');
+        return;
+      }
+      
+      // Get seller from currentCar
+      const sellerUsername = currentCar.seller || currentCar.seller_username;
+      
+      if (sellerUsername && sellerUsername === currentUser) {
+        showMessage('You cannot inquire about your own car', 'error');
+        return;
+      }
+
+      document.getElementById('inquiryModal').style.display = 'block';
+    }
+
+    function hideInquiryModal() {
+      document.getElementById('inquiryModal').style.display = 'none';
+      document.getElementById('inquiryForm').reset();
+    }
+
+    function submitInquiry() {
+      try {
+        const inquiryData = {
+          message: document.getElementById('inquiryMessage').value,
+          phone: document.getElementById('inquiryPhone').value
+        };
+
+        // Validate inputs
+        if (!inquiryData.message.trim()) {
+          showMessage('Please enter your inquiry message', 'error');
+          return;
+        }
+        if (!inquiryData.phone.trim()) {
+          showMessage('Please enter your phone number', 'error');
+          return;
+        }
+
+        // Submit inquiry using carManager (async function)
+        if (carManager && carManager.submitInquiry) {
+          // Call the async function and handle the promise
+          carManager.submitInquiry(currentCar.id, inquiryData).then(result => {
+            // result is the data object returned from carManager.submitInquiry()
+            if (result && result.inquiryId) {
+              showMessage('✅ Inquiry sent successfully!', 'success');
+              hideInquiryModal();
+              // Refresh car data to update inquiry count
+              loadCarDetails(currentCar.id);
+            } else {
+              showMessage('❌ Failed to send inquiry', 'error');
+            }
+          }).catch(error => {
+            showMessage('❌ ' + error.message, 'error');
+            console.error('Inquiry error:', error);
+          });
+        } else {
+          showMessage('Error: Inquiry system not available', 'error');
+        }
+      } catch (error) {
+        showMessage('❌ ' + error.message, 'error');
+        console.error('Inquiry error:', error);
+      }
+    }
+
+    function showBookingModal() {
+      console.log('showBookingModal called');
+      console.log('currentCar:', currentCar);
+      
+      const authToken = localStorage.getItem('authToken');
+      const ridebazzarUser = localStorage.getItem('ridebazzar_user');
+      
+      if (!authToken && !ridebazzarUser) {
+        showMessage('Please login to book a car', 'error');
+        return;
+      }
+
+      let currentUser = ridebazzarUser;
+      if (!currentUser && authToken) {
+        const userDataStr = localStorage.getItem('userData');
+        if (userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            currentUser = userData.username;
+          } catch (error) {
+            console.error('Error parsing userData:', error);
+          }
+        }
+      }
+      
+      if (!currentUser) {
+        showMessage('Please login to book a car', 'error');
+        return;
+      }
+      
+      console.log('currentUser:', currentUser);
+      console.log('car seller:', currentCar.seller);
+      console.log('car seller_username:', currentCar.seller_username);
+      
+      if (currentCar.seller === currentUser || currentCar.seller_username === currentUser) {
+        showMessage('You cannot book your own car', 'error');
+        return;
+      }
+
+      if (currentCar.status !== 'available' && currentCar.status !== 'active') {
+        showMessage('This car is not available for booking. Status: ' + currentCar.status, 'error');
+        return;
+      }
+
+      // Use seller's specified booking amount from database
+      const bookingAmount = currentCar.booking_amount || currentCar.bookingAmount || Math.max(Math.min(currentCar.price * 0.1, 50000), 5000);
+      document.getElementById('bookingAmount').value = bookingAmount;
+
+      // Car summary for booking
+      document.getElementById('bookingCarSummary').innerHTML = `
+        <h4>${currentCar.make} ${currentCar.model} ${currentCar.year}</h4>
+        <div style="display:flex; justify-content:space-between; margin-top:10px;">
+          <span>Total Price:</span>
+          <span style="font-weight:bold;">${carManager.formatPrice(currentCar.price)}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:5px;">
+          <span>Booking Amount:</span>
+          <span style="font-weight:bold; color:#e74c3c;">${carManager.formatPrice(bookingAmount)}</span>
+        </div>
+      `;
+
+      document.getElementById('bookingModal').style.display = 'block';
+    }
+
+    function hideBookingModal() {
+      document.getElementById('bookingModal').style.display = 'none';
+      document.getElementById('bookingForm').reset();
+    }
+
+    function processBooking() {
+      console.log('processBooking called');
+      console.log('currentCar:', currentCar);
+      
+      try {
+        // Validate required fields
+        const fullName = document.getElementById('buyerName').value.trim();
+        const phone = document.getElementById('buyerPhone').value.trim();
+        const email = document.getElementById('buyerEmail').value.trim();
+        const address = document.getElementById('buyerAddress').value.trim();
+        const bookingAmount = document.getElementById('bookingAmount').value;
+        const inspectionDate = document.getElementById('inspectionDate').value;
+
+        if (!fullName) {
+          showMessage('Please enter your full name', 'error');
+          return;
+        }
+        if (!phone) {
+          showMessage('Please enter your phone number', 'error');
+          return;
+        }
+        if (!email) {
+          showMessage('Please enter your email address', 'error');
+          return;
+        }
+        if (!address) {
+          showMessage('Please enter your address', 'error');
+          return;
+        }
+        if (!bookingAmount || bookingAmount <= 0) {
+          showMessage('Please enter a valid booking amount', 'error');
+          return;
+        }
+        if (!inspectionDate) {
+          showMessage('Please select an inspection date', 'error');
+          return;
+        }
+
+        const form = document.getElementById('bookingForm');
+        const formData = new FormData(form);
+
+        // Create booking data object for backend API
+        const bookingData = {
+          carId: currentCar.id,
+          bookingAmount: parseFloat(bookingAmount),
+          totalAmount: currentCar.price,
+          inspectionDate: inspectionDate,
+          notes: document.getElementById('bookingNotes').value,
+          buyerInfo: {
+            fullName: fullName,
+            phone: phone,
+            email: email,
+            address: address
+          }
+        };
+        
+        console.log('bookingData:', bookingData);
+        console.log('paymentSystem:', paymentSystem);
+
+        // Call backend API to create booking
+        paymentSystem.createBooking(bookingData)
+          .then(result => {
+            console.log('Booking API response:', result);
+            
+            if (result.success) {
+              hideBookingModal();
+              showMessage('Booking created successfully! Redirecting to payment...', 'success');
+              
+              // Redirect to payment page after a short delay
+              setTimeout(() => {
+                console.log('Redirecting to payment page with booking ID:', result.data.bookingId);
+                window.location.href = `payment.html?booking=${result.data.bookingId}`;
+              }, 1500);
+            } else {
+              showMessage(result.message || 'Booking failed. Please try again.', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Booking error:', error);
+            showMessage(error.message || 'Booking failed. Please try again.', 'error');
+          });
+        
+      } catch (error) {
+        console.error('processBooking error:', error);
+        showMessage(error.message, 'error');
+      }
+    }
+
+    function setupEMICalculator() {
+// Set default loan amount (80% of car price)
+      const defaultLoanAmount = Math.round(currentCar.price * 0.8);
+      document.getElementById('loanAmount').value = defaultLoanAmount;
+      calculateEMIDisplay();
+      
+      // Pre-fill the inquiry message with a template
+      if (document.getElementById('inquiryMessage')) {
+        document.getElementById('inquiryMessage').value = getMessageTemplate('interest', currentCar);
+      }
+    }
+
+    function toggleEMICalculator() {
+      const content = document.getElementById('emiCalculatorContent');
+      const arrow = document.getElementById('emiArrow');
+      if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        content.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function calculateEMIDisplay() {
+      const principal = parseFloat(document.getElementById('loanAmount').value) || 0;
+      const tenureSelect = document.getElementById('loanTenure');
+      const months = parseInt(tenureSelect.value) || 60;
+      const rate = parseFloat(tenureSelect.options[tenureSelect.selectedIndex].getAttribute('data-rate')) || 11.99;
+      
+      // Use global currentCar variable
+      const carEMIAmount = currentCar?.emi_amount || currentCar?.emiAmount || 0;
+
+      if (principal > 0) {
+        const emiData = calculateEMI(principal, rate, months);
+        const years = months / 12;
+        document.getElementById('emiResult').innerHTML = `
+          ${carEMIAmount > 0 ? `
+          <div style="margin-bottom:12px; padding:12px; background:#e3f2fd; border-radius:6px; border-left:4px solid #007bff;">
+            <div style="font-size:12px; color:#666; margin-bottom:5px;">🏷️ Seller's EMI Offer</div>
+            <div style="font-size:20px; font-weight:bold; color:#007bff;">${formatCurrency(carEMIAmount)}/month</div>
+          </div>` : ''}
+          <div style="margin-bottom:12px; padding-bottom:10px; border-bottom:2px solid #ddd;">
+            <div style="font-size:12px; color:#666; margin-bottom:5px;">💰 Calculated EMI for ${years} Years @ ${rate}%</div>
+            <div style="font-size:24px; font-weight:bold; color:#e74c3c;">${formatCurrency(emiData.emi)}/month</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
+            <span style="color:#666;">Principal Amount:</span>
+            <span style="font-weight:600;">${formatCurrency(principal)}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
+            <span style="color:#666;">Total Interest:</span>
+            <span style="font-weight:600; color:#ff6b6b;">${formatCurrency(emiData.totalInterest)}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-top:10px; border-top:2px solid #ddd; font-size:15px;">
+            <span style="font-weight:600;">Total Payable:</span>
+            <span style="font-weight:bold; color:#333;">${formatCurrency(emiData.totalAmount)}</span>
+          </div>
+        `;
+      } else if (carEMIAmount > 0) {
+        // Show only seller's EMI if no loan amount entered
+        document.getElementById('emiResult').innerHTML = `
+          <div style="padding:12px; background:#e3f2fd; border-radius:6px; border-left:4px solid #007bff; text-align:center;">
+            <div style="font-size:12px; color:#666; margin-bottom:5px;">🏷️ Seller's EMI Offer</div>
+            <div style="font-size:24px; font-weight:bold; color:#007bff;">${formatCurrency(carEMIAmount)}/month</div>
+            <div style="font-size:11px; color:#888; margin-top:8px;">Enter loan amount above to calculate custom EMI</div>
+          </div>
+        `;
+      }
+    }
+
+    function showMessage(message, type) {
+      const messageDiv = document.getElementById('messageDisplay');
+      messageDiv.textContent = message;
+      messageDiv.style.display = 'block';
+      messageDiv.style.background = type === 'success' ? '#28a745' : '#dc3545';
+      
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+      }, 3000);
+    }
+
+    function handleSellCarClick() {
+      const authToken = localStorage.getItem('authToken');
+      const ridebazzarUser = localStorage.getItem('ridebazzar_user');
+      
+      if (authToken || ridebazzarUser) {
+        window.location.href = 'post-car.html';
+      } else {
+        showMessage('Please login to sell a car', 'error');
+      }
+    }
+    
+    // Test Drive functions
+    function showTestDriveModal() {
+      const authToken = localStorage.getItem('authToken');
+      const ridebazzarUser = localStorage.getItem('ridebazzar_user');
+      
+      if (!authToken && !ridebazzarUser) {
+        showMessage('Please login to schedule a test drive', 'error');
+        return;
+      }
+
+      const currentUser = authManager ? authManager.getCurrentUser() : null;
+      const username = currentUser ? currentUser.username : ridebazzarUser;
+
+      if (currentCar.seller === username) {
+        showMessage('You cannot schedule a test drive for your own car', 'error');
+        return;
+      }
+
+      // Set minimum date to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const minDate = tomorrow.toISOString().split('T')[0];
+      document.getElementById('testDriveDate').setAttribute('min', minDate);
+
+      // Car summary for test drive
+      document.getElementById('testDriveCarSummary').innerHTML = `
+        <div style="display:flex; align-items:center; gap:15px;">
+          <img src="${currentCar.images && currentCar.images[0] ? currentCar.images[0] : 'images/default-car.jpg'}" 
+               style="width:80px; height:60px; object-fit:cover; border-radius:6px;">
+          <div>
+            <h4 style="margin:0; font-size:16px;">${currentCar.make} ${currentCar.model} ${currentCar.year}</h4>
+            <p style="margin:5px 0 0 0; color:#666; font-size:14px;">${carManager.formatPrice(currentCar.price)}</p>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('testDriveModal').style.display = 'block';
+    }
+
+    function hideTestDriveModal() {
+      document.getElementById('testDriveModal').style.display = 'none';
+      document.getElementById('testDriveForm').reset();
+      document.getElementById('customLocationDiv').style.display = 'none';
+    }
+
+    // Show/hide custom location field
+    document.addEventListener('DOMContentLoaded', function() {
+      const meetingPointSelect = document.getElementById('testDriveMeetingPoint');
+      if (meetingPointSelect) {
+        meetingPointSelect.addEventListener('change', function() {
+          const customDiv = document.getElementById('customLocationDiv');
+          const customInput = document.getElementById('customLocation');
+          if (this.value === 'custom') {
+            customDiv.style.display = 'block';
+            customInput.required = true;
+          } else {
+            customDiv.style.display = 'none';
+            customInput.required = false;
+          }
+        });
+      }
+    });
+
+    function submitTestDrive() {
+      try {
+        const currentUser = authManager ? authManager.getCurrentUser() : null;
+        const username = currentUser ? currentUser.username : localStorage.getItem('ridebazzar_user');
+
+        if (!username) {
+          showMessage('User information not found', 'error');
+          return;
+        }
+
+        console.log('=== Test Drive Submission Debug ===');
+        console.log('Submitting test drive - Buyer:', username);
+        console.log('Current car object:', currentCar);
+        console.log('Seller field:', currentCar.seller);
+        console.log('Seller_username field:', currentCar.seller_username);
+        console.log('===================================');
+
+        const testDriveData = {
+          id: Date.now().toString(),
+          carId: currentCar.id,
+          carInfo: {
+            make: currentCar.make,
+            model: currentCar.model,
+            year: currentCar.year,
+            price: currentCar.price,
+            image: currentCar.images && currentCar.images[0] ? currentCar.images[0] : 'images/default-car.jpg'
+          },
+          buyer: username,
+          seller: currentCar.seller_username || currentCar.seller || 'Unknown',
+          date: document.getElementById('testDriveDate').value,
+          time: document.getElementById('testDriveTime').value,
+          meetingPoint: document.getElementById('testDriveMeetingPoint').value,
+          customLocation: document.getElementById('customLocation').value,
+          phone: document.getElementById('testDrivePhone').value,
+          notes: document.getElementById('testDriveNotes').value,
+          status: 'pending', // pending, confirmed, completed, cancelled
+          createdAt: new Date().toISOString()
+        };
+
+        // Save to localStorage
+        let testDrives = JSON.parse(localStorage.getItem('ridebazzar_testdrives') || '[]');
+        testDrives.push(testDriveData);
+        localStorage.setItem('ridebazzar_testdrives', JSON.stringify(testDrives));
+
+        console.log('Test drive saved to localStorage:', testDriveData);
+        console.log('Total test drives in localStorage:', testDrives.length);
+
+        showMessage('Test drive scheduled successfully! The seller will contact you soon.', 'success');
+        hideTestDriveModal();
+
+        // Optional: Create a notification for the seller
+        createTestDriveNotification(testDriveData);
+
+      } catch (error) {
+        console.error('Test drive submission error:', error);
+        showMessage(error.message || 'Failed to schedule test drive', 'error');
+      }
+    }
+
+    function createTestDriveNotification(testDriveData) {
+      try {
+        let notifications = JSON.parse(localStorage.getItem(`ridebazzar_notifications_${testDriveData.seller}`) || '[]');
+        notifications.push({
+          id: Date.now().toString(),
+          type: 'test_drive',
+          message: `New test drive request for your ${testDriveData.carInfo.make} ${testDriveData.carInfo.model}`,
+          carId: testDriveData.carId,
+          testDriveId: testDriveData.id,
+          from: testDriveData.buyer,
+          timestamp: new Date().toISOString(),
+          read: false
+        });
+        localStorage.setItem(`ridebazzar_notifications_${testDriveData.seller}`, JSON.stringify(notifications));
+      } catch (error) {
+        console.error('Error creating notification:', error);
+      }
+    }
+    
+    // Call Seller Function
+    function callSeller() {
+      if (!currentCar) {
+        showMessage('Car information not available', 'error');
+        return;
+      }
+      
+      const sellerContact = currentCar.contact || currentCar.phone;
+      
+      if (!sellerContact) {
+        showMessage('Seller contact number not available', 'error');
+        return;
+      }
+      
+      // Detect if user is on mobile device
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // Mobile: Open phone dialer
+        const confirmCall = confirm(`Call seller at ${sellerContact}?\n\nThis will open your phone dialer.`);
+        
+        if (confirmCall) {
+          window.location.href = `tel:${sellerContact}`;
+          logContact('call', sellerContact);
+        }
+      } else {
+        // Desktop: Open WhatsApp Web
+        const confirmWhatsApp = confirm(`Contact seller via WhatsApp at ${sellerContact}?\n\nThis will open WhatsApp Web.`);
+        
+        if (confirmWhatsApp) {
+          // Format phone number for WhatsApp (remove spaces, dashes, etc.)
+          const formattedNumber = sellerContact.replace(/\D/g, '');
+          
+          // Prepare default message
+          const carInfo = `${currentCar.make} ${currentCar.model} (${currentCar.year})`;
+          const message = `Hi! I'm interested in your ${carInfo} listed on RideBazzar for ₹${parseInt(currentCar.price).toLocaleString()}. Is it still available?`;
+          
+          // Open WhatsApp Web with pre-filled message
+          const whatsappUrl = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
+          window.open(whatsappUrl, '_blank');
+          
+          logContact('whatsapp', sellerContact);
+        }
+      }
+    }
+    
+    // Log contact attempts
+    function logContact(type, contact) {
+      try {
+        let contactLogs = JSON.parse(localStorage.getItem('ridebazzar_contact_logs') || '[]');
+        contactLogs.push({
+          id: Date.now().toString(),
+          type: type, // 'call' or 'whatsapp'
+          carId: currentCar.id,
+          seller: currentCar.seller,
+          sellerContact: contact,
+          timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('ridebazzar_contact_logs', JSON.stringify(contactLogs));
+      } catch (error) {
+        console.error('Error logging contact:', error);
+      }
+    }
+    
+    // Messaging functions
+    function startMessageConversation() {
+      if (!localStorage.getItem('authToken')) {
+        showMessage('Please login to message the seller', 'error');
+        return;
+      }
+      
+      if (currentCar.seller === localStorage.getItem('ridebazzar_user')) {
+        showMessage('You cannot message yourself', 'error');
+        return;
+      }
+      
+      try {
+        // Create or get conversation
+        const conversation = startConversation(currentCar.seller, currentCar.id);
+        
+        // Redirect to messages page with this conversation
+        window.location.href = `messages.html?conversation=${conversation.id}`;
+      } catch (error) {
+        showMessage(error.message, 'error');
+      }
+    }
+
+    // Authentication helper functions
+    function showLoginModal() {
+      document.getElementById('loginModal').style.display = 'block';
+    }
+
+    function hideLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
+
+    async function handleLogin() {
+      const usernameOrEmail = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+      const messageDiv = document.getElementById('authMessage');
+
+      if (!usernameOrEmail || !password) {
+        messageDiv.textContent = 'Please fill in all fields';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: usernameOrEmail,
+            password
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          localStorage.setItem('authToken', data.data.token);
+          localStorage.setItem('userData', JSON.stringify(data.data.user));
+          localStorage.setItem('currentUser', JSON.stringify(data.data.user));
+          
+          messageDiv.textContent = 'Login successful!';
+          messageDiv.className = 'auth-message success';
+          messageDiv.style.display = 'block';
+
+          setTimeout(() => {
+            hideLoginModal();
+            updateNavForLoggedInUser(data.data.user);
+            
+            // Redirect based on role
+            if (data.data.user.role === 'admin') {
+              window.location.href = 'admin.html';
+            } else {
+              window.location.href = 'dashboard.html';
+            }
+          }, 1000);
+        } else {
+          messageDiv.textContent = data.message || 'Login failed';
+          messageDiv.className = 'auth-message error';
+          messageDiv.style.display = 'block';
+        }
+      } catch (error) {
+        // Silently handle connection errors - backend may not be running
+        console.warn('Backend server not available. Using localStorage authentication.');
+        
+        // Fallback to localStorage authentication
+        const users = JSON.parse(localStorage.getItem('ridebazzar_users') || '[]');
+        const user = users.find(u => 
+          (u.username === usernameOrEmail || u.email === usernameOrEmail) && 
+          u.password === password
+        );
+        
+        if (user) {
+          const userData = {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role || 'user'
+          };
+          
+          localStorage.setItem('authToken', 'local_' + Date.now());
+          localStorage.setItem('userData', JSON.stringify(userData));
+          
+          messageDiv.textContent = 'Login successful!';
+          messageDiv.className = 'auth-message success';
+          messageDiv.style.display = 'block';
+          
+          setTimeout(() => {
+            hideLoginModal();
+            updateNavForLoggedInUser(userData);
+            
+            if (userData.role === 'admin') {
+              window.location.href = 'admin.html';
+            } else {
+              window.location.href = 'dashboard.html';
+            }
+          }, 1000);
+        } else {
+          messageDiv.textContent = 'Invalid credentials. Please check username and password.';
+          messageDiv.className = 'auth-message error';
+          messageDiv.style.display = 'block';
+        }
+      }
+    }
+
+    async function handleRegister() {
+      const username = document.getElementById('registerUsername').value;
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const messageDiv = document.getElementById('authMessage');
+
+      if (!username || !email || !password || !confirmPassword) {
+        messageDiv.textContent = 'Please fill in all fields';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        messageDiv.textContent = 'Passwords do not match';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+        return;
+      }
+
+      if (password.length < 6) {
+        messageDiv.textContent = 'Password must be at least 6 characters long';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username,
+            email,
+            password
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          messageDiv.textContent = 'Registration successful! Please login.';
+          messageDiv.className = 'auth-message success';
+          messageDiv.style.display = 'block';
+          
+          // Clear form
+          document.getElementById('registerUsername').value = '';
+          document.getElementById('registerEmail').value = '';
+          document.getElementById('registerPassword').value = '';
+          document.getElementById('confirmPassword').value = '';
+          
+          // Switch to login tab after 2 seconds
+          setTimeout(() => {
+            switchTab('login');
+          }, 2000);
+        } else {
+          messageDiv.textContent = data.message || 'Registration failed';
+          messageDiv.className = 'auth-message error';
+          messageDiv.style.display = 'block';
+        }
+      } catch (error) {
+        // Fallback to localStorage registration when backend is not available
+        console.warn('Backend server not available. Using localStorage registration.');
+        
+        const users = JSON.parse(localStorage.getItem('ridebazzar_users') || '[]');
+        
+        // Check if username or email already exists
+        const existingUser = users.find(u => u.username === username || u.email === email);
+        
+        if (existingUser) {
+          messageDiv.textContent = 'Username or email already exists';
+          messageDiv.className = 'auth-message error';
+          messageDiv.style.display = 'block';
+          return;
+        }
+        
+        // Create new user
+        const newUser = {
+          id: Date.now().toString(),
+          username,
+          email,
+          password, // Note: In production, this should be hashed
+          role: 'user',
+          createdAt: new Date().toISOString()
+        };
+        
+        users.push(newUser);
+        localStorage.setItem('ridebazzar_users', JSON.stringify(users));
+        
+        messageDiv.textContent = 'Registration successful! Please login.';
+        messageDiv.className = 'auth-message success';
+        messageDiv.style.display = 'block';
+        
+        // Clear form
+        document.getElementById('registerUsername').value = '';
+        document.getElementById('registerEmail').value = '';
+        document.getElementById('registerPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        
+        // Switch to login tab after 2 seconds
+        setTimeout(() => {
+          switchTab('login');
+        }, 2000);
+      }
+    }
+
+    async function logoutUser() {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          await fetch('http://localhost:5000/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }).catch(() => {
+            // Silently handle backend connection errors
+            console.warn('Backend server not available during logout.');
+          });
+        }
+        
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        updateNavForLoggedOutUser();
+        
+        // Redirect to home page
+        window.location.href = 'home.html';
+      } catch (error) {
+        // Still logout locally even if server request fails
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        updateNavForLoggedOutUser();
+        
+        // Redirect to home page
+        window.location.href = 'home.html';
+      }
+    }
+
+    function switchTab(tab) {
+      const loginTab = document.getElementById('loginTab');
+      const registerTab = document.getElementById('registerTab');
+      const loginContent = document.getElementById('loginFormContent');
+      const registerContent = document.getElementById('registerFormContent');
+      const messageDiv = document.getElementById('authMessage');
+
+      // Hide message
+      messageDiv.style.display = 'none';
+
+      if (tab === 'login') {
+        loginTab.style.borderBottomColor = '#f9b233';
+        loginTab.style.color = '#f9b233';
+        registerTab.style.borderBottomColor = 'transparent';
+        registerTab.style.color = '#999';
+        loginContent.style.display = 'block';
+        registerContent.style.display = 'none';
+      } else {
+        registerTab.style.borderBottomColor = '#f9b233';
+        registerTab.style.color = '#f9b233';
+        loginTab.style.borderBottomColor = 'transparent';
+        loginTab.style.color = '#999';
+        registerContent.style.display = 'block';
+        loginContent.style.display = 'none';
+      }
+    }
+
+    function togglePassword(inputId, icon) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        icon.textContent = '👁️';
+      }
+    }
+
+    function handleLoginSubmit(event) {
+      event.preventDefault();
+      handleLogin();
+      return false;
+    }
+
+    function showAuthMessage(message, type) {
+      const msgDiv = document.getElementById('authMessage');
+      msgDiv.textContent = message;
+      msgDiv.style.display = 'block';
+      msgDiv.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
+      msgDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+    }
+
+    // Car Eye Animation on Mouse Move
+    document.addEventListener('mousemove', (e) => {
+      const modal = document.getElementById('loginModal');
+      if (modal && modal.style.display === 'block') {
+        const leftPupil = document.getElementById('modalLeftPupil');
+        const rightPupil = document.getElementById('modalRightPupil');
+        
+        if (leftPupil && rightPupil) {
+          const leftEyeRect = leftPupil.getBoundingClientRect();
+          const rightEyeRect = rightPupil.getBoundingClientRect();
+          
+          const leftEyeX = leftEyeRect.left + leftEyeRect.width / 2;
+          const leftEyeY = leftEyeRect.top + leftEyeRect.height / 2;
+          const leftAngle = Math.atan2(e.clientY - leftEyeY, e.clientX - leftEyeX);
+          const leftDistance = Math.min(8, Math.hypot(e.clientX - leftEyeX, e.clientY - leftEyeY) / 20);
+          const leftPupilX = 100 + Math.cos(leftAngle) * leftDistance;
+          const leftPupilY = 185 + Math.sin(leftAngle) * leftDistance;
+          leftPupil.setAttribute('cx', leftPupilX);
+          leftPupil.setAttribute('cy', leftPupilY);
+          
+          const rightEyeX = rightEyeRect.left + rightEyeRect.width / 2;
+          const rightEyeY = rightEyeRect.top + rightEyeRect.height / 2;
+          const rightAngle = Math.atan2(e.clientY - rightEyeY, e.clientX - rightEyeX);
+          const rightDistance = Math.min(8, Math.hypot(e.clientX - rightEyeX, e.clientY - rightEyeY) / 20);
+          const rightPupilX = 220 + Math.cos(rightAngle) * rightDistance;
+          const rightPupilY = 185 + Math.sin(rightAngle) * rightDistance;
+          rightPupil.setAttribute('cx', rightPupilX);
+          rightPupil.setAttribute('cy', rightPupilY);
+        }
+      }
+    });
+
+    function updateNavForLoggedInUser(user) {
+      const loginBtn = document.getElementById('loginNavBtn');
+      const logoutBtn = document.getElementById('logoutNavBtn');
+      const profileBtn = document.getElementById('profileNavBtn');
+
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'block';
+      if (profileBtn) profileBtn.style.display = 'block';
+    }
+
+    function updateNavForLoggedOutUser() {
+      const loginBtn = document.getElementById('loginNavBtn');
+      const logoutBtn = document.getElementById('logoutNavBtn');
+      const profileBtn = document.getElementById('profileNavBtn');
+
+      if (loginBtn) loginBtn.style.display = 'block';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+      if (profileBtn) profileBtn.style.display = 'none';
+    }
+
+    // Check login status on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      
+      if (token && userData) {
+        try {
+          const user = JSON.parse(userData);
+          updateNavForLoggedInUser(user);
+        } catch (error) {
+          updateNavForLoggedOutUser();
+        }
+      } else {
+        updateNavForLoggedOutUser();
+      }
+    });
+  </script>
+
+  <!-- Login Modal -->
+  <div id="loginModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+  <div style="display:flex; background:#fff; max-width:900px; height:550px; margin:80px auto; border-radius:16px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden;">
+    <span onclick="hideLoginModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999; z-index:10;">&times;</span>
+    
+    <!-- Left Side - Car with Eyes -->
+    <div style="flex:1; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+      <div style="position:relative; z-index:2;">
+        <svg width="320" height="220" viewBox="0 0 320 220" style="filter:drop-shadow(0 10px 30px rgba(0,0,0,0.3));">
+          <rect x="40" y="120" width="240" height="60" rx="10" fill="#F9B233" />
+          <path d="M 80 120 L 110 80 L 210 80 L 240 120 Z" fill="#F9B233" />
+          <path d="M 190 85 L 210 85 L 235 115 L 210 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+          <path d="M 115 85 L 180 85 L 180 115 L 130 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+          <rect x="245" y="140" width="25" height="12" rx="3" fill="#333" />
+          <path d="M 100 155 Q 160 165 220 155" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round" />
+          <line x1="160" y1="120" x2="160" y2="175" stroke="#333" stroke-width="2" />
+          <circle cx="100" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+          <ellipse id="modalLeftPupil" cx="100" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+          <circle cx="100" cy="182" r="4" fill="white" opacity="0.8" />
+          <circle cx="220" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+          <ellipse id="modalRightPupil" cx="220" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+          <circle cx="220" cy="182" r="4" fill="white" opacity="0.8" />
+          <path d="M 72 180 Q 100 165 128 180" stroke="#333" stroke-width="2" fill="none" />
+          <path d="M 192 180 Q 220 165 248 180" stroke="#333" stroke-width="2" fill="none" />
+        </svg>
+      </div>
+      <div style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); text-align:center; color:white; z-index:3;">
+        <h2 style="font-size:28px; margin-bottom:10px; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">Welcome to RideBazzar</h2>
+        <p style="opacity:0.9; text-shadow:1px 1px 2px rgba(0,0,0,0.3);">Your trusted car marketplace</p>
+      </div>
+    </div>
+    
+    <div style="flex:1; padding:40px; overflow-y:auto;">
+      <div style="display:flex; border-bottom:2px solid #eee; margin-bottom:30px;">
+        <button id="loginTab" onclick="switchTab('login')" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid #f9b233; color:#f9b233;">Login</button>
+        <button id="registerTab" onclick="switchTab('register')" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid transparent; color:#999;">Register</button>
+      </div>
+      <div id="authMessage" style="display:none; margin:15px 0; padding:10px; border-radius:6px; text-align:center; font-weight:bold;"></div>
+      <div id="loginFormContent" style="padding:0;">
+        <form id="loginForm" onsubmit="return handleLoginSubmit(event);">
+          <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Username</label>
+            <input type="text" id="loginUsername" name="loginUsername" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="loginPassword" name="loginPassword" required style="width:100%; padding:12px 45px 12px 12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('loginPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:20px; user-select:none;">👁️</span>
+            </div>
+            <div style="text-align:right; margin-top:8px;">
+              <a href="#" onclick="event.preventDefault();" style="color:#f9b233; font-size:14px; text-decoration:none;">Forgot Password?</a>
+            </div>
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e6a429'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#f9b233'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Login</button>
+        </form>
+      </div>
+      <div id="registerFormContent" style="padding:0; display:none;">
+        <form id="registerForm" onsubmit="event.preventDefault(); handleRegister();">
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Username</label>
+            <input type="text" id="registerUsername" required style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Email</label>
+            <input type="email" id="registerEmail" required style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Phone</label>
+            <input type="tel" id="registerPhone" required placeholder="10-digit mobile number" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Location</label>
+            <input type="text" id="registerLocation" required placeholder="City, State" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="registerPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
+          </div>
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Confirm Password</label>
+            <div style="position:relative;">
+              <input type="password" id="confirmPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('confirmPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#222; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#000'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#222'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <!-- CSS for tabs and messages -->
+  <style>
+    .tab-button.active {
+      border-bottom-color: #f9b233 !important;
+      color: #f9b233;
+    }
+    .auth-message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .auth-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    /* Fix autofill and input visibility */
+    input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
+      color: black !important;
+      background-color: white !important;
+      -webkit-text-fill-color: black !important;
+    }
+    
+    input[type="text"]:-webkit-autofill,
+    input[type="password"]:-webkit-autofill,
+    input[type="email"]:-webkit-autofill,
+    input[type="tel"]:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0 1000px white inset !important;
+      -webkit-text-fill-color: black !important;
+      color: black !important;
+    }
+  </style>
+</body>
+</html>
+

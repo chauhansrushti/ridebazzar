@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-Login Test - RideBazzar</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        .test-button { background: #007bff; color: white; padding: 15px 25px; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+        .test-button:hover { background: #0056b3; }
+        .result { margin: 15px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 RideBazzar Post-Login Test</h1>
+        <p>This page will test the login and post-login redirect functionality.</p>
+        
+        <div id="results"></div>
+        
+        <button class="test-button" onclick="testAdminLogin()">Test Admin Login</button>
+        <button class="test-button" onclick="testUserLogin()">Test User Login</button>
+        <button class="test-button" onclick="testDashboardAccess()">Test Dashboard Access</button>
+        <button class="test-button" onclick="checkAuthState()">Check Auth State</button>
+        
+        <div id="statusDisplay"></div>
+    </div>
+
+    <script src="js/auth-api.js"></script>
+    <script>
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        async function testLogin() {
+            addResult('🔄 Testing login flow...', 'info');
+            
+            try {
+                const result = await window.authManager.loginUser('admin', 'admin123');
+                
+                if (result.success) {
+                    addResult(`✅ Login successful! User: ${result.user.username}`, 'success');
+                    addResult(`� User role: ${result.user.role}`, 'info');
+                    addResult(`�📋 User data: ${JSON.stringify(result.user, null, 2)}`, 'info');
+                    
+                    // Test redirect logic
+                    const redirectUrl = result.user.role === 'admin' ? 'admin.html' : 'dashboard.html';
+                    addResult(`🔄 Should redirect to: ${redirectUrl}`, 'info');
+                    
+                    // Test redirect simulation
+                    setTimeout(() => {
+                        addResult('🔄 Simulating redirect based on role...', 'info');
+                        if (result.user.role === 'admin') {
+                            addResult('<a href="admin.html" target="_blank">🔗 Open Admin Panel</a>', 'success');
+                        } else {
+                            addResult('<a href="dashboard.html" target="_blank">🔗 Open User Dashboard</a>', 'success');
+                        }
+                    }, 1000);
+                } else {
+                    addResult(`❌ Login failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAdminLogin() {
+            addResult('🔄 Testing admin login...', 'info');
+            await testLoginWithCredentials('admin', 'admin123');
+        }
+
+        async function testUserLogin() {
+            addResult('🔄 Testing user login...', 'info');
+            await testLoginWithCredentials('srushti', 'srushti123');
+        }
+
+        async function testLoginWithCredentials(username, password) {
+            try {
+                const result = await window.authManager.loginUser(username, password);
+                
+                if (result.success) {
+                    addResult(`✅ Login successful! User: ${result.user.username}`, 'success');
+                    addResult(`👤 User role: ${result.user.role}`, 'info');
+                    
+                    // Test redirect logic
+                    const redirectUrl = result.user.role === 'admin' ? 'admin.html' : 'dashboard.html';
+                    addResult(`🔄 Should redirect to: ${redirectUrl}`, 'info');
+                    
+                    // Test redirect simulation
+                    if (result.user.role === 'admin') {
+                        addResult('<a href="admin.html" target="_blank">🔗 Open Admin Panel</a>', 'success');
+                    } else {
+                        addResult('<a href="dashboard.html" target="_blank">🔗 Open User Dashboard</a>', 'success');
+                    }
+                } else {
+                    addResult(`❌ Login failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDashboardAccess() {
+            addResult('🔄 Testing dashboard access...', 'info');
+            
+            // Check if user is logged in
+            const token = localStorage.getItem('authToken');
+            const currentUser = localStorage.getItem('currentUser');
+            
+            if (token && currentUser) {
+                addResult('✅ Auth token found in localStorage', 'success');
+                addResult(`📋 Current user: ${currentUser}`, 'info');
+                
+                // Check if dashboard.html exists
+                try {
+                    const response = await fetch('dashboard.html');
+                    if (response.ok) {
+                        addResult('✅ Dashboard.html is accessible', 'success');
+                        addResult('<a href="dashboard.html" target="_blank">🔗 Open Dashboard</a>', 'info');
+                    } else {
+                        addResult('❌ Dashboard.html not found or accessible', 'error');
+                    }
+                } catch (error) {
+                    addResult(`❌ Error accessing dashboard: ${error.message}`, 'error');
+                }
+            } else {
+                addResult('❌ No auth token or user data found. Please login first.', 'error');
+            }
+        }
+
+        function checkAuthState() {
+            addResult('🔄 Checking authentication state...', 'info');
+            
+            const token = localStorage.getItem('authToken');
+            const currentUser = localStorage.getItem('currentUser');
+            
+            if (token) {
+                addResult(`✅ Auth token: ${token.substring(0, 20)}...`, 'success');
+            } else {
+                addResult('❌ No auth token found', 'error');
+            }
+            
+            if (currentUser) {
+                addResult(`✅ Current user data: ${currentUser}`, 'success');
+            } else {
+                addResult('❌ No user data found', 'error');
+            }
+            
+            // Check if authManager is available
+            if (window.authManager) {
+                addResult('✅ AuthManager is loaded and available', 'success');
+            } else {
+                addResult('❌ AuthManager not available', 'error');
+            }
+        }
+
+        // Auto-check auth state on page load
+        window.addEventListener('load', () => {
+            addResult('🚀 Post-Login Test page loaded', 'info');
+            checkAuthState();
+        });
+    </script>
+</body>
+</html>

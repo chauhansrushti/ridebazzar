@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="../js/auth-api.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>In it to drive it</title>
+  <link rel="stylesheet" href="about.css">
+  <link rel="stylesheet" href="../css/index.css" />
+  <link rel="icon" type="image/png" href="../images/logotab.png" sizes="16x16" />
+<script>
+  function toggleNavbar() {
+    const nav = document.getElementById("navbarLinks");
+    nav.classList.toggle("show");
+  }
+</script>
+</head>
+ <!-- Hamburger icon -->
+  <div class="hamburger" onclick="toggleNavbar()">☰</div>
+  <!-- Navbar -->
+
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="../images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <div class="navbar-right" id="navbarLinks">
+      <a href="../home.html">Home</a>
+      <a href="../all-cars.html">Buy Car</a>
+      <a href="../post-car.html">Sell Car</a>
+  
+     <a href="#" id="loginNavBtn" onclick="showLoginModal()">Login/Register</a>
+
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero-section">
+    <div class="overlay">
+      <h1><em>In it to</em> <strong>drive it</strong></h1>
+      <p>Four wheels fuel a billion dreams and<br>for every dream there is a RideBazzar<sup>®</sup></p>
+      
+    </div>
+  </div>
+   <!-- Our Vision Section -->
+  <section class="vision-section">
+    <div class="vision-card">
+      <div class="vision-image">
+        <h2>Our Vision</h2>
+        <img src="vision.png" alt="People with car">
+      </div>
+      <div class="vision-text">
+        <h3>To redefine the way India buys and sells used cars—trusted, transparent, and technology-driven.</h3>
+        <p>
+          At RideBazzar, our vision is to redefine the used car marketplace in India by making it more organized, accessible, and trustworthy. We aim to empower individuals by providing them with a transparent and technology-driven platform that takes the stress and uncertainty out of buying or selling a pre-owned vehicle. Our goal is to ensure that every user, whether a first-time buyer or a seasoned seller, has a smooth, informed, and satisfying experience.
+        </p>
+        <p>
+          We envision a future where RideBazzar becomes a household name in the automobile industry, known for innovation, integrity, and customer satisfaction. By continuously improving our services, embracing new technology, and expanding across regions, we strive to build a robust ecosystem that supports car buyers and sellers at every step—from vehicle selection to delivery and beyond.
+        </p>
+      </div></div></section>
+      <section class="vision-section">
+    <div class="vision-card">
+      <div class="vision-image">
+        <h2>Our Mission</h2>
+        <img src="mission.jpg" alt="Car service concept">
+      </div>
+      <div class="vision-text">
+  <h3>To simplify car ownership by making used car buying and selling effortless, fair, and fully digital.</h3>
+        <p>
+          Our mission is to provide a reliable, end-to-end solution for buying and selling used cars by combining modern technology with expert human assistance. We are committed to making car transactions simpler through features like instant vehicle valuation, 200-point inspection reports, secure payments, and doorstep service—all designed to save time and build confidence among users.
+        </p>
+        <p>
+          We aim to bridge the trust gap in the used automobile market by ensuring transparency, fair pricing, and quality control at every stage. Whether you're looking to sell your old car at the best price or buy a certified pre-owned car with full peace of mind, RideBazzar is dedicated to delivering value, convenience, and satisfaction—driven by a customer-first approach.</p>
+      </div></div></section>
+      <section class="values-section">
+    <h2>Our Core Values</h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <img src="integrity.webp" alt="Integrity Icon">
+        <h3>Integrity</h3>
+        <p>
+          We don’t just talk about honesty – we live it. At RideBazzar, doing the right thing is more than a commitment; it’s our culture. We stand by our word, keep things transparent, and take full ownership of our actions.
+        </p>
+      </div>
+<div class="value-card">
+        <img src="collaboration.png" alt="Collaboration Icon">
+        <h3>Collaboration</h3>
+        <p>
+          Together is where the magic happens. We thrive on open communication and shared ideas, ensuring every voice shapes our success. When we connect, we go further.
+        </p>
+      </div>
+      <div class="value-card">
+        <img src="excellence.png" alt="Excellence Icon">
+        <h3>Excellence</h3>
+        <p>
+          We don’t believe in meeting standards; we believe in setting them. We aim for extraordinary with a strong commitment to quality that redefines expectations.
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer style="background-color: #333; color: white; padding: 20px 0; text-align: center;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+    <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 15px; flex-wrap: wrap;">
+      <a href="compare.html" style="color: white; text-decoration: none; font-weight: 500;">Compare</a>
+      <a href="aboutus/about.html" style="color: white; text-decoration: none; font-weight: 500;">About Us</a>
+      <a href="carfinance/carfinance.html" style="color: white; text-decoration: none; font-weight: 500;">Car Finance</a>
+    </div>
+    <div style="border-top: 1px solid #555; padding-top: 15px;">
+      &copy; 2025 RideBazzar - Used Car Marketplace
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Authentication functions
+  function showLoginModal() {
+    // Redirect to home page with login modal
+    window.location.href = '../home.html#login';
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+    window.location.href = '../home.html';
+  }
+
+  // Update navbar on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('authToken');
+    const loginBtn = document.getElementById('loginNavBtn');
+    const logoutBtn = document.getElementById('logoutNavBtn');
+    const profileBtn = document.getElementById('profileNavBtn');
+    const messagesBtn = document.getElementById('messagesNavBtn');
+
+    if (token) {
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      if (profileBtn) profileBtn.style.display = 'inline-block';
+      if (messagesBtn) messagesBtn.style.display = 'inline-block';
+    } else {
+      if (loginBtn) loginBtn.style.display = 'inline-block';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+      if (profileBtn) profileBtn.style.display = 'none';
+      if (messagesBtn) messagesBtn.style.display = 'none';
+    }
+  });
+  function showLoginModal() {
+      document.getElementById('loginModal').style.display = 'block';
+    }
+    
+   
+
+</script>
+
+<!-- Login Modal -->
+<div id="loginModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+  <div style="display:flex; background:#fff; max-width:900px; height:550px; margin:80px auto; border-radius:16px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden;">
+    <span onclick="hideLoginModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999; z-index:10;">&times;</span>
+    
+    <!-- Left Side - Car with Eyes -->
+    <div style="flex:1; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+      <div style="position:relative; z-index:2;">
+        <svg width="320" height="220" viewBox="0 0 320 220" style="filter:drop-shadow(0 10px 30px rgba(0,0,0,0.3));">
+          <rect x="40" y="120" width="240" height="60" rx="10" fill="#F9B233" />
+          <path d="M 80 120 L 110 80 L 210 80 L 240 120 Z" fill="#F9B233" />
+          <path d="M 190 85 L 210 85 L 235 115 L 210 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+          <path d="M 115 85 L 180 85 L 180 115 L 130 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+          <rect x="245" y="140" width="25" height="12" rx="3" fill="#333" />
+          <path d="M 100 155 Q 160 165 220 155" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round" />
+          <line x1="160" y1="120" x2="160" y2="175" stroke="#333" stroke-width="2" />
+          <circle cx="100" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+          <ellipse id="modalLeftPupil" cx="100" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+          <circle cx="100" cy="182" r="4" fill="white" opacity="0.8" />
+          <circle cx="220" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+          <ellipse id="modalRightPupil" cx="220" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+          <circle cx="220" cy="182" r="4" fill="white" opacity="0.8" />
+          <path d="M 72 180 Q 100 165 128 180" stroke="#333" stroke-width="2" fill="none" />
+          <path d="M 192 180 Q 220 165 248 180" stroke="#333" stroke-width="2" fill="none" />
+        </svg>
+      </div>
+      <div style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); text-align:center; color:white; z-index:3;">
+        <h2 style="font-size:28px; margin-bottom:10px; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">Welcome to RideBazzar</h2>
+        <p style="opacity:0.9; text-shadow:1px 1px 2px rgba(0,0,0,0.3);">Your trusted car marketplace</p>
+      </div>
+    </div>
+    
+    <div style="flex:1; padding:40px; overflow-y:auto;">
+      <div style="display:flex; border-bottom:2px solid #eee; margin-bottom:30px;">
+        <button id="loginTab" onclick="switchTab('login')" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid #f9b233; color:#f9b233;">Login</button>
+        <button id="registerTab" onclick="switchTab('register')" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid transparent; color:#999;">Register</button>
+      </div>
+      <div id="authMessage" style="display:none; margin:15px 0; padding:10px; border-radius:6px; text-align:center; font-weight:bold;"></div>
+      <div id="loginFormContent" style="padding:0;">
+        <form id="loginForm" onsubmit="return handleLoginSubmit(event);">
+          <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Username</label>
+            <input type="text" id="loginUsername" name="loginUsername" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="loginPassword" name="loginPassword" required style="width:100%; padding:12px 45px 12px 12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('loginPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:20px; user-select:none;">👁️</span>
+            </div>
+            <div style="text-align:right; margin-top:8px;">
+              <a href="#" onclick="event.preventDefault();" style="color:#f9b233; font-size:14px; text-decoration:none;">Forgot Password?</a>
+            </div>
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e6a429'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#f9b233'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Login</button>
+        </form>
+      </div>
+      <div id="registerFormContent" style="padding:0; display:none;">
+        <form id="registerForm" onsubmit="event.preventDefault(); handleRegister();">
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Username</label>
+            <input type="text" id="registerUsername" required style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Email</label>
+            <input type="email" id="registerEmail" required style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Phone</label>
+            <input type="tel" id="registerPhone" required placeholder="10-digit mobile number" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Location</label>
+            <input type="text" id="registerLocation" required placeholder="City, State" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="registerPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
+          </div>
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Confirm Password</label>
+            <div style="position:relative;">
+              <input type="password" id="registerConfirmPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerConfirmPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#222; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#000'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#222'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
+    color: black !important;
+    background-color: white !important;
+    -webkit-text-fill-color: black !important;
+  }
+  input[type="text"]:-webkit-autofill,
+  input[type="password"]:-webkit-autofill,
+  input[type="email"]:-webkit-autofill,
+  input[type="tel"]:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: black !important;
+    color: black !important;
+  }
+</style>
+
+<script>
+  function hideLoginModal() {
+    document.getElementById('loginModal').style.display = 'none';
+  }
+
+  function switchTab(tab) {
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginForm = document.getElementById('loginFormContent');
+    const registerForm = document.getElementById('registerFormContent');
+    
+    if (tab === 'login') {
+      loginTab.style.borderBottomColor = '#f9b233';
+      loginTab.style.color = '#f9b233';
+      registerTab.style.borderBottomColor = 'transparent';
+      registerTab.style.color = '#999';
+      loginForm.style.display = 'block';
+      registerForm.style.display = 'none';
+    } else {
+      registerTab.style.borderBottomColor = '#f9b233';
+      registerTab.style.color = '#f9b233';
+      loginTab.style.borderBottomColor = 'transparent';
+      loginTab.style.color = '#999';
+      registerForm.style.display = 'block';
+      loginForm.style.display = 'none';
+    }
+  }
+
+  async function handleLoginSubmit(event) {
+    event.preventDefault();
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        localStorage.setItem('authToken', data.data.token);
+        localStorage.setItem('userData', JSON.stringify(data.data.user));
+        localStorage.setItem('currentUser', JSON.stringify(data.data.user));
+        hideLoginModal();
+        window.location.reload();
+      } else {
+        showAuthMessage(data.message || 'Login failed', 'error');
+      }
+    } catch (error) {
+      showAuthMessage('Error connecting to server', 'error');
+    }
+    return false;
+  }
+
+  async function handleRegister() {
+    const username = document.getElementById('registerUsername').value;
+    const email = document.getElementById('registerEmail').value;
+    const phone = document.getElementById('registerPhone').value;
+    const password = document.getElementById('registerPassword').value;
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, phone, password, full_name: username })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        localStorage.setItem('authToken', data.data.token);
+        localStorage.setItem('userData', JSON.stringify(data.data.user));
+        localStorage.setItem('currentUser', JSON.stringify(data.data.user));
+        showAuthMessage('Registration successful!', 'success');
+        setTimeout(() => {
+          hideLoginModal();
+          window.location.reload();
+        }, 1500);
+      } else {
+        showAuthMessage(data.message || 'Registration failed', 'error');
+      }
+    } catch (error) {
+      showAuthMessage('Error connecting to server', 'error');
+    }
+  }
+
+  function showAuthMessage(message, type) {
+    const msgDiv = document.getElementById('authMessage');
+    msgDiv.textContent = message;
+    msgDiv.style.display = 'block';
+    msgDiv.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
+    msgDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+  }
+
+  function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      icon.textContent = '👁️';
+    }
+  }
+
+  document.addEventListener('mousemove', (e) => {
+    const modal = document.getElementById('loginModal');
+    if (modal && modal.style.display === 'block') {
+      const leftPupil = document.getElementById('modalLeftPupil');
+      const rightPupil = document.getElementById('modalRightPupil');
+      
+      if (leftPupil && rightPupil) {
+        const leftEyeRect = leftPupil.getBoundingClientRect();
+        const rightEyeRect = rightPupil.getBoundingClientRect();
+        
+        const leftEyeX = leftEyeRect.left + leftEyeRect.width / 2;
+        const leftEyeY = leftEyeRect.top + leftEyeRect.height / 2;
+        const leftAngle = Math.atan2(e.clientY - leftEyeY, e.clientX - leftEyeX);
+        const leftDistance = Math.min(8, Math.hypot(e.clientX - leftEyeX, e.clientY - leftEyeY) / 20);
+        const leftPupilX = 100 + Math.cos(leftAngle) * leftDistance;
+        const leftPupilY = 185 + Math.sin(leftAngle) * leftDistance;
+        leftPupil.setAttribute('cx', leftPupilX);
+        leftPupil.setAttribute('cy', leftPupilY);
+        
+        const rightEyeX = rightEyeRect.left + rightEyeRect.width / 2;
+        const rightEyeY = rightEyeRect.top + rightEyeRect.height / 2;
+        const rightAngle = Math.atan2(e.clientY - rightEyeY, e.clientX - rightEyeX);
+        const rightDistance = Math.min(8, Math.hypot(e.clientX - rightEyeX, e.clientY - rightEyeY) / 20);
+        const rightPupilX = 220 + Math.cos(rightAngle) * rightDistance;
+        const rightPupilY = 185 + Math.sin(rightAngle) * rightDistance;
+        rightPupil.setAttribute('cx', rightPupilX);
+        rightPupil.setAttribute('cy', rightPupilY);
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

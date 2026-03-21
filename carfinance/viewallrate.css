@@ -1,0 +1,212 @@
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+ 
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f6f8ff;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    .top-navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 25px;
+      z-index: 1001;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    @media (max-width: 900px) {
+      .hamburger {
+        display: block !important;
+      }
+
+      .navbar-right {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background-color: #1c1b1b;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        padding: 10px 0;
+        z-index: 999;
+      }
+
+      .navbar-right.show {
+        display: flex !important;
+      }
+
+      .navbar-right a {
+        padding: 10px 20px;
+        text-align: left;
+        width: 100%;
+      }
+    }
+
+    .section {
+      max-width: 1400px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    .section h1 {
+      font-size: 32px;
+      color: #1c2d75;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .section p {
+      font-size: 15px;
+      color: #4a4a4a;
+      margin-top: 10px;
+      margin-bottom: 25px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    thead {
+      background-color: #1c2d75;
+      color: white;
+    }
+
+    th, td {
+      padding: 16px 20px;
+      text-align: left;
+      font-size: 15px;
+      vertical-align: top;
+    }
+
+    tr:not(:last-child) {
+      border-bottom: 1px solid #ddd;
+    }
+
+    @media screen and (max-width: 768px) {
+      th, td {
+        padding: 12px 10px;
+        font-size: 14px;
+      }
+
+      .section h1 {
+        font-size: 24px;
+      }
+    }
+    .misc-charges-section {
+  max-width: 2000px;
+  margin: 48px auto 0 auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(60,0,80,0.07);
+  padding: 40px 48px;
+}
+.misc-charges-section h2 {
+  font-size: 2.5rem;
+  color: #1c2d75;
+  font-weight: 800;
+  margin-bottom: 15px;
+}
+.misc-charges-section ul {
+  margin: 18px 0 0 0;
+  padding-left: 20px;
+  font-size: 1.18rem;
+  color: #222;
+}
+.misc-charges-section li {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+.misc-charges-section p {
+  font-size: 1.18rem;
+  color: #333;
+  margin-bottom: 0;
+}
+@media (max-width: 900px) {
+  .misc-charges-section {
+    padding: 20px 10px;
+  }
+  .misc-charges-section h2 {
+    font-size: 1.5rem;
+  }
+  .misc-charges-section ul {
+    font-size: 1rem;
+  }
+}
+.help-section-faq {
+  background: #056afc;
+  padding: 40px 0 60px 0;
+  margin-top: 48px;
+}
+.help-title {
+  color: #fff;
+  font-size: 2.7rem;
+  font-weight: 700;
+  margin-left: 24px;
+  margin-bottom: 32px;
+}
+.help-card-faq {
+  max-width: 96vw;
+  width: 90%;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 2px 12px rgba(60,0,80,0.07);
+  padding: 32px 32px 18px 32px;
+  display: flex;
+  flex-direction: column;
+  font-size: 1.25rem;
+}
+
+footer {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+  margin-top: 0;
+}
+
+.faq-contact {
+  border-top: 1px solid #eee;
+  margin-top: 18px;
+  padding-top: 18px;
+  color: #333;
+  font-size: 1.1rem;
+  line-height: 2;
+}
+.faq-contact a {
+  font-weight: 500;
+}
+@media (max-width: 900px) {
+  .help-title {
+    font-size: 1.5rem;
+    margin-left: 10px;
+  }
+  .help-card-faq {
+    padding: 18px 8px 10px 8px;
+    font-size: 1rem;
+  }
+}

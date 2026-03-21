@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RideBazzar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .login-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Left Side - Animated Shapes */
+        .left-side {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shapes-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50% 50% 30% 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .shape-1 {
+            width: 180px;
+            height: 200px;
+            background: #FF6B35;
+            border-radius: 50% 50% 50% 20%;
+            bottom: 0;
+            left: 20px;
+            z-index: 1;
+        }
+
+        .shape-2 {
+            width: 120px;
+            height: 140px;
+            background: #2D2D2D;
+            border-radius: 40% 50% 50% 30%;
+            bottom: 50px;
+            left: 140px;
+            z-index: 3;
+        }
+
+        .shape-3 {
+            width: 200px;
+            height: 220px;
+            background: #7B2CBF;
+            border-radius: 50% 30% 50% 50%;
+            top: 20px;
+            left: 50px;
+            z-index: 2;
+        }
+
+        .shape-4 {
+            width: 160px;
+            height: 180px;
+            background: #FFD60A;
+            border-radius: 50% 50% 20% 50%;
+            top: 100px;
+            right: 40px;
+            z-index: 4;
+        }
+
+        /* Car with Eyes */
+        .car-shape {
+            position: absolute;
+            width: 140px;
+            height: 120px;
+            background: #FFD60A;
+            border-radius: 40% 40% 30% 30%;
+            bottom: 40px;
+            right: 60px;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .eye {
+            width: 25px;
+            height: 25px;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pupil {
+            width: 12px;
+            height: 12px;
+            background: #2D2D2D;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+        }
+
+        /* Right Side - Login Form */
+        .right-side {
+            flex: 1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .login-form-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-section i {
+            font-size: 48px;
+            color: #f9b233;
+            margin-bottom: 10px;
+        }
+
+        .logo-section h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .logo-section p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #f9b233;
+            box-shadow: 0 0 0 3px rgba(249, 178, 51, 0.1);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #999;
+            font-size: 18px;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .remember-me label {
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .forgot-password {
+            color: #f9b233;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: #2D2D2D;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .login-btn:hover {
+            background: #1a1a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .google-login {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .google-login:hover {
+            background: #f8f8f8;
+            border-color: #d0d0d0;
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .signup-link {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .signup-link a {
+            color: #f9b233;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 968px) {
+            .left-side {
+                display: none;
+            }
+            .right-side {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Left Side with Animated Shapes -->
+        <div class="left-side">
+            <div class="shapes-container">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+                <div class="shape shape-4"></div>
+                <div class="car-shape">
+                    <div class="eye">
+                        <div class="pupil" id="leftPupil"></div>
+                    </div>
+                    <div class="eye">
+                        <div class="pupil" id="rightPupil"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side with Login Form -->
+        <div class="right-side">
+            <div class="login-form-container">
+                <div class="logo-section">
+                    <i class="fas fa-car"></i>
+                    <h1>Welcome back!</h1>
+                    <p>Please enter your details</p>
+                </div>
+
+                <div id="message" class="message"></div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="anna@gmail.com"
+                            required
+                            autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                placeholder="••••••••••"
+                                required
+                                autocomplete="current-password">
+                            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-options">
+                        <div class="remember-me">
+                            <input type="checkbox" id="remember" name="remember">
+                            <label for="remember">Remember for 30 days</label>
+                        </div>
+                        <a href="#" class="forgot-password" onclick="event.preventDefault(); alert('Forgot password feature coming soon!');">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="login-btn">Log in</button>
+
+                    <button type="button" class="google-login" onclick="alert('Google login coming soon!')">
+                        <svg class="google-icon" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Log in with Google
+                    </button>
+                </form>
+
+                <div class="signup-link">
+                    Don't have an account? <a href="#" onclick="event.preventDefault(); switchToRegister();">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth-api.js"></script>
+    <script>
+        // Eye tracking animation
+        const leftPupil = document.getElementById('leftPupil');
+        const rightPupil = document.getElementById('rightPupil');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        function moveEyes(targetElement) {
+            if (!targetElement) return;
+
+            const rect = targetElement.getBoundingClientRect();
+            const targetX = rect.left + rect.width / 2;
+            const targetY = rect.top + rect.height / 2;
+
+            const carShape = document.querySelector('.car-shape');
+            const carRect = carShape.getBoundingClientRect();
+            const carCenterX = carRect.left + carRect.width / 2;
+            const carCenterY = carRect.top + carRect.height / 2;
+
+            // Calculate angle to target
+            const deltaX = targetX - carCenterX;
+            const deltaY = targetY - carCenterY;
+            const angle = Math.atan2(deltaY, deltaX);
+
+            // Move pupils (max 6px from center)
+            const maxDistance = 6;
+            const distance = Math.min(maxDistance, Math.sqrt(deltaX * deltaX + deltaY * deltaY) / 50);
+            const pupilX = Math.cos(angle) * distance;
+            const pupilY = Math.sin(angle) * distance;
+
+            leftPupil.style.transform = `translate(calc(-50% + ${pupilX}px), calc(-50% + ${pupilY}px))`;
+            rightPupil.style.transform = `translate(calc(-50% + ${pupilX}px), calc(-50% + ${pupilY}px))`;
+        }
+
+        // Move eyes when user focuses on inputs
+        emailInput.addEventListener('focus', () => moveEyes(emailInput));
+        passwordInput.addEventListener('focus', () => moveEyes(passwordInput));
+        
+        // Reset eyes when blur
+        emailInput.addEventListener('blur', () => {
+            leftPupil.style.transform = 'translate(-50%, -50%)';
+            rightPupil.style.transform = 'translate(-50%, -50%)';
+        });
+        passwordInput.addEventListener('blur', () => {
+            leftPupil.style.transform = 'translate(-50%, -50%)';
+            rightPupil.style.transform = 'translate(-50%, -50%)';
+        });
+
+        // Password toggle
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            try {
+                // Using auth-api.js login function
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: email, password: password })
+                })
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Store token and user data
+                    localStorage.setItem('authToken', data.data.token);
+                    localStorage.setItem('userData', JSON.stringify(data.data.user));
+                    localStorage.setItem('ridebazzar_user', data.data.user.username);
+
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = '✅ Login successful! Redirecting...';
+                    messageDiv.style.display = 'block';
+
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 1000);
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = '❌ ' + (data.message || 'Invalid credentials');
+                    messageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                messageDiv.className = 'message error';
+                messageDiv.textContent = '❌ Error connecting to server';
+                messageDiv.style.display = 'block';
+            }
+        });
+
+        function switchToRegister() {
+            window.location.href = 'home.html#register';
+        }
+
+        // Add subtle animation to shapes
+        const shapes = document.querySelectorAll('.shape');
+        shapes.forEach((shape, index) => {
+            setInterval(() => {
+                const randomX = (Math.random() - 0.5) * 10;
+                const randomY = (Math.random() - 0.5) * 10;
+                shape.style.transform = `translate(${randomX}px, ${randomY}px)`;
+            }, 2000 + index * 500);
+        });
+    </script>
+</body>
+</html>

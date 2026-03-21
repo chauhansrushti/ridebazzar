@@ -1,0 +1,230 @@
+═══════════════════════════════════════════════════════════════════════════════
+                  RIDEBAZZAR DEPLOYMENT CHECKLIST
+                     GitHub: chauhansrushti
+                    Print this page and check off!
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: GITHUB SETUP (5 minutes) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ Open PowerShell in project folder
+☐ Run: git add .
+☐ Run: git commit -m "Deploy ready"
+☐ Run: git push -u origin main
+☐ Verify code appears on GitHub.com
+
+STEP 2: RAILWAY ACCOUNT (2 minutes) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ Go to https://railway.app
+☐ Click "Start Project"
+☐ Sign up with GitHub (or login if already have account)
+☐ Authorize Railway to access GitHub
+
+STEP 3: CREATE RAILWAY PROJECT (3 minutes) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ Click "New Project"
+☐ Select "Deploy from GitHub"
+☐ Select repo: chauhansrushti/ridebazzar
+☐ Click "Deploy Now"
+☐ Wait for build to complete (2-3 minutes)
+
+STEP 4: ADD DATABASE (2 minutes) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ In Railway project, click "Create"
+☐ Select "Add Service"
+☐ Choose "MySQL"
+☐ Wait for MySQL to provision
+☐ Note the MYSQL_PASSWORD from Variables
+
+STEP 5: SET ENVIRONMENT VARIABLES (1 minute) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ Click Backend Service in Railway
+☐ Go to "Variables" tab
+☐ Add all these variables:
+
+   Variable Name               │ Value
+   ─────────────────────────────┼──────────────────────────────
+   DB_HOST                     │ mysql.railway.internal
+   DB_USER                     │ root
+   DB_PASSWORD                 │ (from MySQL Variables)
+   DB_NAME                     │ railway
+   DB_PORT                     │ 3306
+   NODE_ENV                    │ production
+   PORT                        │ 3000
+   JWT_SECRET                  │ SuperSecretKey2024Railway
+   FRONTEND_URL                │ (will update after deploy)
+   SMTP_HOST                   │ smtp.gmail.com
+   SMTP_PORT                   │ 587
+   SMTP_USER                   │ ridebazzar797@gmail.com
+   SMTP_PASS                   │ (Gmail app password - see below)
+
+☐ Add Gmail App Password:
+   • Go to: https://myaccount.google.com/apppasswords
+   • Requires 2FA enabled
+   • Select Mail + Windows Computer
+   • Copy 16-character password
+   • Paste as SMTP_PASS
+
+STEP 6: VERIFY DEPLOYMENT (5 minutes) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ Check Railway dashboard
+☐ Status should be "Running" (green)
+☐ If building: Wait 2 more minutes
+☐ If failed: Check Logs for error
+☐ Click Service → find "Service URL"
+☐ Copy your live URL: https://ridebazzar-xxxx.railway.app
+
+STEP 7: TEST YOUR APP (10 minutes) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ Open browser to: https://[your-url].railway.app/home.html
+☐ Home page should load
+☐ Click "Browse All Cars" → loads car list
+☐ Try to login
+   Email: test@test.com (if you have test account)
+   Or: Create new account → Register
+☐ Try to search for cars
+☐ Click a car → Opens details
+☐ Try "Book Now" → Booking form
+☐ Check Dashboard → My Bookings
+☐ Try Payment (don't actually charge 😄)
+☐ Check console for any errors (F12)
+
+STEP 8: VERIFY EMAIL (2 minutes) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ Create test booking
+☐ Complete payment
+☐ Check inbox for confirmation email
+☐ If no email: Check SMTP_PASS is correct
+
+STEP 9: UPDATE GITHUB README (2 minutes) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ Edit GitHub README.md
+☐ Add section:
+   ## Live Demo
+   🚗 **[Visit RideBazzar](https://[your-url].railway.app)**
+   
+   Backend API: https://[your-url].railway.app/api
+   GitHub Repo: https://github.com/chauhansrushti/ridebazzar
+
+☐ Commit and push changes
+
+STEP 10: SHARE WITH TEAM (1 minute) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ Copy your live URL
+☐ Send to team members
+☐ Send to faculty (for presentation)
+☐ Update any documentation with link
+
+PRESENTATION PREP (10 minutes) ☐
+───────────────────────────────────────────────────────────────────────────────
+☐ Test live demo works smoothly
+☐ Prepare talking points:
+   • Technology stack
+   • Features demonstrated
+   • Deployment architecture
+   • Cost breakdown ($0 - FREE!)
+☐ Plan demo flow
+☐ Have backup (local version just in case)
+☐ Screenshot your live URL for slides
+
+═══════════════════════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING QUICK FIXES
+───────────────────────────────────────────────────────────────────────────────
+
+Problem                          Solution
+─────────────────────────────────────────────────────────────────────────────
+Build failed                   │ Check backend/package.json exists
+                               │ Check backend/server.js exists
+                               │ View Railway Logs tab for details
+
+Page won't load / 404           │ Add /home.html to end of URL
+                               │ Check status is "Running"
+                               │ Wait 5 minutes, try again
+
+Cannot connect to database     │ Wait 5 minutes for MySQL provision
+                               │ Check DB_HOST = mysql.railway.internal
+                               │ Verify DB_PASSWORD is correct
+
+Email not sending              │ Create Gmail App Password
+                               │ Need 2FA enabled first
+                               │ Make sure SMTP_PASS = 16 chars
+
+API connection errors          │ Check config.js in home.html
+                               │ Verify frontend uses CONFIG object
+                               │ Check browser console for errors
+
+API returns 401 (Unauthorized) │ Check JWT_SECRET matches
+                               │ Test login first
+                               │ Get fresh auth token
+
+═══════════════════════════════════════════════════════════════════════════════
+
+IMPORTANT REMINDERS
+───────────────────────────────────────────────────────────────────────────────
+
+🔐 SECURITY:
+   ✓ Never commit .env to GitHub
+   ✓ Use strong passwords (20+ chars)
+   ✓ Keep JWT_SECRET secret
+   ✓ Never share email passwords
+   ✓ Enable 2FA on Gmail
+
+☁️ RAILWAY:
+   ✓ Free tier includes $5/month credit
+   ✓ Auto-scales on high traffic
+   ✓ Auto-deploys when you push to GitHub
+   ✓ Check Logs if something goes wrong
+
+📊 MONITORING:
+   ✓ Keep Railway dashboard open
+   ✓ Watch for errors in Logs
+   ✓ Check response times (should be <1s)
+   ✓ Monitor MySQL database size
+
+🎯 NEXT STEPS:
+   ✓ After deployment: Test all features
+   ✓ After testing: Present to faculty
+   ✓ Get feedback: Plan improvements
+   ✓ Iterate: Deploy updated version
+
+═══════════════════════════════════════════════════════════════════════════════
+
+TIME ESTIMATE
+───────────────────────────────────────────────────────────────────────────────
+
+Active Time (you work):        ~15 minutes
+Waiting Time (system works):   ~10 minutes
+Testing Time:                  ~15 minutes
+Total Wall-Clock Time:         ~40 minutes
+
+All done?  ✓  CONGRATS! Your app is live! 🎉
+
+═══════════════════════════════════════════════════════════════════════════════
+
+YOUR ACCOUNTS
+───────────────────────────────────────────────────────────────────────────────
+
+GitHub Username:    chauhansrushti
+GitHub Repo:        ridebazzar
+Railway Account:    [Your Railway email]
+Railway Deploy:     [Will show after deploy]
+Live URL:           https://ridebazzar-xxxx.railway.app
+Email Account:      ridebazzar797@gmail.com
+
+═══════════════════════════════════════════════════════════════════════════════
+
+HELPFUL LINKS
+───────────────────────────────────────────────────────────────────────────────
+
+• Railway Docs:     https://docs.railway.app
+• GitHub Docs:      https://docs.github.com
+• MySQL Connection: https://dev.mysql.com/doc/
+• Node.js Guide:    https://nodejs.org/docs/
+• Gmail 2FA:        https://myaccount.google.com/security
+• Gmail App Pwd:    https://myaccount.google.com/apppasswords
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PRINT & SAVE THIS CHECKLIST! ✓
+
+═══════════════════════════════════════════════════════════════════════════════

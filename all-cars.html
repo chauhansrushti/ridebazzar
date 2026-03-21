@@ -1,0 +1,847 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All Cars - RideBazzar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <link rel="icon" type="image/png" href="images/logotab.png" sizes="16x16" />  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">  <link rel="stylesheet" href="css/index.css" />
+  <style>
+    .material-icons {
+      font-family: 'Material Icons';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      display: inline-flex;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+  </style>
+  <script src="js/auth-api.js"></script>
+  <script src="js/carManager-api.js"></script>
+  <script src="js/chatbot.js"></script>
+  <script src="js/paymentSystem.js"></script>
+  <script src="js/messaging.js"></script>
+  <script>
+    function toggleNavbar() {
+      const nav = document.getElementById("navbarLinks");
+      if (nav) nav.classList.toggle("show");
+    }
+  </script>
+</head>
+<body>
+  <!-- Hamburger icon -->
+  <div class="hamburger" onclick="toggleNavbar()">☰</div>
+  <!-- Navbar -->
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <div class="navbar-right" id="navbarLinks">
+      <a href="home.html">Home</a>
+      <a href="all-cars.html" class="active">Buy Car</a>
+      <a href="post-car.html">Sell Car</a>
+      <a href="compare.html">Compare</a>
+      <a href="dashboard.html" id="profileNavBtn" style="display:none;">Dashboard</a>
+      <a href="#" id="loginNavBtn" onclick="showLoginModal()">Login/Register</a>
+      <a href="#" id="logoutNavBtn" onclick="logoutUser()" style="display:none;">Logout</a>
+    </div>
+  </nav>
+  <div class="container" style="max-width:900px; margin:40px auto 0;">
+    <h2 style="text-align:center;">All Cars</h2>
+    <!-- Search Bar -->
+    <div style="text-align:center; margin-bottom:30px;">
+      <div style="display:inline-flex; background:#fff; border-radius:25px; box-shadow:0 4px 15px rgba(0,0,0,0.1); overflow:hidden; max-width:500px; width:100%;">
+        <input type="text" id="searchInput" placeholder="Search by make, model, or location..." style="flex:1; padding:15px 20px; border:none; outline:none; font-size:16px;">
+        <button onclick="performSearch()" style="padding:15px 25px; background:#f9b233; border:none; color:#fff; font-weight:bold; cursor:pointer;"><i class="material-icons">search</i></button>
+      </div>
+    </div>
+    
+    <!-- Advanced Filters -->
+    <div style="background:#fff; border-radius:12px; padding:25px; margin-bottom:25px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3 style="margin:0; color:#333;">🔧 Filters</h3>
+        <button onclick="toggleFilters()" id="filterToggle" style="padding:8px 16px; background:none; border:2px solid #f9b233; color:#f9b233; border-radius:6px; font-weight:bold; cursor:pointer;">Show Filters</button>
+      </div>
+      
+      <div id="filtersContent" style="display:none;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px;">
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Make</label>
+            <select id="filterMake">
+              <option value="">All Makes</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Fuel Type</label>
+            <select id="filterFuelType">
+              <option value="">All Fuel Types</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="CNG">CNG</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Transmission</label>
+            <select id="filterTransmission">
+              <option value="">All Transmissions</option>
+              <option value="Manual">Manual</option>
+              <option value="Automatic">Automatic</option>
+              <option value="CVT">CVT</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Location</label>
+            <input type="text" id="filterLocation" placeholder="City" style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px;">
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:15px; margin-bottom:20px;">
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Min Price (₹)</label>
+            <input type="number" id="filterMinPrice" placeholder="50000" style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px;">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Max Price (₹)</label>
+            <input type="number" id="filterMaxPrice" placeholder="7000000" style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px;">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Min Year</label>
+            <input type="number" id="filterMinYear" placeholder="2010" style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px;">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Max Year</label>
+            <input type="number" id="filterMaxYear" placeholder="2025" style="width:100%; padding:10px; border:2px solid #eee; border-radius:6px;">
+          </div>
+        </div>
+        
+        <div style="display:flex; gap:10px; justify-content:center;">
+          <button onclick="applyFilters()" style="padding:12px 30px; background:#f9b233; border:none; color:#fff; font-weight:bold; border-radius:8px; cursor:pointer;">Apply Filters</button>
+          <button onclick="clearAllFilters()" style="padding:12px 30px; background:#6c757d; border:none; color:#fff; font-weight:bold; border-radius:8px; cursor:pointer;">Clear All</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sorting Options -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+      <div style="display:flex; align-items:center; gap:15px;">
+        <span style="font-weight:600;">Sort by:</span>
+        <select id="sortBy" onchange="applyFilters()" style="padding:8px 12px; border:2px solid #eee; border-radius:6px; background:#fff;">
+          <option value="newest">Newest First</option>
+          <option value="price_low">Price: Low to High</option>
+          <option value="price_high">Price: High to Low</option>
+          <option value="year_new">Year: Newest First</option>
+          <option value="mileage_low">Mileage: Low to High</option>
+          <option value="popular">Most Popular</option>
+        </select>
+      </div>
+      <div id="resultsCount" style="color:#666; font-weight:600;"></div>
+    </div>
+    <div id="allCarsList" style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center;"></div>
+    <!-- Car Details Modal -->
+    <div id="carDetailsModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+      <div id="carDetailsContent" style="background:#fff; max-width:400px; margin:60px auto; padding:30px; border-radius:8px; position:relative;"></div>
+    </div>
+  </div>
+  <style>
+    @keyframes slowZoom {
+      0% {
+        transform: scale(1);
+      }
+      100% {
+        transform: scale(1.2);
+      }
+    }
+    
+    .car-image-hover {
+      animation: slowZoom 3s ease-in-out infinite alternate;
+    }
+  </style>
+  <script>
+    let currentSearchQuery = '';
+    let filtersVisible = false;
+
+    // Car brands database for filter dropdown
+    const carBrands = {
+      'Maruti Suzuki': ['Swift', 'Baleno', 'Vitara Brezza', 'Ertiga', 'Dzire', 'Alto', 'WagonR', 'Celerio', 'S-Cross', 'Ciaz', 'Ignis'],
+      'Hyundai': ['Creta', 'Verna', 'i20', 'Venue', 'Elantra', 'Grand i10', 'Aura', 'Tucson', 'Kona', 'Alcazar'],
+      'Tata': ['Nexon', 'Harrier', 'Safari', 'Altroz', 'Tiago', 'Tigor', 'Punch', 'Hexa', 'Indica'],
+      'Mahindra': ['XUV700', 'XUV300', 'Scorpio', 'Thar', 'Bolero', 'XUV500', 'KUV100', 'Marazzo'],
+      'Honda': ['City', 'Amaze', 'Jazz', 'WR-V', 'Civic', 'CR-V', 'Accord', 'Brio'],
+      'Toyota': ['Fortuner', 'Innova Crysta', 'Glanza', 'Urban Cruiser', 'Camry', 'Yaris', 'Etios', 'Corolla'],
+      'Ford': ['EcoSport', 'Endeavour', 'Figo', 'Aspire', 'Freestyle'],
+      'Volkswagen': ['Polo', 'Vento', 'Tiguan', 'T-Roc', 'Passat'],
+      'Renault': ['Duster', 'Kwid', 'Triber', 'Kiger', 'Captur'],
+      'Nissan': ['Magnite', 'Kicks', 'GT-R', 'Terrano'],
+      'Skoda': ['Octavia', 'Rapid', 'Superb', 'Kodiaq', 'Kushaq'],
+      'Kia': ['Seltos', 'Sonet', 'Carnival', 'Carens'],
+      'MG': ['Hector', 'Astor', 'ZS EV', 'Gloster'],
+      'Jeep': ['Compass', 'Wrangler', 'Grand Cherokee'],
+      'Audi': ['A4', 'A6', 'Q3', 'Q5', 'Q7', 'A3', 'Q8', 'RS5'],
+      'BMW': ['3 Series', '5 Series', 'X1', 'X3', 'X5', 'X7', '7 Series', 'Z4'],
+      'Mercedes-Benz': ['C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE', 'GLS', 'A-Class'],
+      'Chevrolet': ['Beat', 'Spark', 'Cruze', 'Trailblazer'],
+      'Fiat': ['Punto', 'Linea', 'Avventura'],
+      'Datsun': ['GO', 'GO+', 'redi-GO']
+    };
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      initializePage();
+      await renderAllCars();
+    });
+
+    function initializePage() {
+      populateMakeFilter();
+      setupEventListeners();
+    }
+
+    function populateMakeFilter() {
+      const makeSelect = document.getElementById('filterMake');
+      Object.keys(carBrands).forEach(brand => {
+        const option = document.createElement('option');
+        option.value = brand;
+        option.textContent = brand;
+        makeSelect.appendChild(option);
+      });
+    }
+
+    function setupEventListeners() {
+      // Search on Enter key
+      document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+    }
+
+    function toggleFilters() {
+      const content = document.getElementById('filtersContent');
+      const toggle = document.getElementById('filterToggle');
+      
+      filtersVisible = !filtersVisible;
+      content.style.display = filtersVisible ? 'block' : 'none';
+      toggle.textContent = filtersVisible ? 'Hide Filters' : 'Show Filters';
+    }
+
+    function performSearch() {
+      currentSearchQuery = document.getElementById('searchInput').value.trim();
+      applyFilters();
+    }
+
+    function getFilters() {
+      const minPrice = document.getElementById('filterMinPrice').value.trim();
+      const maxPrice = document.getElementById('filterMaxPrice').value.trim();
+      const minYear = document.getElementById('filterMinYear').value.trim();
+      const maxYear = document.getElementById('filterMaxYear').value.trim();
+      const make = document.getElementById('filterMake').value;
+      const fuelType = document.getElementById('filterFuelType').value;
+      const transmission = document.getElementById('filterTransmission').value;
+      const location = document.getElementById('filterLocation').value.trim();
+      
+      const filters = {
+        status: 'available',
+        limit: 100
+      };
+      
+      // Only add filters if they have values
+      if (make) filters.make = make;
+      if (fuelType) filters.fuelType = fuelType;
+      if (transmission) filters.transmission = transmission;
+      if (location) filters.location = location;
+      if (minPrice) filters.priceFrom = minPrice;
+      if (maxPrice) filters.priceTo = maxPrice;
+      if (minYear) filters.yearFrom = minYear;
+      if (maxYear) filters.yearTo = maxYear;
+      
+      return filters;
+    }
+
+    async function applyFilters() {
+      const filters = getFilters();
+      const sortBy = document.getElementById('sortBy').value;
+      
+      // Add sorting parameters based on selected sort option
+      switch(sortBy) {
+        case 'newest':
+          filters.sortBy = 'created_at';
+          filters.sortOrder = 'DESC';
+          break;
+        case 'price_low':
+          filters.sortBy = 'price';
+          filters.sortOrder = 'ASC';
+          break;
+        case 'price_high':
+          filters.sortBy = 'price';
+          filters.sortOrder = 'DESC';
+          break;
+        case 'year_new':
+          filters.sortBy = 'year';
+          filters.sortOrder = 'DESC';
+          break;
+        case 'mileage_low':
+          filters.sortBy = 'mileage';
+          filters.sortOrder = 'ASC';
+          break;
+        case 'popular':
+          filters.sortBy = 'views_count';
+          filters.sortOrder = 'DESC';
+          break;
+      }
+      
+      // Add search query if exists
+      if (currentSearchQuery) {
+        filters.search = currentSearchQuery;
+      }
+      
+      const cars = await carManager.getAllCars(filters);
+      renderCars(cars);
+      updateResultsCount(cars.length);
+    }
+
+    async function clearAllFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterMake').value = '';
+      document.getElementById('filterFuelType').value = '';
+      document.getElementById('filterTransmission').value = '';
+      document.getElementById('filterLocation').value = '';
+      document.getElementById('filterMinPrice').value = '';
+      document.getElementById('filterMaxPrice').value = '';
+      document.getElementById('filterMinYear').value = '';
+      document.getElementById('filterMaxYear').value = '';
+      
+      currentSearchQuery = '';
+      await renderAllCars();
+    }
+
+    async function renderAllCars() {
+      const cars = await carManager.getAllCars({ status: 'available', limit: 100 });
+      renderCars(cars);
+      updateResultsCount(cars.length);
+    }
+
+    function renderCars(cars) {
+      const list = document.getElementById('allCarsList');
+      if (!list) return;
+      
+      list.innerHTML = '';
+      
+      if (cars.length === 0) {
+        list.innerHTML = `
+          <div style="text-align:center; padding:60px; color:#888; width:100%;">
+            <div style="font-size:48px; margin-bottom:20px;"><i class="material-icons">directions_car</i></div>
+            <h3>No cars found</h3>
+            <p>Try adjusting your search criteria or filters</p>
+          </div>
+        `;
+        return;
+      }
+      
+      cars.forEach((car, idx) => {
+        const card = document.createElement('div');
+        card.style = 'border:1px solid #eee; border-radius:16px; padding:0; width:320px; background:#fff; box-shadow:0 4px 20px rgba(0,0,0,0.08); cursor:pointer; transition:all 0.3s ease; overflow:hidden;';
+        
+        // Add hover effects with continuous zoom animation
+        card.onmouseenter = () => {
+          card.style.transform = 'scale(1.05)';
+          card.style.boxShadow = '0 8px 30px rgba(0,0,0,0.15)';
+          const img = card.querySelector('img');
+          if (img) {
+            img.classList.add('car-image-hover');
+          }
+        };
+        card.onmouseleave = () => {
+          card.style.transform = 'scale(1)';
+          card.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)';
+          const img = card.querySelector('img');
+          if (img) {
+            img.classList.remove('car-image-hover');
+            img.style.transform = 'scale(1)';
+          }
+        };
+        
+        const imgSrc = (car.images && car.images.length > 0) ? car.images[0] : 'images/logo.png';
+        const formattedCar = formatCarForDisplay(car);
+        
+        card.innerHTML = `
+          <div style="position:relative; overflow:hidden;">
+            <img src="${imgSrc}" alt="Car Image" style="width:100%;height:200px;object-fit:cover;">
+            <button onclick="event.stopPropagation(); toggleFavoriteFromCard('${car.id}')" 
+                    style="position:absolute; top:12px; right:12px; width:40px; height:40px; border-radius:50%; border:none; background:rgba(255,255,255,0.95); cursor:pointer; font-size:20px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+              ${carManager.isCarInFavorites(car.id) ? '<i class="material-icons">favorite</i>' : '<i class="material-icons">favorite_border</i>'}
+            </button>
+            <div style="position:absolute; bottom:12px; left:12px; padding:6px 12px; background:rgba(0,0,0,0.7); color:#fff; border-radius:20px; font-size:12px; font-weight:bold;">
+              ${car.status.toUpperCase()}
+            </div>
+          </div>
+          <div style="padding:20px;">
+            <div style="font-size:1.4em; font-weight:bold; margin-bottom:10px; color:#222;">${car.make} ${car.model}</div>
+            <div style="font-size:1.6em; font-weight:bold; color:#e74c3c; margin-bottom:12px;">${formattedCar.formattedPrice}</div>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; font-size:14px; color:#666;">
+              <div><strong>Year:</strong> ${car.year}</div>
+              <div><strong>Mileage:</strong> ${car.mileage ? car.mileage.toLocaleString() + ' km' : 'N/A'}</div>
+              <div><strong>Fuel:</strong> ${car.fuelType || 'N/A'}</div>
+              <div><strong>Transmission:</strong> ${car.transmission || 'N/A'}</div>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; padding-top:15px; border-top:1px solid #eee;">
+              <span style="font-size:13px; color:#888; display:flex; align-items:center;"><i class="material-icons" style="font-size:18px; margin-right:6px;">location_on</i>${car.location || 'Location N/A'}</span>
+            </div>
+          </div>
+        `;
+        
+        card.onclick = () => window.location.href = `car-details.html?id=${car.id}`;
+        list.appendChild(card);
+      });
+    }
+
+    function updateResultsCount(count) {
+      document.getElementById('resultsCount').textContent = `${count} car${count !== 1 ? 's' : ''} found`;
+    }
+
+    function toggleFavoriteFromCard(carId) {
+      if (!authManager.isLoggedIn()) {
+        showMessage('Please login to add favorites', 'error');
+        return;
+      }
+
+      try {
+        const isFavorite = carManager.toggleFavorite(carId);
+        showMessage(isFavorite ? 'Added to favorites ❤️' : 'Removed from favorites 🤍', 'success');
+        
+        // Update the heart icon for all matching buttons
+        const heartBtns = document.querySelectorAll(`button[onclick*="toggleFavoriteFromCard('${carId}')"]`);
+        heartBtns.forEach(btn => {
+          btn.innerHTML = isFavorite ? '<i class="material-icons">favorite</i>' : '<i class="material-icons">favorite_border</i>';
+        });
+      } catch (error) {
+        console.error('Favorite toggle error:', error);
+        showMessage('Failed to update favorites', 'error');
+      }
+    }
+
+    function showMessage(message, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.style = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${type === 'success' ? '#28a745' : '#dc3545'};
+        color: white;
+        border-radius: 8px;
+        font-weight: bold;
+        z-index: 1001;
+        animation: slideIn 0.3s ease-out;
+      `;
+      messageDiv.textContent = message;
+      document.body.appendChild(messageDiv);
+
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 3000);
+    }
+
+    // Legacy functions for compatibility
+    function getPostedCars() {
+      return carManager.getCars();
+    }
+
+    function showCarDetails(car) {
+      window.location.href = `car-details.html?id=${car.id}`;
+    }
+
+    function hideCarDetails() {
+      document.getElementById('carDetailsModal').style.display = 'none';
+    }
+
+    // Helper functions
+    function formatCurrency(amount) {
+      if (!amount) return '₹0';
+      return '₹' + parseFloat(amount).toLocaleString('en-IN');
+    }
+
+    function formatCarForDisplay(car) {
+      return {
+        formattedPrice: formatCurrency(car.price)
+      };
+    }
+
+    // Login Modal Functions
+    function showLoginModal() {
+      document.getElementById('loginModal').style.display = 'block';
+    }
+    
+    function hideLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
+
+    function switchTab(tab) {
+      const loginTab = document.getElementById('loginTab');
+      const registerTab = document.getElementById('registerTab');
+      const loginContent = document.getElementById('loginFormContent');
+      const registerContent = document.getElementById('registerFormContent');
+      const messageDiv = document.getElementById('authMessage');
+
+      // Hide message
+      messageDiv.style.display = 'none';
+
+      if (tab === 'login') {
+        loginTab.style.borderBottomColor = '#f9b233';
+        loginTab.style.color = '#f9b233';
+        registerTab.style.borderBottomColor = 'transparent';
+        registerTab.style.color = '#999';
+        loginContent.style.display = 'block';
+        registerContent.style.display = 'none';
+      } else {
+        registerTab.style.borderBottomColor = '#f9b233';
+        registerTab.style.color = '#f9b233';
+        loginTab.style.borderBottomColor = 'transparent';
+        loginTab.style.color = '#999';
+        registerContent.style.display = 'block';
+        loginContent.style.display = 'none';
+      }
+    }
+
+    function togglePassword(inputId, icon) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        icon.textContent = '👁️';
+      }
+    }
+
+    function handleLoginSubmit(event) {
+      event.preventDefault();
+      handleLogin();
+      return false;
+    }
+
+    function showAuthMessage(message, type) {
+      const msgDiv = document.getElementById('authMessage');
+      msgDiv.textContent = message;
+      msgDiv.style.display = 'block';
+      msgDiv.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
+      msgDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+    }
+
+    // Car Eye Animation on Mouse Move
+    document.addEventListener('mousemove', (e) => {
+      const modal = document.getElementById('loginModal');
+      if (modal && modal.style.display === 'block') {
+        const leftPupil = document.getElementById('modalLeftPupil');
+        const rightPupil = document.getElementById('modalRightPupil');
+        
+        if (leftPupil && rightPupil) {
+          const leftEyeRect = leftPupil.getBoundingClientRect();
+          const rightEyeRect = rightPupil.getBoundingClientRect();
+          
+          const leftEyeX = leftEyeRect.left + leftEyeRect.width / 2;
+          const leftEyeY = leftEyeRect.top + leftEyeRect.height / 2;
+          const leftAngle = Math.atan2(e.clientY - leftEyeY, e.clientX - leftEyeX);
+          const leftDistance = Math.min(8, Math.hypot(e.clientX - leftEyeX, e.clientY - leftEyeY) / 20);
+          const leftPupilX = 100 + Math.cos(leftAngle) * leftDistance;
+          const leftPupilY = 185 + Math.sin(leftAngle) * leftDistance;
+          leftPupil.setAttribute('cx', leftPupilX);
+          leftPupil.setAttribute('cy', leftPupilY);
+          
+          const rightEyeX = rightEyeRect.left + rightEyeRect.width / 2;
+          const rightEyeY = rightEyeRect.top + rightEyeRect.height / 2;
+          const rightAngle = Math.atan2(e.clientY - rightEyeY, e.clientX - rightEyeX);
+          const rightDistance = Math.min(8, Math.hypot(e.clientX - rightEyeX, e.clientY - rightEyeY) / 20);
+          const rightPupilX = 220 + Math.cos(rightAngle) * rightDistance;
+          const rightPupilY = 185 + Math.sin(rightAngle) * rightDistance;
+          rightPupil.setAttribute('cx', rightPupilX);
+          rightPupil.setAttribute('cy', rightPupilY);
+        }
+      }
+    });
+
+    // Login and Register Handler Functions
+    async function handleLogin() {
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+      const messageDiv = document.getElementById('authMessage');
+
+      try {
+        messageDiv.style.display = 'block';
+        messageDiv.textContent = 'Logging in...';
+        messageDiv.className = 'auth-message';
+
+        const result = await window.authManager.loginUser(username, password);
+        
+        if (result.success) {
+          messageDiv.textContent = 'Login successful! Redirecting...';
+          messageDiv.className = 'auth-message success';
+          
+          // Determine redirect URL
+          const redirectUrl = result.user.role === 'admin' ? 'admin.html' : 'dashboard.html';
+          
+          // Close modal first
+          hideLoginModal();
+          
+          // Update navigation
+          updateNavForLoggedInUser(result.user);
+          
+          // Redirect
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 1000);
+          
+        } else {
+          throw new Error(result.message || 'Login failed');
+        }
+      } catch (error) {
+        messageDiv.textContent = error.message || 'Login failed';
+        messageDiv.className = 'auth-message error';
+      }
+    }
+
+    async function handleRegister() {
+      const username = document.getElementById('registerUsername').value;
+      const email = document.getElementById('registerEmail').value;
+      const phone = document.getElementById('registerPhone').value;
+      const location = document.getElementById('registerLocation').value;
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('registerConfirmPassword').value;
+      const messageDiv = document.getElementById('authMessage');
+
+      try {
+        if (password !== confirmPassword) {
+          throw new Error('Passwords do not match');
+        }
+
+        messageDiv.style.display = 'block';
+        messageDiv.textContent = 'Creating account...';
+        messageDiv.className = 'auth-message';
+
+        const userData = {
+          username,
+          email,
+          phone,
+          location,
+          password,
+          full_name: username
+        };
+
+        const result = await window.authManager.registerUser(userData);
+        
+        if (result.success) {
+          messageDiv.textContent = 'Registration successful! Redirecting...';
+          messageDiv.className = 'auth-message success';
+          
+          // Update UI
+          updateNavForLoggedInUser(result.user);
+          
+          // Close modal and redirect
+          setTimeout(() => {
+            hideLoginModal();
+            window.location.href = 'dashboard.html';
+          }, 1000);
+        } else {
+          throw new Error(result.message || 'Registration failed');
+        }
+      } catch (error) {
+        messageDiv.textContent = error.message || 'Registration failed';
+        messageDiv.className = 'auth-message error';
+      }
+    }
+
+    function updateNavForLoggedInUser(user) {
+      const loginBtn = document.getElementById('loginNavBtn');
+      const logoutBtn = document.getElementById('logoutNavBtn');
+      const profileBtn = document.getElementById('profileNavBtn');
+      const messagesBtn = document.getElementById('messagesNavBtn');
+
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'block';
+      if (profileBtn) profileBtn.style.display = 'block';
+      if (messagesBtn) messagesBtn.style.display = 'block';
+    }
+
+    function updateNavForLoggedOutUser() {
+      const loginBtn = document.getElementById('loginNavBtn');
+      const logoutBtn = document.getElementById('logoutNavBtn');
+      const profileBtn = document.getElementById('profileNavBtn');
+      const messagesBtn = document.getElementById('messagesNavBtn');
+
+      if (loginBtn) loginBtn.style.display = 'block';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+      if (profileBtn) profileBtn.style.display = 'none';
+      if (messagesBtn) messagesBtn.style.display = 'none';
+    }
+
+    // Check login status on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      
+      if (token && userData) {
+        try {
+          const user = JSON.parse(userData);
+          updateNavForLoggedInUser(user);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          updateNavForLoggedOutUser();
+        }
+      } else {
+        updateNavForLoggedOutUser();
+      }
+    });
+  </script>
+
+  <!-- Enhanced Login/Register Modal -->
+  <div id="loginModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+  <div style="display:flex; background:#fff; max-width:900px; height:550px; margin:80px auto; border-radius:16px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden;">
+    <span onclick="hideLoginModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999; z-index:10;">&times;</span>
+    
+    <!-- Left Side - Car with Eyes -->
+    <div style="flex:1; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+      <div style="position:relative; z-index:2;">
+        <svg width="320" height="220" viewBox="0 0 320 220" style="filter:drop-shadow(0 10px 30px rgba(0,0,0,0.3));">
+          <rect x="40" y="120" width="240" height="60" rx="10" fill="#F9B233" />
+          <path d="M 80 120 L 110 80 L 210 80 L 240 120 Z" fill="#F9B233" />
+          <path d="M 190 85 L 210 85 L 235 115 L 210 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+          <path d="M 115 85 L 180 85 L 180 115 L 130 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+          <rect x="245" y="140" width="25" height="12" rx="3" fill="#333" />
+          <path d="M 100 155 Q 160 165 220 155" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round" />
+          <line x1="160" y1="120" x2="160" y2="175" stroke="#333" stroke-width="2" />
+          <circle cx="100" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+          <ellipse id="modalLeftPupil" cx="100" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+          <circle cx="100" cy="182" r="4" fill="white" opacity="0.8" />
+          <circle cx="220" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+          <ellipse id="modalRightPupil" cx="220" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+          <circle cx="220" cy="182" r="4" fill="white" opacity="0.8" />
+          <path d="M 72 180 Q 100 165 128 180" stroke="#333" stroke-width="2" fill="none" />
+          <path d="M 192 180 Q 220 165 248 180" stroke="#333" stroke-width="2" fill="none" />
+        </svg>
+      </div>
+      <div style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); text-align:center; color:white; z-index:3;">
+        <h2 style="font-size:28px; margin-bottom:10px; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">Welcome to RideBazzar</h2>
+        <p style="opacity:0.9; text-shadow:1px 1px 2px rgba(0,0,0,0.3);">Your trusted car marketplace</p>
+      </div>
+    </div>
+    
+    <div style="flex:1; padding:40px; overflow-y:auto;">
+      <div style="display:flex; border-bottom:2px solid #eee; margin-bottom:30px;">
+        <button id="loginTab" onclick="switchTab('login')" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid #f9b233; color:#f9b233;">Login</button>
+        <button id="registerTab" onclick="switchTab('register')" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid transparent; color:#999;">Register</button>
+      </div>
+      <div id="authMessage" style="display:none; margin:15px 0; padding:10px; border-radius:6px; text-align:center; font-weight:bold;"></div>
+      <div id="loginFormContent" style="padding:0;">
+        <form id="loginForm" onsubmit="return handleLoginSubmit(event);">
+          <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Username</label>
+            <input type="text" id="loginUsername" name="loginUsername" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="loginPassword" name="loginPassword" required style="width:100%; padding:12px 45px 12px 12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('loginPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:20px; user-select:none;">👁️</span>
+            </div>
+            <div style="text-align:right; margin-top:8px;">
+              <a href="#" onclick="event.preventDefault();" style="color:#f9b233; font-size:14px; text-decoration:none;">Forgot Password?</a>
+            </div>
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e6a429'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#f9b233'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Login</button>
+        </form>
+      </div>
+      <div id="registerFormContent" style="padding:0; display:none;">
+        <form id="registerForm" onsubmit="event.preventDefault(); handleRegister();">
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Username</label>
+            <input type="text" id="registerUsername" required style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Email</label>
+            <input type="email" id="registerEmail" required style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Phone</label>
+            <input type="tel" id="registerPhone" required placeholder="10-digit mobile number" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Location</label>
+            <input type="text" id="registerLocation" required placeholder="City, State" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="registerPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
+          </div>
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Confirm Password</label>
+            <div style="position:relative;">
+              <input type="password" id="registerConfirmPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerConfirmPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#222; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#000'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#222'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    
+    .container {
+      max-width: 1400px !important;
+      padding: 0 20px;
+    }
+    
+    #allCarsList {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px !important;
+      justify-content: center;
+    }
+    
+    /* Login Modal Styles */
+    .tab-button.active {
+      border-bottom-color: #f9b233 !important;
+      color: #f9b233;
+    }
+    .auth-message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .auth-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    /* Fix autofill and input visibility */
+    input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
+      color: black !important;
+      background-color: white !important;
+    }
+    
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px white inset !important;
+      -webkit-text-fill-color: black !important;
+    }
+  </style>
+</body>
+</html>
+

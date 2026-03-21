@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Confirmation Emails - RideBazzar</title>
+  <link rel="stylesheet" href="css/index.css" />
+  <style>
+    body {
+      background: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .email-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background: #fafafa;
+    }
+    .email-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .email-to {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+    .email-date {
+      font-size: 12px;
+      color: #999;
+    }
+    .email-subject {
+      font-size: 14px;
+      font-weight: bold;
+      color: #f9b233;
+      margin-bottom: 15px;
+    }
+    .email-body {
+      background: white;
+      padding: 20px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #333;
+      border: 1px solid #e0e0e0;
+    }
+    .no-emails {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+    .clear-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .clear-btn:hover {
+      background: #c82333;
+    }
+    .back-btn {
+      background: #f9b233;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 20px;
+      margin-left: 10px;
+    }
+    .back-btn:hover {
+      background: #ff8c00;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📧 Booking Confirmation Emails</h1>
+    <p class="subtitle">All booking confirmation emails sent from RideBazzar</p>
+    
+    <div>
+      <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+      <button class="clear-btn" onclick="clearEmails()">🗑️ Clear All Emails</button>
+    </div>
+    
+    <div id="emailsList"></div>
+  </div>
+
+  <script>
+    function loadEmails() {
+      const emails = JSON.parse(localStorage.getItem('ridebazzar_emails') || '[]');
+      const emailsList = document.getElementById('emailsList');
+      
+      if (emails.length === 0) {
+        emailsList.innerHTML = `
+          <div class="no-emails">
+            <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
+            <h3>No emails sent yet</h3>
+            <p>Booking confirmation emails will appear here after payment is completed.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Sort by date, newest first
+      emails.sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
+      
+      emailsList.innerHTML = emails.map(email => `
+        <div class="email-card">
+          <div class="email-header">
+            <div>
+              <div class="email-to">📧 To: ${email.to}</div>
+              <div class="email-date">Sent: ${new Date(email.sentAt).toLocaleString()}</div>
+            </div>
+            <div style="text-align: right; font-size: 12px; color: #666;">
+              <div>Transaction: ${email.transactionId}</div>
+              <div>Booking: ${email.bookingId}</div>
+            </div>
+          </div>
+          <div class="email-subject">📨 ${email.subject}</div>
+          <div class="email-body">${email.body}</div>
+        </div>
+      `).join('');
+    }
+    
+    function clearEmails() {
+      if (confirm('Are you sure you want to clear all emails?')) {
+        localStorage.removeItem('ridebazzar_emails');
+        loadEmails();
+      }
+    }
+    
+    // Load emails on page load
+    loadEmails();
+  </script>
+</body>
+</html>

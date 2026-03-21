@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Compare Feature</title>
+</head>
+<body>
+  <h1>Testing Compare Cars Feature</h1>
+  
+  <div id="status"></div>
+  <button onclick="addTestCars()">Add Test Cars to LocalStorage</button>
+  <button onclick="checkDatabase()">Check Database Cars</button>
+  <button onclick="testCompare()">Go to Compare Page</button>
+  
+  <script>
+    function addTestCars() {
+      const testCars = [
+        {
+          id: 'test-001',
+          make: 'Toyota',
+          model: 'Fortuner',
+          year: 2022,
+          price: 2500000,
+          fuelType: 'Diesel',
+          transmission: 'Manual',
+          mileage: 15000,
+          condition: 'Good',
+          location: 'Mumbai',
+          status: 'available',
+          images: ['images/toyota.avif'],
+          seller: 'John Doe',
+          postedAt: new Date().toISOString(),
+          views: 45,
+          inquiries: 3
+        },
+        {
+          id: 'test-002',
+          make: 'Mahindra',
+          model: 'XUV500',
+          year: 2021,
+          price: 1800000,
+          fuelType: 'Petrol',
+          transmission: 'Automatic',
+          mileage: 25000,
+          condition: 'Excellent',
+          location: 'Delhi',
+          status: 'available',
+          images: ['images/mumbai1.avif'],
+          seller: 'Jane Smith',
+          postedAt: new Date().toISOString(),
+          views: 78,
+          inquiries: 5
+        },
+        {
+          id: 'test-003',
+          make: 'Volkswagen',
+          model: 'Vento',
+          year: 2023,
+          price: 950000,
+          fuelType: 'Petrol',
+          transmission: 'Manual',
+          mileage: 5000,
+          condition: 'Like New',
+          location: 'Bangalore',
+          status: 'available',
+          images: ['images/volkswagen.avif'],
+          seller: 'Mike Johnson',
+          postedAt: new Date().toISOString(),
+          views: 120,
+          inquiries: 8
+        }
+      ];
+      
+      const existing = JSON.parse(localStorage.getItem('ridebazzar_cars') || '[]');
+      const combined = [...existing, ...testCars];
+      localStorage.setItem('ridebazzar_cars', JSON.stringify(combined));
+      
+      document.getElementById('status').innerHTML = `<p style="color: green;">✅ Added ${testCars.length} test cars to localStorage. Total cars: ${combined.length}</p>`;
+    }
+    
+    async function checkDatabase() {
+      try {
+        const response = await fetch('http://localhost:5000/api/cars?limit=100');
+        const result = await response.json();
+        
+        if (result.success) {
+          const cars = result.data.cars || [];
+          const html = `<p style="color: green;">✅ Database has ${cars.length} cars</p>
+            <ul>
+              ${cars.slice(0, 5).map(car => `<li>${car.make} ${car.model} (${car.status}) - ₹${car.price}</li>`).join('')}
+            </ul>`;
+          document.getElementById('status').innerHTML = html;
+        } else {
+          document.getElementById('status').innerHTML = `<p style="color: red;">❌ API Error: ${result.message}</p>`;
+        }
+      } catch (error) {
+        document.getElementById('status').innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+      }
+    }
+    
+    function testCompare() {
+      // Add test cars first
+      addTestCars();
+      // Then navigate to compare page
+      setTimeout(() => {
+        window.location.href = 'compare.html';
+      }, 500);
+    }
+  </script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      background: #f9b233;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #e8a119;
+    }
+  </style>
+</body>
+</html>

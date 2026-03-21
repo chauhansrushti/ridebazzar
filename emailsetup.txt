@@ -1,0 +1,65 @@
+Quick EmailJS Setup (5 minutes):
+Step 1: Create Account
+Go to https://www.emailjs.com/
+Click "Sign Up" (it's FREE)
+Use your email: srushtichauhan2006@gmail.com
+Create a password and verify your email
+Step 2: Add Email Service
+After logging in, click "Email Services" in the left menu
+Click "Add New Service"
+Select "Gmail"
+Click "Connect Account" and sign in with your Gmail
+You'll get a Service ID (like service_abc123) - COPY THIS
+Step 3: Create Email Template
+Click "Email Templates" in the left menu
+Click "Create New Template"
+Give it a name: "Booking Confirmation"
+In the template editor:
+Subject: Booking Confirmation - {{car_name}}
+Content: Click "Edit" and paste this:
+Dear {{to_name}},
+
+Your payment of {{booking_amount}} for {{car_name}} has been confirmed!
+
+Transaction ID: {{transaction_id}}
+Payment Method: {{payment_method}}
+Booking Date: {{booking_date}}
+Inspection Date: {{inspection_date}}
+
+Your Details:
+Phone: {{buyer_phone}}
+Address: {{buyer_address}}
+
+Need help? Call {{support_phone}}
+
+Thank you for choosing RideBazzar!
+5.Click "Save" and you'll get a Template ID (like template_xyz789) - COPY THIS
+Step 4: Get Public Key
+Click "Account" in the left menu
+Go to "API Keys" tab
+Copy your Public Key (like abcXYZ123)
+Step 5: Update Your Code
+Now open your payment.html file and make these changes:
+
+Change 1 (around line 11):
+emailjs.init({
+  publicKey: "PASTE_YOUR_PUBLIC_KEY_HERE", // Replace with actual key
+});
+Change 2 (around line 567):
+emailjs.send('PASTE_SERVICE_ID_HERE', 'PASTE_TEMPLATE_ID_HERE', templateParams)
+Example:
+If your keys are:
+
+Public Key: abcXYZ123
+Service ID: service_gmail
+Template ID: template_booking
+Then update like this:
+emailjs.init({ publicKey: "abcXYZ123" });
+emailjs.send('service_gmail', 'template_booking', templateParams)
+That's it! After this, every booking will send a real email to the customer's inbox.
+
+
+
+Public Key: 2bF1YIVOOU1Ymuee1
+Service ID: service_lqycqtt
+Template ID: template_4iha8tj

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Used Car Loan EMI Calculator</title>
+  <script src="../js/auth-api.js"></script>
+  <script src="../js/carManager.js"></script>
+  <script src="../js/paymentSystem.js"></script>
+ <link rel="stylesheet" href="../css/index.css" />
+<link rel="stylesheet" href="carfinance.css" />
+<link rel="icon" type="image/png" href="images/logotab.png" sizes="16x16" />
+<script>
+  function toggleNavbar() {
+    const nav = document.getElementById("navbarLinks");
+    nav.classList.toggle("show");
+  }
+</script>
+</head>
+<body>
+  <!-- Hamburger icon -->
+  <div class="hamburger" onclick="toggleNavbar()">☰</div>
+  <!-- Navbar -->
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="../images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <div class="navbar-right" id="navbarLinks">
+      <a href="../home.html">Home</a>
+      <a href="../all-cars.html">Buy Car</a>
+      <a href="../post-car.html">Sell Car</a>
+      <a href="../compare.html">Compare</a>
+      <a href="../dashboard.html" id="profileNavBtn" style="display:none;">Dashboard</a>
+      <a href="#" id="loginNavBtn" onclick="showLoginModal()"style="display:none;">Login/Register</a>
+      <a href="#" id="logoutNavBtn" onclick="logoutUser()" style="display:none;">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+
+ 
+
+<div><div>
+<h1>Used car loan <span style="color: #7a4df8;">EMI Calculator</span></h1>
+</div></div>
+<div class="container">
+  <div class="left">
+    <label for="loanAmount">Loan amount</label>
+    <input type="range" id="loanAmount" min="50000" max="5000000" step="10000" value="1500000">
+    <input type="text" id="loanAmountDisplay" readonly>
+
+    <label for="tenure">Tenure</label>
+    <input type="range" id="tenure" min="12" max="72" step="1" value="72">
+    <input type="text" id="tenureDisplay" readonly>
+  </div>
+
+  <div class="right">
+    <div class="circle" id="emiChart">
+      <div class="circle-inner">
+        <div>Your monthly EMI will be</div>
+        <strong id="emiAmount">₹0</strong>
+      </div>
+    </div>
+    <div class="breakdown">
+      <span><span class="dot" style="background:#e0e0ff;"></span>Principal amount: <strong id="principalAmt">₹0</strong></span>
+      <span><span class="dot" style="background:#5a50f5;"></span>Interest @15% p.a.: <strong id="interestAmt">₹0</strong></span>
+    </div>
+  </div>
+</div>
+<!-- ...existing code above... -->
+<h1>Eligibility criteria and documents required for a used car loan</h1>
+<div class="criteria-docs-section">
+  <div class="criteria-card">
+    <h2>Eligibility criteria</h2>
+    <ul>
+      <li><span class="icon">📅</span> <strong>Age</strong><br>18–63 years of age</li>
+      <li><span class="icon">💼</span> <strong>Employment status</strong><br>Serving everyone - salaried, self-employed, and pensioners</li>
+      <li><span class="icon">💰</span> <strong>Minimum income</strong><br>Minimum income of ₹15,000 per month</li>
+      <li><span class="icon">⏱️</span> <strong>Credit score</strong><br>Credit score of 650 or above</li>
+    </ul>
+  </div>
+  <div class="criteria-card">
+    <h2>Documents required</h2>
+    <ul>
+      <li><span class="icon">🧑‍💼</span> <strong>Identity proof:</strong>
+        <ul>
+          <li>PAN card (mandatory)</li>
+          <li>Aadhar card / Driver’s license / Voter ID / Passport</li>
+        </ul>
+      </li>
+      <li><span class="icon">🏠</span> <strong>Address proof:</strong>
+        <ul>
+          <li>Aadhar card / Passport / Voter ID / Driver’s license / Utility bills / Notarised rent agreement</li>
+        </ul>
+      </li>
+      <li><span class="icon">💵</span> <strong>Income proof (optional):</strong>
+        <ul>
+          <li>6 months’ bank statement</li>
+          <li>3 months’ salary slips or equivalent business proof</li>
+        </ul>
+      </li>
+      <li><span class="icon">🚗</span> <strong>Vehicle documents:</strong>
+        <ul>
+          <li>Vehicle registration number/registration certificate (RC)</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+<!-- ...existing code above... -->
+
+<div class="rate-charges-box">
+  <div class="rate-charges-content">
+    <div>
+      <div class="rate-charges-title">Used car loan interest rate and charges</div>
+      <div class="rate-charges-desc">
+        Buying a car is a big monetary decision. We offer low-interest rates and minimal charges to ease your purchase. You can look at our different types of fees and charges.
+      </div>
+    </div>
+    <a href="viewallrate.html" class="rate-charges-btn">View all rates <span>&rarr;</span></a>
+  </div>
+</div>
+<footer>
+    &copy; 2025 RideBazzar - Used Car Marketplace
+  </footer>
+
+<script>
+  const loanAmountInput = document.getElementById('loanAmount');
+  const tenureInput = document.getElementById('tenure');
+  const loanAmountDisplay = document.getElementById('loanAmountDisplay');
+  const tenureDisplay = document.getElementById('tenureDisplay');
+  const emiAmount = document.getElementById('emiAmount');
+  const principalAmt = document.getElementById('principalAmt');
+  const interestAmt = document.getElementById('interestAmt');
+  const emiChart = document.getElementById('emiChart');
+
+  function formatINR(num) {
+    return '₹' + num.toLocaleString('en-IN');
+  }
+
+  function calculateEMI(P, annualRate, n) {
+    //simple int*compound interest formula
+    const r = annualRate / 12 / 100; // monthly interest rate
+    if (r === 0) return Math.round(P / n);
+    const factor = Math.pow(1 + r, n);
+    const emi = (P * r * factor) / (factor - 1);
+    return Math.round(emi);
+  }
+
+  function updateUI() {
+    const loan = parseInt(loanAmountInput.value);
+    const tenure = parseInt(tenureInput.value);
+    const interestRate = 15; // 15% annual rate
+
+    loanAmountDisplay.value = formatINR(loan);
+    tenureDisplay.value = `${tenure} month${tenure > 1 ? 's' : ''}`;
+
+    const emi = calculateEMI(loan, interestRate, tenure);
+    const totalPayment = emi * tenure;
+    const interest = totalPayment - loan;
+
+    emiAmount.textContent = formatINR(emi);
+    principalAmt.textContent = formatINR(loan);
+    interestAmt.textContent = formatINR(interest);
+
+    const interestAngle = Math.round((interest / totalPayment) * 360);
+    emiChart.style.background = `conic-gradient(#5a50f5 ${interestAngle}deg, #e0e0ff 0deg)`;
+  }
+
+  loanAmountInput.addEventListener('input', updateUI);
+  tenureInput.addEventListener('input', updateUI);
+
+  // Initialize on load
+  updateUI();
+
+  // Authentication functions
+  function showLoginModal() {
+    const modal = document.getElementById('loginModal');
+    if (modal) {
+      modal.style.display = 'block';
+    } else {
+      // Fallback - redirect to home page with login hash
+      window.location.href = '../home.html#login';
+    }
+  }
+
+  function logoutUser() {
+    if (typeof window.logoutUser === 'function') {
+      window.logoutUser();
+    } else {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('userData');
+      window.location.href = '../home.html';
+    }
+  }
+
+  // Modal functionality
+  function openTab(evt, tabName) {
+    const tabcontent = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].classList.remove("active");
+    }
+    const tablinks = document.getElementsByClassName("tab-button");
+    for (let i = 0; i < tablinks.length; i++) {
+      tablinks[i].classList.remove("active");
+    }
+    document.getElementById(tabName).classList.add("active");
+    evt.currentTarget.classList.add("active");
+  }
+
+  // Update navbar on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('authToken');
+    const loginBtn = document.getElementById('loginNavBtn');
+    const logoutBtn = document.getElementById('logoutNavBtn');
+    const profileBtn = document.getElementById('profileNavBtn');
+    const messagesBtn = document.getElementById('messagesNavBtn');
+
+    if (token) {
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      if (profileBtn) profileBtn.style.display = 'inline-block';
+      if (messagesBtn) messagesBtn.style.display = 'inline-block';
+    } else {
+      if (loginBtn) loginBtn.style.display = 'inline-block';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+      if (profileBtn) profileBtn.style.display = 'none';
+      if (messagesBtn) messagesBtn.style.display = 'none';
+    }
+
+    // Modal close functionality
+    const modal = document.getElementById('loginModal');
+    const closeBtn = modal ? modal.querySelector('.close') : null;
+    
+    if (closeBtn) {
+      closeBtn.onclick = function() {
+        modal.style.display = 'none';
+      }
+    }
+    
+    if (modal) {
+      window.onclick = function(event) {
+        if (event.target == modal) {
+          modal.style.display = 'none';
+        }
+      }
+    }
+
+    // Login form handler
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        const messageDiv = document.getElementById('loginMessage');
+        
+        try {
+          // Try different API URLs in case of port issues
+          const apiUrls = [
+            'http://localhost:5000/api/auth/login',
+            'http://127.0.0.1:3000/api/auth/login',
+            'http://127.0.0.1:5000/api/auth/login'
+          ];
+          
+          let response = null;
+          let lastError = null;
+          
+          for (let url of apiUrls) {
+            try {
+              console.log('Trying URL:', url);
+              response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+              });
+              console.log('Success with URL:', url);
+              break;
+            } catch (err) {
+              console.log('Failed with URL:', url, err.message);
+              lastError = err;
+              continue;
+            }
+          }
+          
+          if (!response) {
+            throw lastError || new Error('All API URLs failed');
+          }
+          
+          console.log('Response status:', response.status);
+          console.log('Response headers:', response.headers);
+          
+          const data = await response.json();
+          console.log('Response data:', data);
+          
+          if (data.success) {
+            localStorage.setItem('authToken', data.data.token);
+            localStorage.setItem('userData', JSON.stringify(data.data.user));
+            messageDiv.innerHTML = '<p style="color: green;">Login successful!</p>';
+            setTimeout(() => {
+              modal.style.display = 'none';
+              location.reload();
+            }, 1000);
+          } else {
+            messageDiv.innerHTML = `<p style="color: red;">${data.message}</p>`;
+          }
+        } catch (error) {
+          console.error('Login error details:', error);
+          console.error('Error name:', error.name);
+          console.error('Error message:', error.message);
+          
+          if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            messageDiv.innerHTML = '<p style="color: red;">Cannot connect to server. Please ensure the backend server is running on port 5000.</p>';
+          } else if (error.name === 'NetworkError') {
+            messageDiv.innerHTML = '<p style="color: red;">Network error. Please check your internet connection.</p>';
+          } else {
+            messageDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+          }
+        }
+      });
+    }
+
+    // Register form handler
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+      registerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = {
+          username: document.getElementById('registerUsername').value,
+          email: document.getElementById('registerEmail').value,
+          password: document.getElementById('registerPassword').value,
+          fullName: document.getElementById('registerFullName').value,
+          phone: document.getElementById('registerPhone').value,
+          location: document.getElementById('registerLocation').value
+        };
+        
+        const messageDiv = document.getElementById('registerMessage');
+        
+        try {
+          const response = await fetch('http://localhost:5000/api/auth/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            messageDiv.innerHTML = '<p style="color: green;">Registration successful! Please login.</p>';
+            setTimeout(() => {
+              openTab({currentTarget: document.querySelector('.tab-button')}, 'loginTab');
+            }, 1500);
+          } else {
+            messageDiv.innerHTML = `<p style="color: red;">${data.message}</p>`;
+          }
+        } catch (error) {
+          console.error('Registration error:', error);
+          messageDiv.innerHTML = '<p style="color: red;">Network error. Please try again.</p>';
+        }
+      });
+    }
+  });
+</script>

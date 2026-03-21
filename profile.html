@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/auth-api.js"></script>
+  <meta charset="UTF-8">
+  <title>My Profile - RideBazzar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/index.css" />
+  <script src="js/auth.js"></script>
+  <script src="js/carManager.js"></script>
+  <script src="js/paymentSystem.js"></script>
+  <style>
+    body {
+      background: #f8f9fa;
+    }
+    .profile-container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+    .profile-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .profile-tabs {
+      display: flex;
+      background: #fff;
+      border-radius: 12px;
+      padding: 5px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      overflow-x: auto;
+    }
+    .tab-button {
+      flex: 1;
+      padding: 15px 20px;
+      border: none;
+      background: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+      min-width: 120px;
+    }
+    .tab-button.active {
+      background: #f9b233;
+      color: #fff;
+    }
+    .tab-content {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      min-height: 400px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .car-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .car-card {
+      border: 1px solid #eee;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+    .car-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    @media (max-width: 768px) {
+      .profile-tabs {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+  <style>
+    body { background: #fafbfc; }
+    .profile-container { display: flex; gap: 40px; max-width: 1100px; margin: 40px auto 0; }
+    .profile-sidebar { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px #0001; padding: 32px 0; min-width: 220px; display: flex; flex-direction: column; gap: 8px; }
+    .profile-sidebar a { display: flex; align-items: center; gap: 10px; padding: 12px 32px; color: #222; text-decoration: none; font-size: 1.08em; border-radius: 6px; transition: background 0.2s; }
+    .profile-sidebar a.active, .profile-sidebar a:hover { background: #f3f4f6; font-weight: bold; }
+  .profile-main { flex: 1; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px #0001; padding: 40px 48px; min-width: 350px; min-height: 400px; }
+    .profile-header { display: flex; align-items: center; gap: 32px; }
+    .profile-avatar { width: 120px; height: 120px; border-radius: 50%; background: #e5e4e2; display: flex; align-items: center; justify-content: center; font-size: 60px; color: #bbb; }
+    .profile-info { flex: 1; }
+    .profile-info h2 { margin: 0 0 8px 0; font-size: 2em; }
+    .profile-info .profile-phone, .profile-info .profile-location { color: #444; font-size: 1.08em; margin-bottom: 2px; }
+    .profile-edit-btn { float: right; margin-top: 8px; padding: 8px 18px; border: 1px solid #bbb; border-radius: 6px; background: #fff; color: #222; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    .profile-edit-btn:hover { background: #f3f4f6; }
+    .profile-about { margin-top: 32px; }
+    .profile-about h3 { margin-bottom: 8px; }
+    @media (max-width: 900px) {
+      .profile-container { flex-direction: column; gap: 0; }
+      .profile-main { padding: 24px 10px; }
+      .profile-header { flex-direction: column; gap: 16px; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <div class="navbar-right">
+      <a href="home.html">Home</a>
+      <a href="all-cars.html">Buy Car</a>
+      <a href="post-car.html">Sell Car</a>
+      <a href="compare.html">Compare</a>
+      <a href="dashboard.html">Dashboard</a>
+      <div style="display:inline-block; position:relative;">
+        <div style="display:flex;align-items:center;gap:8px;position:relative;">
+          <span class="profile-avatar" style="width:32px;height:32px;font-size:18px;background:#e5e4e2;cursor:pointer;" id="profileDropdownBtn"> <i class="fa fa-user"></i> </span>
+          <span id="navProfileName" style="cursor:pointer;" onclick="toggleProfileDropdown()">Srushti <i class='fa fa-caret-down'></i></span>
+          <div id="profileDropdown" style="display:none;position:absolute;top:36px;right:0;background:#fff;border:1px solid #eee;border-radius:6px;box-shadow:0 2px 8px #0002;z-index:10;min-width:120px;">
+            <a href="#" onclick="logoutUserFromDropdown();return false;" style="display:block;padding:10px 18px;color:#222;text-decoration:none;">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="profile-container" id="profileContainer" style="display:none;">
+    <div class="profile-sidebar">
+      <a href="#" class="active"><i class="fa fa-user"></i> Profile</a>
+      <a href="#"><i class="fa fa-car"></i> My Posted Car</a>
+      <a href="#" onclick="goToFavorites()"><i class="fa fa-heart"></i> Favorites</a>
+      <a href="#"><i class="fa fa-calendar"></i> Appointment</a>
+    </div>
+    <div class="profile-main" id="profileMain">
+      <!-- Profile Section -->
+      <div id="profileSection">
+        <div class="profile-header">
+          <div class="profile-avatar"><i class="fa fa-user"></i></div>
+          <div class="profile-info">
+            <h2 id="profileName">Srushti Chauhan</h2>
+            <div class="profile-phone" id="profilePhone">07045779408</div>
+            <div class="profile-location" id="profileLocation">Goregaon West, Mumbai.</div>
+          </div>
+          <button class="profile-edit-btn" onclick="editProfile()">Edit Profile</button>
+        </div>
+        <div class="profile-about">
+          <h3>About Me</h3>
+          <div id="profileAbout">df</div>
+        </div>
+      </div>
+      <!-- My Posted Cars Section -->
+      <div id="postedCarsSection" style="display:none;">
+        <h2>My Posted Cars</h2>
+        <div id="myCarsList" style="display:flex; flex-wrap:wrap; gap:20px; margin-top:20px;"></div>
+      </div>
+      <!-- Appointments Section -->
+      <div id="appointmentsSection" style="display:none;">
+        <h2>Appointments</h2>
+        <div style="color:#888; margin-top:20px;">No appointments found.</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Demo: Load profile info from localStorage or use defaults
+    function isLoggedIn() {
+      return !!localStorage.getItem('ridebazzar_user');
+    }
+    function toggleProfileDropdown() {
+      const dd = document.getElementById('profileDropdown');
+      dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+    }
+    function logoutUserFromDropdown() {
+      localStorage.removeItem('ridebazzar_user');
+      document.getElementById('profileContainer').style.display = 'none';
+      document.body.innerHTML += '<div style="text-align:center;margin:60px auto;color:#888;font-size:1.3em;">You are logged out. <a href="home.html">Go to Home</a></div>';
+      setTimeout(function(){ window.location.href = 'home.html'; }, 1500);
+    }
+    function loadProfile() {
+      if (!isLoggedIn()) {
+        document.getElementById('profileContainer').style.display = 'none';
+        document.body.innerHTML += '<div style="text-align:center;margin:60px auto;color:#888;font-size:1.3em;">You are not logged in. <a href="home.html">Go to Home</a></div>';
+    // No logoutBtn in navbar anymore
+        return;
+      }
+      document.getElementById('profileContainer').style.display = 'flex';
+      document.getElementById('logoutBtn').style.display = '';
+      const user = JSON.parse(localStorage.getItem('ridebazzar_profile') || '{}');
+      document.getElementById('profileName').textContent = user.name || 'Srushti Chauhan';
+      document.getElementById('profilePhone').textContent = user.phone || '07045779408';
+      document.getElementById('profileLocation').textContent = user.location || 'Goregaon West, Mumbai.';
+      document.getElementById('profileAbout').textContent = user.about || 'df';
+      document.getElementById('navProfileName').textContent = user.name || 'Srushti';
+    }
+    function logoutUser() {
+      localStorage.removeItem('ridebazzar_user');
+      window.location.href = 'home.html';
+    }
+    function editProfile() {
+      const name = prompt('Enter your name:', document.getElementById('profileName').textContent);
+      const phone = prompt('Enter your phone:', document.getElementById('profilePhone').textContent);
+      const location = prompt('Enter your location:', document.getElementById('profileLocation').textContent);
+      const about = prompt('About you:', document.getElementById('profileAbout').textContent);
+      const user = { name, phone, location, about };
+      localStorage.setItem('ridebazzar_profile', JSON.stringify(user));
+      loadProfile();
+    }
+    function showProfile() {
+      document.getElementById('profileSection').style.display = 'block';
+      document.getElementById('postedCarsSection').style.display = 'none';
+      document.getElementById('appointmentsSection').style.display = 'none';
+      setSidebarActive(0);
+      console.log('Profile section visible');
+    }
+    function showPostedCars() {
+      document.getElementById('profileSection').style.display = 'none';
+      document.getElementById('postedCarsSection').style.display = 'block';
+      document.getElementById('appointmentsSection').style.display = 'none';
+      setSidebarActive(1);
+      renderMyCars();
+      console.log('Posted Cars section visible');
+    }
+    function showAppointments() {
+      document.getElementById('profileSection').style.display = 'none';
+      document.getElementById('postedCarsSection').style.display = 'none';
+      document.getElementById('appointmentsSection').style.display = 'block';
+      setSidebarActive(2);
+      console.log('Appointments section visible');
+    }
+    function setSidebarActive(idx) {
+      const links = document.querySelectorAll('.profile-sidebar a');
+      links.forEach((a, i) => a.classList.toggle('active', i === idx));
+    }
+    function renderMyCars() {
+      // Use username from login, not profile name
+      const username = localStorage.getItem('ridebazzar_user') || '';
+      const cars = JSON.parse(localStorage.getItem('ridebazzar_cars') || '[]');
+      const myCars = cars.filter(car => car.user === username);
+      const list = document.getElementById('myCarsList');
+      list.innerHTML = '';
+      if (myCars.length === 0) {
+        list.innerHTML = '<div style="color:#888;">You have not posted any cars yet.</div>';
+        return;
+      }
+      myCars.forEach(car => {
+        const card = document.createElement('div');
+        card.style = 'border:1px solid #eee; border-radius:12px; padding:20px; min-width:240px; min-height:120px; background:#fff; box-shadow:0 2px 12px #0001; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; margin:10px;';
+        const imgSrc = car.image ? car.image : 'images/logo.png';
+        card.innerHTML = `<img src="${imgSrc}" alt="Car Image" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:10px;background:#eee;">
+          <div style=\"font-size:1.2em; font-weight:bold; margin-bottom:8px; color:#222;\">${car.make} ${car.model}</div>
+          <div style=\"margin-bottom:4px; color:#444;\">Year: <b>${car.year}</b></div>
+          <div style=\"color:#444;\">Price: <b>₹${car.price}</b></div>`;
+        list.appendChild(card);
+      });
+    }
+    
+    function goToFavorites() {
+      // Navigate to dashboard with favorites tab active
+      window.location.href = 'dashboard.html?tab=favorites';
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      loadProfile();
+      showProfile();
+      // Sidebar navigation
+      const sidebarLinks = document.querySelectorAll('.profile-sidebar a');
+      sidebarLinks[0].onclick = function(e){ e.preventDefault(); showProfile(); };
+      sidebarLinks[1].onclick = function(e){ e.preventDefault(); showPostedCars(); };
+      sidebarLinks[2].onclick = function(e){ e.preventDefault(); goToFavorites(); };
+      sidebarLinks[3].onclick = function(e){ e.preventDefault(); showAppointments(); };
+      // Ensure all sections have display set for initial state
+      document.getElementById('profileSection').style.display = 'block';
+      document.getElementById('postedCarsSection').style.display = 'none';
+      document.getElementById('appointmentsSection').style.display = 'none';
+    });
+  </script>
+</body>
+</html>

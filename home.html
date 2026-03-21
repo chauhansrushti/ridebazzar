@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Global Configuration (must be first!) -->
+  <script src="js/config.js"></script>
+  <!-- Include JavaScript files -->
+  <script src="js/auth-api.js"></script>
+  <script src="js/carManager.js"></script>
+  <script src="js/paymentSystem.js"></script>
+  <script src="js/messaging.js"></script>
+  <script src="js/chatbot.js"></script>
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("2bF1YIVOOU1Ymuee1");
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <title>RideBazzar - a used car market place</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/index.css" />
+  <!-- Favicon for browser tab -->
+ <link rel="icon" type="image/png" href="images/logotab.png" sizes="16x16" />
+
+<script>
+  function toggleNavbar() {
+    const nav = document.getElementById("navbarLinks");
+    nav.classList.toggle("show");
+  }
+  
+  function togglePassword(inputId, iconElement) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      iconElement.innerHTML = '👁️‍🗨️';
+    } else {
+      input.type = 'password';
+      iconElement.innerHTML = '👁️';
+    }
+  }
+  
+  function showLoginModal() {
+    document.getElementById('loginModal').style.display = 'block';
+  }
+  function hideLoginModal() {
+    document.getElementById('loginModal').style.display = 'none';
+  }
+  
+  function showForgotPasswordModal() {
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('forgotPasswordModal').style.display = 'block';
+  }
+  
+  function hideForgotPasswordModal() {
+    document.getElementById('forgotPasswordModal').style.display = 'none';
+    document.getElementById('resetCodeSection').style.display = 'none';
+    document.getElementById('forgotPasswordForm').style.display = 'block';
+    document.getElementById('forgotEmail').value = '';
+    document.getElementById('forgotPasswordMessage').style.display = 'none';
+  }
+  
+  let resetCodeStorage = null;
+  let resetEmailStorage = null;
+  
+  function handleForgotPassword() {
+    const email = document.getElementById('forgotEmail').value;
+    const message = document.getElementById('forgotPasswordMessage');
+    
+    // Generate 6-digit code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    resetCodeStorage = resetCode;
+    resetEmailStorage = email;
+    
+    // Send email with reset code using dedicated password reset template
+    emailjs.send('service_wl37npn', 'template_08atm5e', {
+      to_email: email,
+      to_name: email.split('@')[0],
+      reset_code: resetCode
+    })
+    .then(function(response) {
+      console.log('Reset email sent!', response);
+      message.style.display = 'block';
+      message.className = 'auth-message success';
+      message.innerHTML = '✅ Reset code sent to your email!';
+      
+      document.getElementById('forgotPasswordForm').style.display = 'none';
+      document.getElementById('resetCodeSection').style.display = 'block';
+    }, function(error) {
+      console.error('Email send failed:', error);
+      message.style.display = 'block';
+      message.className = 'auth-message error';
+      message.innerHTML = '❌ Failed to send email. Please try again.';
+    });
+  }
+  
+  function handleResetPassword() {
+    const code = document.getElementById('resetCode').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmNewPassword').value;
+    const message = document.getElementById('forgotPasswordMessage');
+    
+    if (newPassword !== confirmPassword) {
+      message.style.display = 'block';
+      message.className = 'auth-message error';
+      message.innerHTML = '❌ Passwords do not match!';
+      return;
+    }
+    
+    if (code !== resetCodeStorage) {
+      message.style.display = 'block';
+      message.className = 'auth-message error';
+      message.innerHTML = '❌ Invalid reset code!';
+      return;
+    }
+    
+    // Update password in backend
+    fetch('http://localhost:5000/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: resetEmailStorage, newPassword: newPassword })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        message.style.display = 'block';
+        message.className = 'auth-message success';
+        message.innerHTML = '✅ Password reset successfully! You can now login.';
+        
+        setTimeout(() => {
+          hideForgotPasswordModal();
+          showLoginModal();
+        }, 2000);
+      } else {
+        message.style.display = 'block';
+        message.className = 'auth-message error';
+        message.innerHTML = '❌ ' + (data.error || 'Failed to reset password');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      message.style.display = 'block';
+      message.className = 'auth-message error';
+      message.innerHTML = '❌ Error resetting password. Please try again.';
+    });
+  }
+</script>
+
+
+</head>
+<body>
+  <!-- Hamburger icon -->
+  <div class="hamburger" onclick="toggleNavbar()">☰</div>
+  <!-- Navbar -->
+
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <div class="navbar-right" id="navbarLinks">
+      <a href="home.html" class="active">Home</a>
+      <a href="all-cars.html">Buy Car</a>
+      <a href="#" onclick="handleSellCarClick()">Sell Car</a>
+      <a href="compare.html">Compare</a>
+      <a href="dashboard.html" id="profileNavBtn" style="display:none;">Dashboard</a>
+      <a href="#" id="loginNavBtn" onclick="showLoginModal()">Login/Register</a>
+      <a href="#" id="logoutNavBtn" onclick="handleLogout()" style="display:none;">Logout</a>
+    </div>
+  </nav>
+<script>
+</script>
+
+<script>
+  function handleSellCarClick() {
+    // Always redirect to the dedicated post-car.html page
+    window.location.href = 'post-car.html';
+  }
+</script>
+    
+
+  <!-- Enhanced Login/Register Modal -->
+  <div id="loginModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+    <div style="display:flex; background:#fff; max-width:900px; height:550px; margin:80px auto; border-radius:16px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden;">
+      <span onclick="hideLoginModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999; z-index:10;">&times;</span>
+      
+      <!-- Left Side - Car with Eyes -->
+      <div style="flex:1; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+        <!-- Car Shape with Eyes -->
+        <div style="position:relative; z-index:2;">
+          <svg width="320" height="220" viewBox="0 0 320 220" style="filter:drop-shadow(0 10px 30px rgba(0,0,0,0.3));">
+            <!-- Car Body (Main Rectangle) -->
+            <rect x="40" y="120" width="240" height="60" rx="10" fill="#F9B233" />
+            
+            <!-- Car Roof/Cabin -->
+            <path d="M 80 120 L 110 80 L 210 80 L 240 120 Z" fill="#F9B233" />
+            
+            <!-- Windshield (Front) -->
+            <path d="M 190 85 L 210 85 L 235 115 L 210 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+            
+            <!-- Side Window -->
+            <path d="M 115 85 L 180 85 L 180 115 L 130 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+            
+            <!-- Front Grille/Smile -->
+            <rect x="245" y="140" width="25" height="12" rx="3" fill="#333" />
+            <path d="M 100 155 Q 160 165 220 155" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round" />
+            
+            <!-- Door Line -->
+            <line x1="160" y1="120" x2="160" y2="175" stroke="#333" stroke-width="2" />
+            
+            <!-- Left Wheel as EYE -->
+            <circle cx="100" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+            <ellipse id="modalLeftPupil" cx="100" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+            <circle cx="100" cy="182" r="4" fill="white" opacity="0.8" />
+            
+            <!-- Right Wheel as EYE -->
+            <circle cx="220" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+            <ellipse id="modalRightPupil" cx="220" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+            <circle cx="220" cy="182" r="4" fill="white" opacity="0.8" />
+            
+            <!-- Wheel Arches -->
+            <path d="M 72 180 Q 100 165 128 180" stroke="#333" stroke-width="2" fill="none" />
+            <path d="M 192 180 Q 220 165 248 180" stroke="#333" stroke-width="2" fill="none" />
+          </svg>
+        </div>
+        
+        <!-- Welcome Text -->
+        <div style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); text-align:center; color:white; z-index:3;">
+          <h2 style="font-size:28px; margin-bottom:10px; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">Welcome to RideBazzar</h2>
+          <p style="opacity:0.9; text-shadow:1px 1px 2px rgba(0,0,0,0.3);">Your trusted car marketplace</p>
+        </div>
+      </div>
+      
+      <!-- Right Side - Login/Register Form -->
+      <div style="flex:1; padding:40px; overflow-y:auto;">
+        <!-- Tab Headers -->
+        <div style="display:flex; border-bottom:2px solid #eee; margin-bottom:30px;">
+          <button id="loginTab" onclick="switchTab('login')" class="tab-button active" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid #f9b233; color:#f9b233;">Login</button>
+          <button id="registerTab" onclick="switchTab('register')" class="tab-button" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid transparent; color:#999;">Register</button>
+        </div>
+      
+      <!-- Message Area -->
+      <div id="authMessage" class="auth-message" style="display:none; margin:15px 30px; padding:10px; border-radius:6px; text-align:center; font-weight:bold;"></div>
+      
+      <!-- Login Form -->
+      <div id="loginFormContent" style="padding:30px;">
+        <form id="loginForm" onsubmit="return handleLoginSubmit(event);">
+          <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Username</label>
+            <input type="text" id="loginUsername" name="loginUsername" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="loginPassword" name="loginPassword" required style="width:100%; padding:12px 45px 12px 12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('loginPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:20px; user-select:none;">👁️</span>
+            </div>
+            <div style="text-align:right; margin-top:8px;">
+              <a href="#" onclick="event.preventDefault(); showForgotPasswordModal();" style="color:#f9b233; font-size:14px; text-decoration:none;">Forgot Password?</a>
+            </div>
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e6a429'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#f9b233'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Login</button>
+        </form>
+      </div>
+      
+      <!-- Register Form -->
+      <div id="registerFormContent" style="padding:30px; display:none;">
+        <form id="registerForm" onsubmit="event.preventDefault(); handleRegister();">
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Username</label>
+            <input type="text" id="registerUsername" required style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Email</label>
+            <input type="email" id="registerEmail" required style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Phone</label>
+            <input type="tel" id="registerPhone" required placeholder="10-digit mobile number" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Location</label>
+            <input type="text" id="registerLocation" required placeholder="City, State" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="registerPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
+          </div>
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Confirm Password</label>
+            <div style="position:relative;">
+              <input type="password" id="registerConfirmPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerConfirmPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#222; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#000'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#222'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- CSS for tabs and messages -->
+  <style>
+    .tab-button.active {
+      border-bottom-color: #f9b233 !important;
+      color: #f9b233;
+    }
+    .auth-message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .auth-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    /* Fix autofill and input visibility */
+    input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
+      color: black !important;
+      background-color: white !important;
+      -webkit-text-fill-color: black !important;
+    }
+    
+    input[type="text"]:-webkit-autofill,
+    input[type="password"]:-webkit-autofill,
+    input[type="email"]:-webkit-autofill,
+    input[type="tel"]:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0 1000px white inset !important;
+      -webkit-text-fill-color: black !important;
+      color: black !important;
+    }
+  </style>
+    </div>
+  </nav>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgotPasswordModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1001;">
+    <div style="background:#fff; max-width:400px; margin:80px auto; padding:30px; border-radius:12px; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+      <span onclick="hideForgotPasswordModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999;">&times;</span>
+      
+      <h2 style="margin-top:0; color:#333; text-align:center;">Reset Password</h2>
+      <p style="color:#666; text-align:center; margin-bottom:25px;">Enter your email and we'll send you a reset code.</p>
+      
+      <div id="forgotPasswordMessage" style="display:none; margin-bottom:15px; padding:10px; border-radius:6px; text-align:center; font-weight:bold;"></div>
+      
+      <form id="forgotPasswordForm" onsubmit="event.preventDefault(); handleForgotPassword();">
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Email Address</label>
+          <input type="email" id="forgotEmail" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+        </div>
+        <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e6a429'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#f9b233'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Send Reset Code</button>
+      </form>
+      
+      <div id="resetCodeSection" style="display:none; margin-top:20px;">
+        <form id="resetPasswordForm" onsubmit="event.preventDefault(); handleResetPassword();">
+          <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Reset Code</label>
+            <input type="text" id="resetCode" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+          </div>
+          <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">New Password</label>
+            <input type="password" id="newPassword" required minlength="6" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+          </div>
+          <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Confirm Password</label>
+            <input type="password" id="confirmNewPassword" required minlength="6" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#28a745; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#218838'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Reset Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full-screen Slideshow Section -->
+  <div class="slideshow-container">
+    <img src="home1.jpg" class="slide active" alt="Slide 1">
+    <img src="home.jpeg" class="slide" alt="Slide 2">
+    <img src="home1.jpg" class="slide" alt="Slide 3">
+
+    <!-- Centered Overlay -->
+    <div class="overlay-content">
+      <h1>Welcome Back</h1>
+      <div class="search-controls">
+  <a href="all-cars.html" class="view-btn">View All Cars</a>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Hector Plus" onkeypress="handleSearchKeyPress(event)">
+          <button onclick="performSearch()"><i class="fas fa-search"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+    <h2>Cars Across India</h2>
+    <p>Discover quality pre-owned cars from verified sellers in major cities. Browse our extensive collection, compare prices, and find your perfect ride with transparent pricing and detailed inspections.</p>
+  </div>
+ <div class="cards-container">
+  <a href="hub/hub.html?city=Delhi" style="text-decoration:none;">
+    <div class="location-card yellow">
+      <h3>Delhi NCR</h3>
+      <div class="diamond-img">
+        <img src="images/delhih.jpg" alt="Delhi NCR">
+      </div>
+      <div class="details">2 hubs &nbsp;•&nbsp; 1410+ cars</div>
+    </div>
+  </a>
+
+  <a href="hub/hub.html?city=Bangalore" style="text-decoration:none;">
+    <div class="location-card purple">
+      <h3>Bangalore</h3>
+      <div class="diamond-img">
+        <img src="images/banglore.jpg" alt="Bangalore">
+      </div>
+      <div class="details">2 hubs &nbsp;•&nbsp; 790+ cars</div>
+    </div>
+  </a>
+
+  <a href="hub/hub.html?city=Hyderabad" style="text-decoration:none;">
+    <div class="location-card dark">
+      <h3>Hyderabad</h3>
+      <div class="diamond-img">
+        <img src="images/hyderabad.jpg" alt="Hyderabad">
+      </div>
+      <div class="details">2 hubs &nbsp;•&nbsp; 710+ cars</div>
+    </div>
+  </a>
+
+  <a href="hub/hub.html?city=Ahmedabad" style="text-decoration:none;">
+    <div class="location-card orange">
+      <h3>Ahmedabad</h3>
+      <div class="diamond-img">
+        <img src="images/amd.jpg" alt="Ahmedabad">
+      </div>
+      <div class="details">1 hub &nbsp;•&nbsp; 490+ cars</div>
+    </div>
+  </a>
+</div>
+
+  <div style="text-align: center; margin-top: 30px;">
+  <a href="hub/hub.html" class="view-all-btn">View all locations</a>
+</div>
+<div class="why-spinny">
+  <h2>Why buy a used car from RideBazzar?</h2>
+  <p>
+    RideBazzar takes the uncertainty and risk out of buying a used car, offering peace of mind at every step with zero compromises. Our selection process ensures that only the highest quality certified second hand cars in your city. A RideBazzar car is only certified once it passes a thorough 200-point evaluation that checks the condition of every part of the car. Any used car can get certified. It takes perfection to be RideBazzar Assured.
+    <br><br>
+    Experience a simple & fully transparent way of buying used cars with RideBazzar. Find your perfect match from our wide range of fully inspected & certified used cars at the best prices. All RideBazzar cars come with hassle-free paperwork, free RC transfer, and used car finance options with low-interest rates starting from only 12.99%.
+    <br><br>
+    With RideBazzar pre-owned is better than new. Get the savings of a pre-owned with the quality of a new car. All this through a transparent, convenient and trustworthy process, to make sure you buy a car you'll love, guaranteed.
+  </p>
+</div>
+<div class="help-section">
+  <h2>Need help?</h2>
+  <div class="help-cards">
+    
+    <!-- WhatsApp Card -->
+    <div class="help-card">
+      <div class="icon-text">
+        <span class="icon">💬</span>
+        <div>
+          <a href="https://wa.me/9082073676?text=Hi%20RideBazzar%20Team%2C%20I%20need%20help%20with%20a%20loan%20query." target="_blank" color="#222" style="text-decoration:none;">
+            <h3>Chat with us on WhatsApp</h3></a>
+          <p>Get instant support via experts</p>
+        </div>
+      </div>
+      <span class="arrow">➔</span>
+    </div>
+
+    <!-- Callback Card -->
+    <div class="help-card">
+      <div class="icon-text">
+        <span class="icon">🎧</span>
+        <div>
+          <a href="wp.html"  color="#222" style="text-decoration:none;"><h3>Request a callback</h3></a>
+          <p>Our team will contact you shortly!</p>
+        </div>
+      </div>
+      <span class="arrow">➔</span>
+    </div>
+
+    <!-- FAQs Card -->
+    <div class="help-card">
+      <div class="icon-text">
+        <span class="icon">❓</span>
+        <div>
+          <a href="faq.html"  color="#222" style="text-decoration:none;"><h3>FAQs</h3></a>
+          <p>Get your doubts cleared</p>
+</div></div></div></div></div>
+<footer style="background-color: #333; color: white; padding: 20px 0; text-align: center;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+    <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 15px; flex-wrap: wrap;">
+      <a href="compare.html" style="color: white; text-decoration: none; font-weight: 500;">Compare</a>
+      <a href="aboutus/about.html" style="color: white; text-decoration: none; font-weight: 500;">About Us</a>
+      <a href="carfinance/carfinance.html" style="color: white; text-decoration: none; font-weight: 500;">Car Finance</a>
+    </div>
+    <div style="border-top: 1px solid #555; padding-top: 15px;">
+      &copy; 2025 RideBazzar - Used Car Marketplace
+    </div>
+  </div>
+</footer>
+
+
+  <!-- JavaScript for Slideshow -->
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.remove('active');
+        if (i === index) slide.classList.add('active');
+      });
+    }
+
+    setInterval(() => {
+      current = (current + 1) % slides.length;
+      showSlide(current);
+    }, 3000);
+
+  
+
+  </script>
+
+  <!-- Search functionality -->
+  <script>
+    function performSearch() {
+      const searchInput = document.getElementById('searchInput');
+      const searchTerm = searchInput.value.trim();
+      
+      if (searchTerm) {
+        // Redirect to all-cars.html with search parameter
+        window.location.href = `all-cars.html?search=${encodeURIComponent(searchTerm)}`;
+      } else {
+        // If no search term, just go to all cars
+        window.location.href = 'all-cars.html';
+      }
+    }
+
+    function handleSearchKeyPress(event) {
+      if (event.key === 'Enter') {
+        performSearch();
+      }
+    }
+
+    // Login and Register Handler Functions
+    
+    // Initialize default users if none exist
+    function initializeDefaultUsers() {
+      let users = JSON.parse(localStorage.getItem('ridebazzar_users') || '[]');
+      
+      // Check if priti user exists
+      const pritiExists = users.some(u => u.username === 'priti');
+      
+      if (!pritiExists) {
+        const defaultUser = {
+          id: Date.now().toString(),
+          username: 'priti',
+          email: 'priti@example.com',
+          password: 'priti',
+          phone: '1234567890',
+          role: 'user',
+          createdAt: new Date().toISOString()
+        };
+        
+        users.push(defaultUser);
+        localStorage.setItem('ridebazzar_users', JSON.stringify(users));
+        console.log('Created default user: priti/priti');
+      }
+    }
+    
+    // Initialize users on page load
+    initializeDefaultUsers();
+    
+    function handleLoginSubmit(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      handleLogin();
+      return false;
+    }
+
+    async function handleLogin() {
+      const usernameInput = document.getElementById('loginUsername');
+      const passwordInput = document.getElementById('loginPassword');
+      const messageDiv = document.getElementById('authMessage');
+
+      console.log('Username input element:', usernameInput);
+      console.log('Password input element:', passwordInput);
+
+      const usernameOrEmail = usernameInput ? usernameInput.value.trim() : '';
+      const password = passwordInput ? passwordInput.value.trim() : '';
+
+      console.log('Login attempt:', { 
+        username: usernameOrEmail, 
+        usernameLength: usernameOrEmail.length,
+        passwordLength: password.length,
+        usernameEmpty: !usernameOrEmail,
+        passwordEmpty: !password
+      });
+
+      if (!usernameOrEmail || !password) {
+        messageDiv.textContent = 'Username and password are required';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+        console.error('Validation failed - empty fields');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: usernameOrEmail,
+            password
+          })
+        });
+
+        const data = await response.json();
+        console.log('Login response:', data);
+
+        if (data.success) {
+          localStorage.setItem('authToken', data.data.token);
+          localStorage.setItem('userData', JSON.stringify(data.data.user));
+          localStorage.setItem('currentUser', JSON.stringify(data.data.user));
+          
+          messageDiv.textContent = 'Login successful!';
+          messageDiv.className = 'auth-message success';
+          messageDiv.style.display = 'block';
+
+          setTimeout(() => {
+            hideLoginModal();
+            updateNavForLoggedInUser(data.data.user);
+            
+            // Redirect based on role
+            if (data.data.user.role === 'admin') {
+              window.location.href = 'admin.html';
+            } else {
+              window.location.href = 'dashboard.html';
+            }
+          }, 1000);
+        } else {
+          messageDiv.textContent = data.message || 'Login failed';
+          messageDiv.className = 'auth-message error';
+          messageDiv.style.display = 'block';
+        }
+      } catch (error) {
+        console.warn('Backend not available, trying localStorage authentication');
+        
+        // Fallback to localStorage authentication
+        const users = JSON.parse(localStorage.getItem('ridebazzar_users') || '[]');
+        const user = users.find(u => 
+          (u.username === usernameOrEmail || u.email === usernameOrEmail) && 
+          u.password === password
+        );
+        
+        if (user) {
+          const userData = {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role || 'user'
+          };
+          
+          localStorage.setItem('authToken', 'local_' + Date.now());
+          localStorage.setItem('userData', JSON.stringify(userData));
+          localStorage.setItem('currentUser', JSON.stringify(userData));
+          
+          messageDiv.textContent = 'Login successful!';
+          messageDiv.className = 'auth-message success';
+          messageDiv.style.display = 'block';
+          
+          setTimeout(() => {
+            hideLoginModal();
+            updateNavForLoggedInUser(userData);
+            window.location.href = 'dashboard.html';
+          }, 1000);
+        } else {
+          messageDiv.textContent = 'Invalid username or password';
+          messageDiv.className = 'auth-message error';
+          messageDiv.style.display = 'block';
+        }
+      }
+    }
+
+    async function handleRegister() {
+      const username = document.getElementById('registerUsername').value.trim();
+      const email = document.getElementById('registerEmail').value.trim();
+      const phone = document.getElementById('registerPhone').value.trim();
+      const location = document.getElementById('registerLocation').value.trim();
+      const password = document.getElementById('registerPassword').value.trim();
+      const confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
+      const messageDiv = document.getElementById('authMessage');
+
+      console.log('Register attempt:', { username, email, phone, location, passwordLength: password.length });
+
+      if (!username || !email || !phone || !location || !password || !confirmPassword) {
+        messageDiv.textContent = 'Please fill in all fields';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        messageDiv.textContent = 'Passwords do not match';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+        return;
+      }
+
+      if (password.length < 6) {
+        messageDiv.textContent = 'Password must be at least 6 characters long';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username,
+            email,
+            password
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          messageDiv.textContent = 'Registration successful! Please login.';
+          messageDiv.className = 'auth-message success';
+          messageDiv.style.display = 'block';
+          
+          // Clear form
+          document.getElementById('registerUsername').value = '';
+          document.getElementById('registerEmail').value = '';
+          document.getElementById('registerPhone').value = '';
+          document.getElementById('registerLocation').value = '';
+          document.getElementById('registerPassword').value = '';
+          document.getElementById('registerConfirmPassword').value = '';
+          
+          // Switch to login tab after 2 seconds
+          setTimeout(() => {
+            switchTab('login');
+          }, 2000);
+        } else {
+          messageDiv.textContent = data.message || 'Registration failed';
+          messageDiv.className = 'auth-message error';
+          messageDiv.style.display = 'block';
+        }
+      } catch (error) {
+        messageDiv.textContent = 'Network error. Please try again.';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+      }
+    }
+
+    // Logout function
+    async function handleLogout() {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          await fetch('http://localhost:5000/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        }
+        
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        updateNavForLoggedOutUser();
+        
+        // Redirect to home page
+        window.location.href = 'home.html';
+      } catch (error) {
+        // Still logout locally even if server request fails
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        updateNavForLoggedOutUser();
+        
+        // Redirect to home page
+        window.location.href = 'home.html';
+      }
+    }
+
+    // Check if user is logged in
+    function isLoggedIn() {
+      return !!localStorage.getItem('authToken');
+    }
+
+    function switchTab(tab) {
+      const loginTab = document.getElementById('loginTab');
+      const registerTab = document.getElementById('registerTab');
+      const loginContent = document.getElementById('loginFormContent');
+      const registerContent = document.getElementById('registerFormContent');
+      const messageDiv = document.getElementById('authMessage');
+
+      // Hide message
+      messageDiv.style.display = 'none';
+
+      if (tab === 'login') {
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        loginTab.style.color = '#f9b233';
+        loginTab.style.borderBottomColor = '#f9b233';
+        registerTab.style.color = '#999';
+        registerTab.style.borderBottomColor = 'transparent';
+        loginContent.style.display = 'block';
+        registerContent.style.display = 'none';
+      } else {
+        registerTab.classList.add('active');
+        loginTab.classList.remove('active');
+        registerTab.style.color = '#f9b233';
+        registerTab.style.borderBottomColor = '#f9b233';
+        loginTab.style.color = '#999';
+        loginTab.style.borderBottomColor = 'transparent';
+        registerContent.style.display = 'block';
+        loginContent.style.display = 'none';
+      }
+    }
+    
+    // Eye tracking for modal
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginUsernameInput = document.getElementById('loginUsername');
+      const loginPasswordInput = document.getElementById('loginPassword');
+      const leftPupil = document.getElementById('modalLeftPupil');
+      const rightPupil = document.getElementById('modalRightPupil');
+      
+      function moveModalEyes(inputElement) {
+        if (!inputElement || !leftPupil || !rightPupil) return;
+        
+        // Move SVG pupils to the right when focusing on input
+        leftPupil.setAttribute('cx', '108');
+        rightPupil.setAttribute('cx', '228');
+      }
+      
+      function resetModalEyes() {
+        if (!leftPupil || !rightPupil) return;
+        leftPupil.setAttribute('cx', '100');
+        rightPupil.setAttribute('cx', '220');
+      }
+      
+      if (loginUsernameInput) {
+        loginUsernameInput.addEventListener('focus', () => moveModalEyes(loginUsernameInput));
+        loginUsernameInput.addEventListener('blur', resetModalEyes);
+      }
+      if (loginPasswordInput) {
+        loginPasswordInput.addEventListener('focus', () => moveModalEyes(loginPasswordInput));
+        loginPasswordInput.addEventListener('blur', resetModalEyes);
+      }
+      
+      // Also add for register inputs
+      const registerUsername = document.getElementById('registerUsername');
+      const registerEmail = document.getElementById('registerEmail');
+      const registerPassword = document.getElementById('registerPassword');
+      
+      if (registerUsername) {
+        registerUsername.addEventListener('focus', () => moveModalEyes(registerUsername));
+        registerUsername.addEventListener('blur', resetModalEyes);
+      }
+      if (registerEmail) {
+        registerEmail.addEventListener('focus', () => moveModalEyes(registerEmail));
+        registerEmail.addEventListener('blur', resetModalEyes);
+      }
+      if (registerPassword) {
+        registerPassword.addEventListener('focus', () => moveModalEyes(registerPassword));
+        registerPassword.addEventListener('blur', resetModalEyes);
+      }
+    });
+
+    function updateNavForLoggedInUser(user) {
+      const loginBtn = document.getElementById('loginNavBtn');
+      const logoutBtn = document.getElementById('logoutNavBtn');
+      const profileBtn = document.getElementById('profileNavBtn');
+
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'block';
+      if (profileBtn) profileBtn.style.display = 'block';
+    }
+
+    function updateNavForLoggedOutUser() {
+      const loginBtn = document.getElementById('loginNavBtn');
+      const logoutBtn = document.getElementById('logoutNavBtn');
+      const profileBtn = document.getElementById('profileNavBtn');
+
+      if (loginBtn) loginBtn.style.display = 'block';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+      if (profileBtn) profileBtn.style.display = 'none';
+    }
+
+    // Function to render posted cars (placeholder)
+    function renderPostedCars() {
+      console.log('Loading posted cars...');
+      // This function can be expanded to fetch and display recent car listings
+      // For now, it's just a placeholder to prevent the error
+      try {
+        // Optional: Fetch recent cars from API
+        // fetchRecentCars();
+      } catch (error) {
+        console.error('Error rendering posted cars:', error);
+      }
+    }
+
+    // Check login status on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      
+      if (token && userData) {
+        try {
+          const user = JSON.parse(userData);
+          updateNavForLoggedInUser(user);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          updateNavForLoggedOutUser();
+        }
+      } else {
+        updateNavForLoggedOutUser();
+      }
+      renderPostedCars();
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "build": {
+    "builder": "nixpacks"
+  },
+  "start": "cd backend && node server.js",
+  "environment": {
+    "PORT": "3000",
+    "NODE_ENV": "production"
+  }
+}

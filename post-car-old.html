@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Post Car - RideBazzar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/index.css" />
+  <script src="js/auth-api.js"></script>
+  <script src="js/carManager.js"></script>
+  <script src="js/messaging.js"></script>
+  <style>
+    body {
+      background: url('images/delhi2.jpg') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .post-car-container {
+      background: rgba(40,40,40,0.95);
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px #0005;
+      color: #ffffff;
+      position: relative;
+    }
+    .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+    .form-row > div {
+      flex: 1;
+    }
+    .form-section {
+      margin-bottom: 30px;
+      border-bottom: 1px solid #666;
+      padding-bottom: 25px;
+    }
+    .form-section:last-child {
+      border-bottom: none;
+    }
+    .form-section h3 {
+      color: #f9b233;
+      margin-bottom: 20px;
+      font-size: 1.4em;
+    }
+    .post-car-container h2 {
+      text-align: left;
+      margin-bottom: 28px;
+      font-size: 2.2em;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    .post-car-container label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      font-size: 1.1em;
+      color: #ffffff;
+    }
+    .post-car-container input[type="text"],
+    .post-car-container input[type="number"],
+    .post-car-container input[type="email"],
+    .post-car-container input[type="tel"],
+    .post-car-container input[type="file"],
+    .post-car-container select,
+    .post-car-container textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1em;
+      background: #ffffff;
+      color: #222222;
+      font-family: inherit;
+    }
+    
+    .post-car-container input::placeholder,
+    .post-car-container textarea::placeholder {
+      color: #666666;
+    }
+    .post-car-container textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .post-car-container input[type="file"] {
+      background: #fff;
+      color: #222;
+      padding: 8px 12px;
+    }
+    .post-car-container button {
+      width: 100%;
+      padding: 14px 0;
+      background: #1976f6;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .post-car-container button:hover {
+      background: #1256b8;
+    }
+    .car-image-preview {
+      display: block;
+      margin: 0 auto 18px auto;
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px #0003;
+    }
+    @media (max-width: 600px) {
+      .post-car-container {
+        padding: 18px 4vw;
+        max-width: 98vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <div class="navbar-right">
+      <a href="home.html">Home</a>
+      <a href="all-cars.html">Buy Car</a>
+      <a href="post-car.html" class="active">Sell Car</a>
+      <a href="compare.html" id="compareNavBtn">Compare</a>
+      
+      <a href="#" id="loginNavBtn" onclick="showLoginModal()">Login/Register</a>
+      <a href="#" id="logoutNavBtn" onclick="logoutUser()" style="display:none;">Logout</a>
+    </div>
+  </nav>
+
+  <div class="post-car-container">
+    <h2>Post Your Car</h2>
+    <form id="postCarForm" autocomplete="off" onsubmit="event.preventDefault(); handleEnhancedPostCar();">
+      
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3>🚗 Basic Information</h3>
+        <div class="form-row">
+          <div>
+            <label for="carMake">Make *</label>
+            <select id="carMake" required onchange="updateModelOptions(this.value)">
+              <option value="">Select Make</option>
+            </select>
+          </div>
+          <div>
+            <label for="carModel">Model *</label>
+            <select id="carModel" required>
+              <option value="">Select Model</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="carYear">Year *</label>
+            <input type="number" id="carYear" required min="1990" max="2025">
+          </div>
+          <div>
+            <label for="carPrice">Price (₹) *</label>
+            <input type="number" id="carPrice" required min="50000" placeholder="e.g. 850000">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Technical Details -->
+      <div class="form-section">
+        <h3>⚙️ Technical Details</h3>
+        <div class="form-row">
+          <div>
+            <label for="carMileage">Mileage (km) *</label>
+            <input type="number" id="carMileage" required min="0" placeholder="e.g. 45000">
+          </div>
+          <div>
+            <label for="carFuelType">Fuel Type *</label>
+            <select id="carFuelType" required>
+              <option value="">Select Fuel Type</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="CNG">CNG</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="carTransmission">Transmission *</label>
+            <select id="carTransmission" required>
+              <option value="">Select Transmission</option>
+              <option value="Manual">Manual</option>
+              <option value="Automatic">Automatic</option>
+              <option value="CVT">CVT</option>
+            </select>
+          </div>
+          <div>
+            <label for="carCondition">Condition *</label>
+            <select id="carCondition" required>
+              <option value="">Select Condition</option>
+              <option value="Excellent">Excellent</option>
+              <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
+              <option value="Needs Work">Needs Work</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Location & Contact -->
+      <div class="form-section">
+        <h3>📍 Location & Contact</h3>
+        <div class="form-row">
+          <div>
+            <label for="carLocation">Location *</label>
+            <input type="text" id="carLocation" required placeholder="City, State">
+          </div>
+          <div>
+            <label for="contactPhone">Contact Phone</label>
+            <input type="tel" id="contactPhone" placeholder="Your phone number">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Description -->
+      <div class="form-section">
+        <h3>📝 Description</h3>
+        <label for="carDescription">Description</label>
+        <textarea id="carDescription" placeholder="Describe your car's features, condition, service history, etc. (optional)" rows="4"></textarea>
+      </div>
+      
+      <!-- Images -->
+      <div class="form-section">
+        <h3>📸 Car Images</h3>
+        <label for="carImages">Upload Images (up to 5)</label>
+        <input type="file" id="carImages" accept="image/*" multiple onchange="previewCarImages(event)" style="margin-bottom:10px;">
+        <div id="imagePreviewContainer" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;"></div>
+      </div>
+      
+      <button type="submit" style="width:100%; padding:16px; background:#f9b233; border:none; color:#222; font-weight:bold; font-size:18px; border-radius:8px; margin-top:20px;">Post Car</button>
+    </form>
+  </div>
+  
+  <script>
+    console.log('Script section loading...');
+    
+    // Initialize auth manager and car manager
+    const authManager = new AuthManager();
+    const carManager = new CarManager();
+    
+    console.log('Auth manager and car manager initialized');
+
+    // Car brands and models data
+    const carBrands = {
+      'Maruti Suzuki': ['Alto', 'Swift', 'Baleno', 'Dzire', 'Vitara Brezza', 'Ertiga', 'Ciaz', 'S-Cross', 'XL6', 'WagonR', 'Celerio', 'Ignis'],
+      'Hyundai': ['i10', 'i20', 'Verna', 'Creta', 'Venue', 'Tucson', 'Elantra', 'Santro', 'Grand i10', 'Aura', 'Alcazar'],
+      'Tata': ['Tiago', 'Tigor', 'Nexon', 'Harrier', 'Safari', 'Altroz', 'Punch', 'Hexa', 'Zest', 'Bolt'],
+      'Mahindra': ['XUV300', 'XUV500', 'XUV700', 'Scorpio', 'Bolero', 'Thar', 'KUV100', 'Marazzo', 'TUV300'],
+      'Honda': ['City', 'Amaze', 'Jazz', 'WR-V', 'CR-V', 'Civic', 'Accord', 'BR-V'],
+      'Toyota': ['Innova Crysta', 'Fortuner', 'Camry', 'Corolla Altis', 'Yaris', 'Glanza', 'Urban Cruiser', 'Vellfire'],
+      'Ford': ['EcoSport', 'Endeavour', 'Figo', 'Aspire', 'Freestyle', 'Mustang'],
+      'Renault': ['Kwid', 'Duster', 'Captur', 'Triber', 'Kiger'],
+      'Nissan': ['Magnite', 'Kicks', 'Terrano', 'Micra', 'Sunny'],
+      'Volkswagen': ['Polo', 'Vento', 'Tiguan', 'T-Roc', 'Passat'],
+      'Skoda': ['Rapid', 'Octavia', 'Superb', 'Kodiaq', 'Kushaq', 'Slavia'],
+      'Kia': ['Seltos', 'Sonet', 'Carnival', 'Carens'],
+      'MG': ['Hector', 'ZS EV', 'Gloster', 'Astor'],
+      'Jeep': ['Compass', 'Wrangler', 'Grand Cherokee'],
+      'BMW': ['3 Series', '5 Series', '7 Series', 'X1', 'X3', 'X5', 'X7', 'Z4'],
+      'Mercedes-Benz': ['A-Class', 'C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE', 'GLS'],
+      'Audi': ['A3', 'A4', 'A6', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT'],
+      'Jaguar': ['XE', 'XF', 'XJ', 'F-Pace', 'E-Pace', 'I-Pace'],
+      'Land Rover': ['Discovery Sport', 'Discovery', 'Range Rover Evoque', 'Range Rover Velar', 'Range Rover Sport', 'Range Rover']
+    };
+    
+    console.log('carBrands loaded with', Object.keys(carBrands).length, 'brands');
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, checking authentication...');
+      
+      // Check if user is logged in using multiple authentication methods
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      const currentUser = localStorage.getItem('currentUser');
+      
+      console.log('Auth token:', token ? 'Present' : 'Missing');
+      console.log('User data:', userData ? 'Present' : 'Missing');
+      console.log('Current user:', currentUser ? 'Present' : 'Missing');
+      
+      // Check if user is authenticated using any method
+      const isAuthenticated = token || currentUser || userData;
+      
+      if (!isAuthenticated) {
+        console.log('No authentication found, redirecting...');
+        alert('You must be logged in to post a car.');
+        window.location.href = 'home.html';
+        return;
+      }
+      
+      console.log('User authenticated, populating dropdowns...');
+      populateMakeDropdown();
+      
+      // Update navbar based on login status
+      updateNavbar();
+    });
+    
+    function populateMakeDropdown() {
+      console.log('Populating make dropdown...');
+      const makeSelect = document.getElementById('carMake');
+      
+      if (!makeSelect) {
+        console.error('Make select element not found!');
+        return;
+      }
+      
+      // Clear existing options except the first one
+      makeSelect.innerHTML = '<option value="">Select Make</option>';
+      
+      Object.keys(carBrands).forEach(brand => {
+        const option = document.createElement('option');
+        option.value = brand;
+        option.textContent = brand;
+        makeSelect.appendChild(option);
+        console.log('Added brand:', brand);
+      });
+      
+      console.log('Make dropdown populated with', Object.keys(carBrands).length, 'brands');
+    }
+
+    function updateModelOptions(selectedMake) {
+      console.log('Updating model options for:', selectedMake);
+      const modelSelect = document.getElementById('carModel');
+      
+      // Clear existing options except the first one
+      modelSelect.innerHTML = '<option value="">Select Model</option>';
+      
+      if (selectedMake && carBrands[selectedMake]) {
+        carBrands[selectedMake].forEach(model => {
+          const option = document.createElement('option');
+          option.value = model;
+          option.textContent = model;
+          modelSelect.appendChild(option);
+        });
+        console.log('Added', carBrands[selectedMake].length, 'models for', selectedMake);
+      }
+    }
+
+    function previewCarImages(event) {
+      const files = Array.from(event.target.files);
+      const container = document.getElementById('imagePreviewContainer');
+      container.innerHTML = '';
+      
+      if (files.length > 5) {
+        alert('You can upload maximum 5 images');
+        event.target.value = '';
+        return;
+      }
+      
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.width = '100px';
+          img.style.height = '80px';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '8px';
+          container.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Handle form submission
+    document.getElementById('postCarForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      try {
+        console.log('Form submitted, processing...');
+        
+        const formData = {
+          make: document.getElementById('carMake').value,
+          model: document.getElementById('carModel').value,
+          year: document.getElementById('carYear').value,
+          price: document.getElementById('carPrice').value,
+          mileage: document.getElementById('carMileage').value,
+          fuelType: document.getElementById('carFuelType').value,
+          transmission: document.getElementById('carTransmission').value,
+          condition: document.getElementById('carCondition').value,
+          location: document.getElementById('carLocation').value,
+          description: document.getElementById('carDescription').value,
+          features: Array.from(document.querySelectorAll('input[name="features"]:checked')).map(cb => cb.value),
+          images: document.getElementById('carImages').files
+        };
+        
+        console.log('Form data prepared:', formData);
+        
+        const car = carManager.postCar(formData);
+        console.log('Car posted successfully:', car);
+        
+        alert('Car posted successfully!');
+        window.location.href = 'dashboard.html';
+        
+      } catch (error) {
+        console.error('Error posting car:', error);
+        alert('Error posting car: ' + error.message);
+      }
+    });
+
+    // Update navbar based on authentication status
+    function updateNavbar() {
+      const loginBtn = document.querySelector('.nav-buttons .login-btn');
+      const logoutBtn = document.querySelector('.nav-buttons .logout-btn');
+      const profileBtn = document.querySelector('.nav-buttons .profile-btn');
+      const compareBtn = document.querySelector('a[href="compare.html"]');
+      
+      const token = localStorage.getItem('authToken');
+      
+      if (token) {
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        if (profileBtn) profileBtn.style.display = 'inline-block';
+        
+        // Change Compare to Dashboard when logged in
+        if (compareBtn) {
+          compareBtn.textContent = 'Dashboard';
+          compareBtn.href = 'dashboard.html';
+        }
+      } else {
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (profileBtn) profileBtn.style.display = 'none';
+        
+        // Show Compare when not logged in
+        if (compareBtn) {
+          compareBtn.textContent = 'Compare';
+          compareBtn.href = 'compare.html';
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+
+    // Car brands and models data
+    const carBrands = {
+      'Maruti Suzuki': ['Alto', 'Swift', 'Baleno', 'Dzire', 'Vitara Brezza', 'Ertiga', 'Ciaz', 'S-Cross', 'XL6', 'WagonR', 'Celerio', 'Ignis'],
+      'Hyundai': ['i10', 'i20', 'Verna', 'Creta', 'Venue', 'Tucson', 'Elantra', 'Santro', 'Grand i10', 'Aura', 'Alcazar'],
+      'Tata': ['Tiago', 'Tigor', 'Nexon', 'Harrier', 'Safari', 'Altroz', 'Punch', 'Hexa', 'Zest', 'Bolt'],
+      'Mahindra': ['XUV300', 'XUV500', 'XUV700', 'Scorpio', 'Bolero', 'Thar', 'KUV100', 'Marazzo', 'TUV300'],
+      'Honda': ['City', 'Amaze', 'Jazz', 'WR-V', 'CR-V', 'Civic', 'Accord', 'BR-V'],
+      'Toyota': ['Innova Crysta', 'Fortuner', 'Camry', 'Corolla Altis', 'Yaris', 'Glanza', 'Urban Cruiser', 'Vellfire'],
+      'Ford': ['EcoSport', 'Endeavour', 'Figo', 'Aspire', 'Freestyle', 'Mustang'],
+      'Renault': ['Kwid', 'Duster', 'Captur', 'Triber', 'Kiger'],
+      'Nissan': ['Magnite', 'Kicks', 'Terrano', 'Micra', 'Sunny'],
+      'Volkswagen': ['Polo', 'Vento', 'Tiguan', 'T-Roc', 'Passat'],
+      'Skoda': ['Rapid', 'Octavia', 'Superb', 'Kodiaq', 'Kushaq', 'Slavia'],
+      'Kia': ['Seltos', 'Sonet', 'Carnival', 'Carens'],
+      'MG': ['Hector', 'ZS EV', 'Gloster', 'Astor'],
+      'Jeep': ['Compass', 'Wrangler', 'Grand Cherokee'],
+      'BMW': ['3 Series', '5 Series', '7 Series', 'X1', 'X3', 'X5', 'X7', 'Z4'],
+      'Mercedes-Benz': ['A-Class', 'C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE', 'GLS'],
+      'Audi': ['A3', 'A4', 'A6', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT'],
+      'Jaguar': ['XE', 'XF', 'XJ', 'F-Pace', 'E-Pace', 'I-Pace'],
+      'Land Rover': ['Discovery Sport', 'Discovery', 'Range Rover Evoque', 'Range Rover Velar', 'Range Rover Sport', 'Range Rover']
+    };
+    
+    console.log('Script loaded, carBrands defined with', Object.keys(carBrands).length, 'brands');
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Page loaded, checking authentication...');
+      
+      // Check if user is logged in using multiple authentication methods
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      const currentUser = localStorage.getItem('currentUser');
+      
+      console.log('Auth token:', token ? 'Present' : 'Missing');
+      console.log('User data:', userData ? 'Present' : 'Missing');
+      console.log('Current user:', currentUser ? 'Present' : 'Missing');
+      console.log('All localStorage keys:', Object.keys(localStorage));
+      
+      // Check if user is authenticated using any method
+      const isAuthenticated = token || currentUser || userData;
+      
+      if (!isAuthenticated) {
+        console.log('No authentication found, redirecting to home page');
+        alert('You must be logged in to post a car.');
+        window.location.href = 'home.html';
+        return;
+      }
+      
+      console.log('User is authenticated, populating dropdowns...');
+      
+      // Populate make dropdown
+      populateMakeDropdown();
+    });
+    
+    function populateMakeDropdown() {
+      console.log('Populating make dropdown...');
+      const makeSelect = document.getElementById('carMake');
+      
+      if (!makeSelect) {
+        console.error('Make select element not found!');
+        return;
+      }
+      
+      console.log('Car brands object:', carBrands);
+      console.log('Number of brands:', Object.keys(carBrands).length);
+      
+      Object.keys(carBrands).forEach(brand => {
+        const option = document.createElement('option');
+        option.value = brand;
+        option.textContent = brand;
+        makeSelect.appendChild(option);
+        console.log('Added brand:', brand);
+      });
+      
+      console.log('Make dropdown populated successfully');
+    }
+
+    function updateModelOptions(selectedMake) {
+      const modelSelect = document.getElementById('carModel');
+      
+      // Clear existing options except the first one
+      modelSelect.innerHTML = '<option value="">Select Model</option>';
+      
+      if (selectedMake && carBrands[selectedMake]) {
+        carBrands[selectedMake].forEach(model => {
+          const option = document.createElement('option');
+          option.value = model;
+          option.textContent = model;
+          modelSelect.appendChild(option);
+        });
+      }
+    }
+
+    function previewCarImages(event) {
+      const files = Array.from(event.target.files);
+      const container = document.getElementById('imagePreviewContainer');
+      container.innerHTML = '';
+      
+      if (files.length > 5) {
+        alert('You can upload maximum 5 images');
+        event.target.value = '';
+        return;
+      }
+      
+      files.forEach((file, index) => {
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const imgDiv = document.createElement('div');
+            imgDiv.style = 'position:relative; width:120px; height:90px; border-radius:8px; overflow:hidden; background:#eee;';
+            imgDiv.innerHTML = `
+              <img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">
+              <button type="button" onclick="removeImage(${index})" style="position:absolute; top:5px; right:5px; width:25px; height:25px; border-radius:50%; border:none; background:rgba(255,0,0,0.8); color:white; cursor:pointer; font-size:12px;">&times;</button>
+            `;
+            container.appendChild(imgDiv);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+    
+    function removeImage(index) {
+      const input = document.getElementById('carImages');
+      const dt = new DataTransfer();
+      const files = Array.from(input.files);
+      
+      files.forEach((file, i) => {
+        if (i !== index) dt.items.add(file);
+      });
+      
+      input.files = dt.files;
+      previewCarImages({ target: input });
+    }
+
+    function handleEnhancedPostCar() {
+      try {
+        const form = document.getElementById('postCarForm');
+        const formData = new FormData(form);
+        
+        // Collect form data
+        const carData = {
+          make: document.getElementById('carMake').value,
+          model: document.getElementById('carModel').value,
+          year: parseInt(document.getElementById('carYear').value),
+          price: parseFloat(document.getElementById('carPrice').value),
+          mileage: parseInt(document.getElementById('carMileage').value),
+          fuelType: document.getElementById('carFuelType').value,
+          transmission: document.getElementById('carTransmission').value,
+          condition: document.getElementById('carCondition').value,
+          location: document.getElementById('carLocation').value,
+          description: document.getElementById('carDescription').value,
+          contact: document.getElementById('contactPhone').value,
+          images: []
+        };
+        
+        // Handle image files
+        const imageFiles = document.getElementById('carImages').files;
+        if (imageFiles.length > 0) {
+          handleImageUpload(imageFiles, carData);
+        } else {
+          postCarToSystem(carData);
+        }
+        
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+    
+    function handleImageUpload(files, carData) {
+      let processedImages = 0;
+      const totalImages = files.length;
+      
+      Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          carData.images.push(e.target.result);
+          processedImages++;
+          
+          if (processedImages === totalImages) {
+            postCarToSystem(carData);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    
+    function postCarToSystem(carData) {
+      try {
+        const car = carManager.postCar(carData);
+        alert('Car posted successfully!');
+        window.location.href = 'all-cars.html';
+      } catch (error) {
+        alert('Error posting car: ' + error.message);
+      }
+    }
+
+    // Authentication functions
+    function showLoginModal() {
+      // Redirect to home page with login modal
+      window.location.href = 'home.html#login';
+    }
+
+    function logoutUser() {
+      if (window.authManager && window.authManager.logoutUser) {
+        window.authManager.logoutUser();
+      } else {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        window.location.href = 'home.html';
+      }
+    }
+
+    // Update navbar on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('authToken');
+      const loginBtn = document.getElementById('loginNavBtn');
+      const logoutBtn = document.getElementById('logoutNavBtn');
+      const profileBtn = document.getElementById('profileNavBtn');
+      const compareBtn = document.getElementById('compareNavBtn');
+
+      if (token) {
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        if (profileBtn) profileBtn.style.display = 'inline-block';
+        
+        // Change Compare to Dashboard when logged in
+        if (compareBtn) {
+          compareBtn.textContent = 'Dashboard';
+          compareBtn.href = 'dashboard.html';
+        }
+      } else {
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (profileBtn) profileBtn.style.display = 'none';
+        
+        // Show Compare when not logged in
+        if (compareBtn) {
+          compareBtn.textContent = 'Compare';
+          compareBtn.href = 'compare.html';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

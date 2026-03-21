@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="../js/auth-api.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interest Rates & Charges</title>
+  <link rel="stylesheet" href="../css/index.css" />
+ <link rel="stylesheet" href="viewallrate.css" />
+ <link rel="icon" type="image/png" href="images/logotab.png" sizes="16x16" />
+<script>
+  function toggleNavbar() {
+    const nav = document.getElementById("navbarLinks");
+    nav.classList.toggle("show");
+  }
+</script>
+</head>
+<body>
+   <!-- Hamburger icon -->
+  <div class="hamburger" onclick="toggleNavbar()">☰</div>
+  <!-- Navbar -->
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="../images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <div class="navbar-right" id="navbarLinks">
+      <a href="../home.html">Home</a>
+      <a href="../all-cars.html">Buy Car</a>
+      <a href="../post-car.html">Sell Car</a>
+      <a href="carfinance.html" class="active">Car Finance</a>
+      <a href="../dashboard.html" id="profileNavBtn" style="display:none;">Dashboard</a>
+      <a href="#" id="loginNavBtn" onclick="showLoginModal()">Login/Register</a>
+      <a href="#" id="logoutNavBtn" onclick="logoutUser()" style="display:none;">Logout</a>
+     
+    </div>
+  </nav>
+
+<div class="section">
+  <h1>Interest Rates & Charges</h1>
+  <p>Understanding the various costs associated with your used car loan is essential for making informed decisions. Below, we break down the different types of charges you can expect for securing your second-hand car finance. This transparency ensures that you are fully aware of all potential costs involved, helping you manage your old vehicle loan effectively. Here are type of charges and applicable fee:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Types of fee</th>
+        <th>Applicable Charges</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Interest rates</td>
+        <td>10.99% p.a. onwards</td>
+      </tr>
+      <tr>
+        <td>Processing Fees</td>
+        <td>Up to 5% of loan amount</td>
+      </tr>
+      <tr>
+        <td>Pre-Closure Charges</td>
+        <td>Flat 5% of the outstanding loan amount</td>
+      </tr>
+      <tr>
+        <td>Loan cancellation charges</td>
+        <td>
+          Up to Rs. 5000/- per instance. In case of event of cancellation, interest charges will be borne by the customer. Processing fees, stamp duty, Documentation, Valuation and RTO charges are non-refundable charges and would not be waived/refunded in case of loan cancellation. Loan cancellation is allowed within 15 days from the date of loan disbursal.
+        </td>
+      </tr>
+      <tr>
+        <td>Penal Charges on default of repayment</td>
+        <td>Rs. 10 per day of the overdue loan amount i.e. EMI due but not paid (per instance)</td>
+      </tr>
+      <tr>
+        <td>Late Payment Charges</td>
+        <td>Rs. 250 per instance</td></tr>
+      <tr>
+        <td>Cheque Bounce Charges</td>
+        <td>Rs. 500 per instance</td>
+      </tr>
+      <tr>
+        <td>Duplicate NOC Charges</td>
+        <td>Rs. 500 per instance</td></tr>
+      <tr>
+        <td>RTO Charges</td>
+        <td>Rs. 500 per instance</td> 
+      </tr>
+      <tr><td>Annual Maintenance contract charges<td>As per actuals</td>
+      </tr> <td>Extended Warranty charges</td>
+        <td>As per actuals</td>
+        </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <!-- ...existing table above... -->
+</div>
+
+<div class="misc-charges-section">
+  <h2>Miscellaneous charges and fees</h2>
+  <p>
+    Additional fees that may apply during the used car loan process, covering various administrative and service-related costs. Some of these charges are listed below:
+  </p>
+  <ul>
+    <li><b>Credit Report Charges:</b> Some lenders might charge a fee to obtain your credit report, which is used to assess your creditworthiness.</li>
+    <li><b>Change in Loan Terms:</b> Making changes to the loan terms, such as the tenure or interest rate, may incur administrative charges.</li>
+    <li><b>EMI Bounce Charges:</b> In case your Equated Monthly Instalment (EMI) payment bounces due to insufficient funds, you may incur a fee.</li>
+    <li><b>Loan Agreement Charges:</b> The preparation and notarization of the loan agreement can involve fees.</li>
+    <li><b>Overdue EMI Charges:</b> If you miss an EMI payment, there may be a penalty charge applied for each day the payment is overdue.</li>
+    <li><b>Late payment fees:</b> EMI payments beyond the grace period may result in late payment fees.</li>
+    <li><b>Foreclosure Charges:</b> If you decide to repay your loan before the agreed-upon tenure, you might face foreclosure charges. These charges are typically a percentage of the outstanding loan amount.</li>
+  </ul>
+  <p style="margin-top:32px;">
+    It's crucial to thoroughly review the terms and conditions to understand any additional charges that may apply. With this clear breakdown of all charges associated with your used car finance, we reiterate our commitment to transparency and building trust.
+  </p>
+</div>
+<div class="help-section-faq">
+  <div class="help-title">Need Help?</div>
+  <div class="help-card-faq">
+    <div class="faq-contact">
+      <div><b>Contact us:</b></div>
+      <div>📞 <a href="tel:7277277275" style="color:#222;text-decoration:none;">727-727-7275</a></div>
+      <div>✉️ <a href="mailto:ridebazzar@gmail.com" style="color:#222;text-decoration:none;">ridebazzar@gmail.com</a></div>
+    </div>
+  </div>
+</div>
+<footer>
+    &copy; 2025 RideBazzar - Used Car Marketplace
+</footer>
+
+<script>
+  // Authentication functions
+  function showLoginModal() {
+    // Redirect to home page with login modal
+    window.location.href = '../home.html#login';
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+    window.location.href = '../home.html';
+  }
+
+  // Update navbar on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('authToken');
+    const loginBtn = document.getElementById('loginNavBtn');
+    const logoutBtn = document.getElementById('logoutNavBtn');
+    const profileBtn = document.getElementById('profileNavBtn');
+    const messagesBtn = document.getElementById('messagesNavBtn');
+
+    if (token) {
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      if (profileBtn) profileBtn.style.display = 'inline-block';
+      if (messagesBtn) messagesBtn.style.display = 'inline-block';
+    } else {
+      if (loginBtn) loginBtn.style.display = 'inline-block';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+      if (profileBtn) profileBtn.style.display = 'none';
+      if (messagesBtn) messagesBtn.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RideBazzar Quick Access</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 50px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #333; 
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .links {
+            display: grid;
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        a { 
+            display: block;
+            padding: 15px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        a:hover { 
+            background: #0056b3;
+        }
+        .api-link {
+            background: #28a745;
+        }
+        .api-link:hover {
+            background: #1e7e34;
+        }
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 5px;
+        }
+        .credentials {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 RideBazzar - Quick Access</h1>
+        
+        <div class="status">
+            <strong>Backend Status:</strong> <span id="status">Checking...</span>
+        </div>
+
+        <div class="credentials">
+            <strong>🔑 Admin Login:</strong><br>
+            Username: <code>admin</code><br>
+            Password: <code>admin123</code>
+        </div>
+
+        <div class="links">
+            <a href="home.html">🏠 Main Application</a>
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="all-cars.html">🚗 Browse Cars</a>
+            <a href="project-launcher.html">🚀 Project Launcher</a>
+            <a href="integration-test.html">🧪 Test Page</a>
+            <a href="http://localhost:5000/api/health" class="api-link" target="_blank">💻 API Health Check</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; color: #666;">
+            <p><strong>Instructions:</strong></p>
+            <p>1. Make sure the backend server is running (check status above)</p>
+            <p>2. Click any link to access different parts of the application</p>
+            <p>3. Use the admin credentials to log in</p>
+        </div>
+    </div>
+
+    <script>
+        // Check backend status
+        fetch('http://localhost:5000/api/health')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status').innerHTML = '✅ <span style="color: green;">Backend Running</span>';
+            })
+            .catch(error => {
+                document.getElementById('status').innerHTML = '❌ <span style="color: red;">Backend Not Running</span>';
+            });
+    </script>
+</body>
+</html>

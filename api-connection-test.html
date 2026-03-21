@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Connection Test</title>
+</head>
+<body>
+    <h1>Backend API Connection Test</h1>
+    <button onclick="testHealthEndpoint()">Test Health Endpoint</button>
+    <button onclick="testLoginEndpoint()">Test Login Endpoint</button>
+    <div id="results"></div>
+
+    <script>
+        async function testHealthEndpoint() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Testing health endpoint...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/health');
+                const data = await response.text();
+                resultsDiv.innerHTML += `<p style="color: green;">Health endpoint works! Response: ${data}</p>`;
+            } catch (error) {
+                resultsDiv.innerHTML += `<p style="color: red;">Health endpoint failed: ${error.message}</p>`;
+            }
+        }
+
+        async function testLoginEndpoint() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML += '<p>Testing login endpoint...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                resultsDiv.innerHTML += `<p style="color: green;">Login endpoint works! Response: ${JSON.stringify(data)}</p>`;
+            } catch (error) {
+                resultsDiv.innerHTML += `<p style="color: red;">Login endpoint failed: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

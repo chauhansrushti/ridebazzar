@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 RideBazzar - Project Launcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .launcher-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .status-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-checking {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .buttons-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .launch-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .launch-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .launch-button i {
+            font-size: 2em;
+        }
+
+        .api-button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .credentials {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .credentials h3 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+
+        .cred-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+
+        .cred-value {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        .instructions {
+            background: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: #0056b3;
+            margin-bottom: 15px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin: 10px 0;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="launcher-container">
+        <div class="logo">🚗</div>
+        <h1>RideBazzar</h1>
+        <p class="subtitle">Full Stack Car Marketplace Application</p>
+
+        <div class="status-section">
+            <h3>📊 System Status</h3>
+            <div class="status-item">
+                <span class="status-label">Backend Server</span>
+                <span id="backendStatus" class="status-indicator status-checking">🔄 Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Database</span>
+                <span id="databaseStatus" class="status-indicator status-checking">🔄 Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">API Health</span>
+                <span id="apiStatus" class="status-indicator status-checking">🔄 Checking...</span>
+            </div>
+        </div>
+
+        <div class="buttons-section">
+            <a href="home.html" class="launch-button">
+                <i class="fas fa-home"></i>
+                <span>Launch RideBazzar</span>
+                <small>Main Application</small>
+            </a>
+            
+            <a href="dashboard.html" class="launch-button">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+                <small>User Dashboard</small>
+            </a>
+            
+            <a href="http://localhost:5000/api" class="launch-button api-button" target="_blank">
+                <i class="fas fa-code"></i>
+                <span>API Documentation</span>
+                <small>Backend API</small>
+            </a>
+            
+            <a href="integration-test.html" class="launch-button test-button">
+                <i class="fas fa-vial"></i>
+                <span>Integration Test</span>
+                <small>Test All Systems</small>
+            </a>
+        </div>
+
+        <div class="credentials">
+            <h3>🔑 Test Credentials</h3>
+            <div class="cred-item">
+                <span>Username:</span>
+                <span class="cred-value">admin</span>
+            </div>
+            <div class="cred-item">
+                <span>Password:</span>
+                <span class="cred-value">admin123</span>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>🚀 How to Run Your Project</h3>
+            <ol>
+                <li><strong>Backend Server:</strong> Should be running on <code>http://localhost:5000</code></li>
+                <li><strong>Frontend:</strong> Click "Launch RideBazzar" to start using the application</li>
+                <li><strong>Testing:</strong> Use "Integration Test" to verify all systems are working</li>
+                <li><strong>API:</strong> Access backend API documentation at the API link</li>
+                <li><strong>Login:</strong> Use the admin credentials provided above</li>
+            </ol>
+        </div>
+
+        <div style="margin-top: 30px; color: #6c757d;">
+            <p><strong>🎉 Your RideBazzar project is ready!</strong></p>
+            <p>Full-stack web application with Node.js backend and MySQL database</p>
+        </div>
+    </div>
+
+    <script>
+        // Check backend status
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch('http://localhost:5000/api/health');
+                const result = await response.json();
+                
+                document.getElementById('backendStatus').textContent = '✅ Running';
+                document.getElementById('backendStatus').className = 'status-indicator status-success';
+                
+                document.getElementById('databaseStatus').textContent = '✅ Connected';
+                document.getElementById('databaseStatus').className = 'status-indicator status-success';
+                
+                document.getElementById('apiStatus').textContent = '✅ Healthy';
+                document.getElementById('apiStatus').className = 'status-indicator status-success';
+                
+            } catch (error) {
+                document.getElementById('backendStatus').textContent = '❌ Not Running';
+                document.getElementById('backendStatus').className = 'status-indicator status-error';
+                
+                document.getElementById('databaseStatus').textContent = '❌ Not Connected';
+                document.getElementById('databaseStatus').className = 'status-indicator status-error';
+                
+                document.getElementById('apiStatus').textContent = '❌ Error';
+                document.getElementById('apiStatus').className = 'status-indicator status-error';
+            }
+        }
+
+        // Check status on page load
+        window.onload = function() {
+            checkBackendStatus();
+            
+            // Recheck every 5 seconds
+            setInterval(checkBackendStatus, 5000);
+        };
+
+        // Add click effects
+        document.querySelectorAll('.launch-button').forEach(button => {
+            button.addEventListener('click', function() {
+                this.classList.add('pulse');
+                setTimeout(() => {
+                    this.classList.remove('pulse');
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>

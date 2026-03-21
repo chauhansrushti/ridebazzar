@@ -1,0 +1,9 @@
+@echo off
+chcp 65001 >nul
+echo Replacing emojis with Material Icons...
+
+powershell -Command "$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'; foreach ($file in @('dashboard.html','car-details.html','payment.html','admin.html','all-cars.html','post-car.html','compare.html','test-database.html')) { if (Test-Path $file) { $c = Get-Content $file -Raw -Encoding UTF8; $c = $c -creplace '🚗','<i class=\"material-icons\">directions_car</i>' -creplace '💳','<i class=\"material-icons\">credit_card</i>' -creplace '📋','<i class=\"material-icons\">assignment</i>' -creplace '📅','<i class=\"material-icons\">event</i>' -creplace '❤️','<i class=\"material-icons\">favorite</i>' -creplace '🤍','<i class=\"material-icons\">favorite_border</i>' -creplace '🔒','<i class=\"material-icons\">lock</i>' -creplace '⚙️','<i class=\"material-icons\">settings</i>' -creplace '📊','<i class=\"material-icons\">bar_chart</i>' -creplace '👤','<i class=\"material-icons\">person</i>' -creplace '🏠','<i class=\"material-icons\">home</i>' -creplace '📞','<i class=\"material-icons\">phone</i>' -creplace '✉️','<i class=\"material-icons\">email</i>' -creplace '🔍','<i class=\"material-icons\">search</i>' -creplace '⭐','<i class=\"material-icons\">star</i>' -creplace '📱','<i class=\"material-icons\">phone_android</i>' -creplace '💰','<i class=\"material-icons\">attach_money</i>' -creplace '🚙','<i class=\"material-icons\">drive_eta</i>' -creplace '🏆','<i class=\"material-icons\">emoji_events</i>' -creplace '📈','<i class=\"material-icons\">trending_up</i>' -creplace '🎯','<i class=\"material-icons\">gps_fixed</i>' -creplace '💔','<i class=\"material-icons\">heart_broken</i>'; Set-Content $file $c -Encoding UTF8; Write-Host \"Updated: $file\" -ForegroundColor Green } }"
+
+echo.
+echo Done! All emojis replaced with Material Icons.
+pause

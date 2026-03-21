@@ -1,0 +1,1320 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment - RideBazzar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="images/logotab.png" sizes="16x16" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="css/index.css" />
+  <!-- Global Configuration (must be first!) -->
+  <script src="js/config.js"></script>
+  <script src="js/auth-api.js"></script>
+  <script src="js/carManager-api.js"></script>
+  <script src="js/paymentSystem-api.js"></script>
+  <!-- EmailJS SDK -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function(){
+      emailjs.init({
+        publicKey: "2bF1YIVOOU1Ymuee1",
+      });
+    })();
+  </script>
+  <style>
+    /* Navbar styling */
+    .top-navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background: #000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .logo-location img {
+      height: 45px;
+      width: auto;
+    }
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 28px;
+      cursor: pointer;
+      padding: 5px;
+      transition: all 0.3s;
+      position: absolute;
+      right: 25px;
+      top: 18px;
+      z-index: 1001;
+    }
+    .menu-toggle:hover {
+      color: #f9b233;
+      transform: scale(1.1);
+    }
+    .navbar-right {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .navbar-right a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 8px 15px;
+      border-radius: 5px;
+    }
+    .navbar-right a:hover {
+      color: #f9b233;
+      background: rgba(249, 178, 51, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+      .navbar-right {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background-color: #1c1b1b;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        padding: 10px 0;
+        z-index: 999;
+        gap: 0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      }
+      .navbar-right.active {
+        display: flex !important;
+      }
+      .navbar-right a {
+        width: 100%;
+        padding: 12px 20px;
+        border-radius: 0;
+        text-align: left;
+        border-bottom: 1px solid #333;
+      }
+      .navbar-right a:hover {
+        background: #2a2a2a;
+      }
+    }
+    
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    .payment-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .payment-header {
+      background: linear-gradient(135deg, #f9b233 0%, #f39c12 100%);
+      color: #fff;
+      padding: 30px;
+      text-align: center;
+    }
+    .payment-content {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 0;
+    }
+    .payment-form {
+      padding: 40px;
+    }
+    .order-summary {
+      background: #f8f9fa;
+      padding: 30px;
+      border-left: 1px solid #eee;
+    }
+    .payment-methods {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+    .payment-method {
+      flex: 1;
+      padding: 15px;
+      border: 2px solid #eee;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      min-width: 120px;
+    }
+    .payment-method.active {
+      border-color: #f9b233;
+      background: #fff9f0;
+    }
+    .payment-method:hover {
+      border-color: #f9b233;
+    }
+    .payment-fields {
+      margin-top: 20px;
+    }
+    .field-group {
+      margin-bottom: 20px;
+    }
+    .field-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    .field-group input,
+    .field-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #eee;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    .field-group input:focus,
+    .field-group select:focus {
+      outline: none;
+      border-color: #f9b233;
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 15px;
+    }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .summary-item:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #e74c3c;
+    }
+    .pay-button {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: transform 0.3s;
+    }
+    .pay-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(40,167,69,0.3);
+    }
+    .security-info {
+      background: #e8f5e8;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #155724;
+    }
+    @media (max-width: 768px) {
+      .payment-content {
+        grid-template-columns: 1fr;
+      }
+      .payment-methods {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="top-navbar">
+    <div class="logo-location">
+      <img src="images/logo.png" alt="logo" style="height: 40px; width: auto;">
+    </div>
+    <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle menu">☰</button>
+    <div class="navbar-right" id="navMenu">
+      <a href="home.html">Home</a>
+      <a href="all-cars.html">Buy Car</a>
+      <a href="post-car.html">Sell Car</a>
+      <a href="compare.html">Compare</a>
+      <a href="dashboard.html" id="profileNavBtn" style="display:none;">Dashboard</a>
+      <a href="#" id="loginNavBtn" onclick="showLoginModal()">Login/Register</a>
+      <a href="#" id="logoutNavBtn" onclick="logoutUser()" style="display:none;">Logout</a>
+    </div>
+  </nav>
+
+  <div class="payment-container">
+    <!-- Header -->
+    <div class="payment-header">
+      <h1><i class="material-icons">lock</i> Secure Payment</h1>
+      <p>Complete your booking for the selected car</p>
+    </div>
+
+    <div class="payment-content">
+      <!-- Payment Form -->
+      <div class="payment-form">
+        <h3 style="margin-bottom: 25px; color: #333;">Choose Payment Method</h3>
+        
+        <!-- Payment Methods -->
+        <div class="payment-methods">
+          <div class="payment-method active" onclick="selectPaymentMethod('card')" id="cardMethod">
+            <div style="font-size: 24px; margin-bottom: 8px;"><i class="material-icons">credit_card</i></div>
+            <div style="font-weight: bold;">Card</div>
+          </div>
+          <div class="payment-method" onclick="selectPaymentMethod('upi')" id="upiMethod">
+            <div style="font-size: 24px; margin-bottom: 8px;"><i class="material-icons">phone_android</i></div>
+            <div style="font-weight: bold;">UPI</div>
+          </div>
+          <div class="payment-method" onclick="selectPaymentMethod('netbanking')" id="netbankingMethod">
+            <div style="font-size: 24px; margin-bottom: 8px;">🏦</div>
+            <div style="font-weight: bold;">Net Banking</div>
+          </div>
+        </div>
+
+        <form id="paymentForm" onsubmit="event.preventDefault(); processPayment();">
+          <!-- Card Payment Fields -->
+          <div id="cardFields" class="payment-fields">
+            <div class="field-group">
+              <label>Card Number</label>
+              <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNumber(this)">
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label>Expiry Date</label>
+                <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" oninput="formatExpiryDate(this)">
+              </div>
+              <div class="field-group">
+                <label>CVV</label>
+                <input type="text" id="cvv" placeholder="123" maxlength="3">
+              </div>
+            </div>
+            <div class="field-group">
+              <label>Cardholder Name</label>
+              <input type="text" id="cardName" placeholder="John Doe">
+            </div>
+          </div>
+
+          <!-- UPI Payment Fields -->
+          <div id="upiFields" class="payment-fields" style="display: none;">
+            <div class="field-group">
+              <label>UPI ID</label>
+              <input type="text" id="upiId" placeholder="yourname@paytm">
+            </div>
+            <div style="text-align: center; margin: 20px 0;">
+              <div style="font-size: 14px; color: #666; margin-bottom: 10px;">Or scan QR code</div>
+              <div style="width: 150px; height: 150px; background: #f8f9fa; border: 2px dashed #ddd; margin: 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                <i class="material-icons">phone_android</i> QR Code
+              </div>
+            </div>
+          </div>
+
+          <!-- Net Banking Fields -->
+          <div id="netbankingFields" class="payment-fields" style="display: none;">
+            <div class="field-group">
+              <label>Select Bank</label>
+              <select id="bankSelect">
+                <option value="">Choose your bank</option>
+                <option value="sbi">State Bank of India</option>
+                <option value="hdfc">HDFC Bank</option>
+                <option value="icici">ICICI Bank</option>
+                <option value="axis">Axis Bank</option>
+                <option value="kotak">Kotak Mahindra Bank</option>
+                <option value="pnb">Punjab National Bank</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="pay-button" id="payButton">
+            <i class="material-icons">credit_card</i> Pay ₹<span id="payAmount">0</span>
+          </button>
+        </form>
+
+        <div class="security-info">
+          <i class="material-icons">lock</i> <strong>100% Secure:</strong> Your payment information is encrypted and secure. 
+          We use industry-standard security measures to protect your data.
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <!-- EMI Calculator Section -->
+        <div id="emiCalculatorSection" style="margin-bottom: 30px; padding-bottom: 30px; border-bottom: 2px solid #eee; display: none;">
+          <h3 style="margin-bottom: 20px; color: #333;"><i class="material-icons">calculate</i> EMI Calculator</h3>
+          
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Loan Amount (₹)</label>
+            <input type="number" id="loanAmountInput" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; font-weight: bold;" oninput="calculateCustomEMI()">
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Select Tenure</label>
+            <select id="tenureSelect" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px;" onchange="calculateCustomEMI()">
+              <option value="12|11.50">1 Year @ 11.50% Interest</option>
+              <option value="24|12.50">2 Years @ 12.50% Interest</option>
+              <option value="36|13.50">3 Years @ 13.50% Interest</option>
+              <option value="48|14.50">4 Years @ 14.50% Interest</option>
+              <option value="60|15.50" selected>5 Years @ 15.50% Interest</option>
+              <option value="84|16.50">7 Years @ 16.50% Interest</option>
+            </select>
+          </div>
+          
+          <!-- Seller's EMI Offer -->
+          <div id="sellerEmiOffer" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #2196F3;">
+            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+              <span style="font-size: 18px; margin-right: 5px;">👍</span>
+              <span style="font-size: 13px; color: #1976D2; font-weight: 600;">Seller's EMI Offer</span>
+            </div>
+            <div id="sellerEmiAmount" style="font-size: 28px; font-weight: bold; color: #2196F3;">₹25,000/month</div>
+          </div>
+          
+          <!-- Calculated EMI -->
+          <div style="background: #fff; padding: 15px; border-radius: 8px; border: 2px solid #FF5722; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+              <span style="font-size: 18px; margin-right: 5px;">💰</span>
+              <span id="calculatedEmiLabel" style="font-size: 13px; color: #666; font-weight: 500;">Calculated EMI for 5 Years @ 15.5%</span>
+            </div>
+            <div id="calculatedEmiAmount" style="font-size: 28px; font-weight: bold; color: #FF5722;">₹9,621/month</div>
+          </div>
+          
+          <!-- EMI Breakdown -->
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span style="color: #666; font-size: 14px;">Principal Amount:</span>
+              <span id="principalAmount" style="font-weight: 600; color: #333;">₹4,00,000</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span style="color: #666; font-size: 14px;">Total Interest:</span>
+              <span id="totalInterestCalc" style="font-weight: 600; color: #FF5722;">₹1,77,277</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 2px solid #dee2e6;">
+              <span style="color: #333; font-weight: 600; font-size: 15px;">Total Payable:</span>
+              <span id="totalPayableCalc" style="font-weight: bold; color: #333; font-size: 16px;">₹5,77,277</span>
+            </div>
+          </div>
+        </div>
+        
+        <h3 style="margin-bottom: 20px; color: #333;"><i class="material-icons">assignment</i> Booking Summary</h3>
+        <div id="bookingSummary">Loading...</div>
+        
+        <div style="margin-top: 30px;">
+          <h4 style="color: #333; margin-bottom: 15px;">💡 What happens next?</h4>
+          <div style="font-size: 14px; line-height: 1.6; color: #666;">
+            1. Complete the payment<br>
+            2. Receive booking confirmation<br>
+            3. Schedule car inspection<br>
+            4. Complete final payment<br>
+            5. Get your car!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:1000; animation: fadeIn 0.3s;">
+    <div style="background:#fff; max-width:550px; margin:80px auto; padding:0; border-radius:16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); animation: slideDown 0.3s;">
+      <div style="background: linear-gradient(135deg, #f9b233 0%, #f97316 100%); padding: 25px; border-radius: 16px 16px 0 0; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 10px;">⚠️</div>
+        <h2 style="color: #fff; margin: 0; font-size: 24px;">Confirm Payment</h2>
+      </div>
+      
+      <div style="padding: 30px;">
+        <p style="color: #666; font-size: 16px; margin-bottom: 25px; text-align: center;">Please review your payment details before proceeding</p>
+        
+        <div id="confirmationDetails" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 2px solid #e0e0e0;"></div>
+        
+        <div style="display: flex; gap: 15px; justify-content: center;">
+          <button onclick="cancelPaymentConfirmation()" style="padding: 14px 35px; background: #6c757d; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s;">
+            Cancel
+          </button>
+          <button onclick="confirmAndPay()" style="padding: 14px 35px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);">
+            ✓ Confirm & Pay
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+    <div style="background:#fff; max-width:500px; margin:100px auto; padding:40px; border-radius:16px; text-align:center;">
+      <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+      <h2 style="color: #28a745; margin-bottom: 15px;">Payment Successful!</h2>
+      <p style="color: #666; margin-bottom: 30px;">Your booking has been confirmed. You will receive a confirmation email shortly.</p>
+      <div id="transactionDetails" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: left;"></div>
+      <p style="color: #999; font-size: 14px; margin-bottom: 20px;">Redirecting to home page in 3 seconds...</p>
+      <button onclick="window.location.href='home.html'" style="padding: 12px 30px; background: #f9b233; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Go to Home</button>
+    </div>
+  </div>
+
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+
+  <script>
+    let currentBooking = null;
+    let selectedPaymentMethod = 'card';
+    let pendingPaymentData = null; // Store payment data for confirmation
+
+    function toggleMenu() {
+      const navMenu = document.getElementById('navMenu');
+      navMenu.classList.toggle('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const bookingId = urlParams.get('booking');
+      
+      if (!bookingId) {
+        window.location.href = 'all-cars.html';
+        return;
+      }
+
+      loadBookingDetails(bookingId);
+    });
+
+    async function loadBookingDetails(bookingId) {
+      console.log('loadBookingDetails called with bookingId:', bookingId);
+      
+      try {
+        // Fetch booking from API
+        const result = await paymentSystem.getBookingById(bookingId);
+        console.log('API booking result:', result);
+        
+        if (!result.success || !result.data) {
+          console.error('Booking not found for ID:', bookingId);
+          alert('Booking not found');
+          window.location.href = 'all-cars.html';
+          return;
+        }
+        
+        currentBooking = result.data;
+        console.log('Found booking:', currentBooking);
+      } catch (error) {
+        console.error('Error loading booking:', error);
+        alert('Error loading booking details');
+        window.location.href = 'all-cars.html';
+        return;
+      }
+
+      // Check if user owns this booking
+      const authToken = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      const ridebazzarUser = localStorage.getItem('ridebazzar_user');
+      
+      if (!authToken && !ridebazzarUser) {
+        alert('Please login to access payment page');
+        window.location.href = 'home.html';
+        return;
+      }
+      
+      let currentUser;
+      
+      // Try to get user from userData first, then fall back to ridebazzar_user
+      if (userData) {
+        try {
+          const userObj = JSON.parse(userData);
+          currentUser = userObj.username;
+        } catch (error) {
+          console.log('Failed to parse userData, using ridebazzar_user');
+          currentUser = ridebazzarUser;
+        }
+      } else {
+        currentUser = ridebazzarUser;
+      }
+      
+      if (!currentUser) {
+        alert('Authentication error. Please login again.');
+        window.location.href = 'home.html';
+        return;
+      }
+      
+      console.log('currentUser:', currentUser, 'booking.buyer:', currentBooking.buyer_username);
+      
+      if (currentBooking.buyer_username !== currentUser && currentBooking.buyer !== currentUser) {
+        console.error('Unauthorized access. User:', currentUser, 'Booking buyer:', currentBooking.buyer_username || currentBooking.buyer);
+        alert('Unauthorized access');
+        window.location.href = 'all-cars.html';
+        return;
+      }
+
+      displayBookingSummary();
+      updatePayAmount();
+      
+      // Initialize EMI calculator with default values
+      setTimeout(() => {
+        if (document.getElementById('loanAmountInput')) {
+          calculateCustomEMI();
+        }
+      }, 100);
+    }
+
+    function displayBookingSummary() {
+      const car = currentBooking;
+      const bookingAmt = currentBooking.booking_amount || currentBooking.bookingAmount || 0;
+      
+      // Calculate EMI details - using default 5 years @ 15.50%
+      const carPrice = car.price;
+      const remainingAmount = carPrice - bookingAmt;
+      const emiMonths = 60; // Default to 60 months (5 years)
+      const interestRate = 15.50; // Default rate
+      const monthlyRate = interestRate / 100 / 12;
+      
+      // EMI calculation
+      const emi = remainingAmount * monthlyRate * Math.pow(1 + monthlyRate, emiMonths) / (Math.pow(1 + monthlyRate, emiMonths) - 1);
+      const totalEmiPayment = emi * emiMonths;
+      const totalInterest = totalEmiPayment - remainingAmount;
+      
+      document.getElementById('bookingSummary').innerHTML = `
+        <div style="margin-bottom: 20px;">
+          <h4 style="margin-bottom: 10px;">${car.make} ${car.model} ${car.year}</h4>
+          <div style="font-size: 14px; color: #666;">Booking ID: ${currentBooking.id}</div>
+        </div>
+        
+        <!-- Car Price -->
+        <div class="summary-item" style="font-size: 16px; padding: 10px 0; border-bottom: 2px solid #eee;">
+          <span style="font-weight: 600;">Car Price:</span>
+          <span style="font-weight: bold; color: #333;">${formatCurrency(carPrice)}</span>
+        </div>
+        
+        <!-- Interactive EMI Calculator -->
+        <div style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; border: 2px solid #e0e0e0;">
+          <h5 style="margin: 0 0 15px 0; color: #333; font-size: 16px; font-weight: 600;">🔢 EMI Calculator</h5>
+          
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 14px;">Loan Amount (₹)</label>
+            <input type="number" id="loanAmountInput" value="${remainingAmount}" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; font-weight: bold;" oninput="calculateCustomEMI()" readonly>
+          </div>
+          
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 14px;">Select Tenure</label>
+            <select id="tenureSelect" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;" onchange="calculateCustomEMI()">
+              <option value="12|11.50">1 Year @ 11.50% Interest</option>
+              <option value="24|12.50">2 Years @ 12.50% Interest</option>
+              <option value="36|13.50">3 Years @ 13.50% Interest</option>
+              <option value="48|14.50">4 Years @ 14.50% Interest</option>
+              <option value="60|15.50" selected>5 Years @ 15.50% Interest</option>
+              <option value="84|16.50">7 Years @ 16.50% Interest</option>
+            </select>
+          </div>
+          
+          <!-- Seller's EMI Offer -->
+          <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 12px 15px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #2196F3;">
+            <div style="display: flex; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 16px; margin-right: 5px;">👍</span>
+              <span style="font-size: 12px; color: #1976D2; font-weight: 600;">Seller's EMI Offer</span>
+            </div>
+            <div id="sellerEmiAmount" style="font-size: 24px; font-weight: bold; color: #2196F3;">₹25,000/month</div>
+          </div>
+          
+          <!-- Calculated EMI -->
+          <div style="background: #fff; padding: 12px 15px; border-radius: 8px; border: 2px solid #FF5722; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 16px; margin-right: 5px;">💰</span>
+              <span id="calculatedEmiLabel" style="font-size: 12px; color: #666; font-weight: 500;">Calculated EMI for 5 Years @ 15.5%</span>
+            </div>
+            <div id="calculatedEmiAmount" style="font-size: 24px; font-weight: bold; color: #FF5722;">₹${Math.round(emi).toLocaleString('en-IN')}/month</div>
+          </div>
+          
+          <!-- EMI Breakdown -->
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #666; font-size: 13px;">Principal Amount:</span>
+              <span id="principalAmount" style="font-weight: 600; color: #333; font-size: 14px;">${formatCurrency(remainingAmount)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #666; font-size: 13px;">Total Interest:</span>
+              <span id="totalInterestCalc" style="font-weight: 600; color: #FF5722; font-size: 14px;">${formatCurrency(Math.round(totalInterest))}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 2px solid #dee2e6;">
+              <span style="color: #333; font-weight: 600; font-size: 14px;">Total Payable:</span>
+              <span id="totalPayableCalc" style="font-weight: bold; color: #333; font-size: 15px;">${formatCurrency(Math.round(totalEmiPayment))}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Booking Amount -->
+        <div class="summary-item" style="padding: 10px 0;">
+          <span style="font-weight: 600;">Booking Amount:</span>
+          <span style="font-weight: bold; color: #28a745; font-size: 16px;">${formatCurrency(bookingAmt)}</span>
+        </div>
+        
+        <!-- Final Amount to Pay -->
+        <div class="summary-item" style="border-top: 3px solid #28a745; padding-top: 15px; margin-top: 15px; background: #f0fff4; padding: 15px; border-radius: 8px;">
+          <span style="font-size: 18px; font-weight: bold; color: #333;">💳 Pay Now:</span>
+          <span style="font-size: 20px; font-weight: bold; color: #28a745;">${formatCurrency(bookingAmt)}</span>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; font-size: 13px; line-height: 1.6;">
+          <strong>ℹ️ Payment Plan:</strong><br>
+          • <strong>Today:</strong> Pay booking amount of ${formatCurrency(bookingAmt)}<br>
+          • <strong>After Inspection:</strong> Remaining ${formatCurrency(remainingAmount)} will be paid in ${emiMonths} monthly installments of ${formatCurrency(Math.round(emi))}
+        </div>
+      `;
+    }
+
+    function selectPaymentMethod(method) {
+      selectedPaymentMethod = method;
+      
+      // Update UI
+      document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+      document.getElementById(method + 'Method').classList.add('active');
+      
+      // Show/hide relevant fields
+      document.getElementById('cardFields').style.display = method === 'card' ? 'block' : 'none';
+      document.getElementById('upiFields').style.display = method === 'upi' ? 'block' : 'none';
+      document.getElementById('netbankingFields').style.display = method === 'netbanking' ? 'block' : 'none';
+      
+      updatePayAmount();
+    }
+
+    function formatCurrency(amount) {
+      if (!amount) return '₹0';
+      const numericAmount = parseInt(amount) || 0;
+      return '₹' + numericAmount.toLocaleString('en-IN');
+    }
+
+    function calculateCustomEMI() {
+      const loanAmount = parseInt(document.getElementById('loanAmountInput').value) || 0;
+      const tenureData = document.getElementById('tenureSelect').value.split('|');
+      const months = parseInt(tenureData[0]);
+      const interestRate = parseFloat(tenureData[1]);
+      
+      if (loanAmount <= 0) return;
+      
+      // Calculate EMI
+      const monthlyRate = interestRate / 100 / 12;
+      const emi = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+      const totalPayable = emi * months;
+      const totalInterest = totalPayable - loanAmount;
+      
+      // Get tenure text for label
+      const years = Math.floor(months / 12);
+      const tenureText = years > 0 ? `${years} Year${years > 1 ? 's' : ''}` : `${months} Months`;
+      
+      // Update UI
+      document.getElementById('calculatedEmiLabel').textContent = `Calculated EMI for ${tenureText} @ ${interestRate}%`;
+      document.getElementById('calculatedEmiAmount').textContent = '₹' + Math.round(emi).toLocaleString('en-IN') + '/month';
+      document.getElementById('principalAmount').textContent = formatCurrency(loanAmount);
+      document.getElementById('totalInterestCalc').textContent = formatCurrency(Math.round(totalInterest));
+      document.getElementById('totalPayableCalc').textContent = formatCurrency(Math.round(totalPayable));
+      
+      // Update seller's offer (showing a higher EMI as seller's expectation)
+      const sellerOffer = Math.round(emi * 2.5);
+      document.getElementById('sellerEmiAmount').textContent = '₹' + sellerOffer.toLocaleString('en-IN') + '/month';
+    }
+
+    function updatePayAmount() {
+      const bookingAmt = currentBooking.booking_amount || currentBooking.bookingAmount || 0;
+      document.getElementById('payAmount').textContent = Math.round(bookingAmt).toLocaleString();
+    }
+
+    function toggleEMI() {
+      const enabled = document.getElementById('enableEMI').checked;
+      document.getElementById('emiFields').style.display = enabled ? 'block' : 'none';
+      if (enabled) {
+        calculateEMI();
+      }
+    }
+
+    function calculateEMI() {
+      const carPrice = currentBooking.total_amount || currentBooking.totalAmount || currentBooking.price;
+      const bookingAmt = currentBooking.booking_amount || currentBooking.bookingAmount || 0;
+      const principal = carPrice - bookingAmt; // EMI on remaining amount after booking
+      const months = parseInt(document.getElementById('emiMonths').value);
+      const annualRate = parseFloat(document.getElementById('interestRate').value);
+      const monthlyRate = annualRate / 100 / 12;
+      
+      // EMI = P × r × (1+r)^n / ((1+r)^n - 1)
+      const emi = principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+      const totalAmount = emi * months;
+      
+      document.getElementById('monthlyEMI').textContent = Math.round(emi).toLocaleString('en-IN');
+      document.getElementById('totalAmount').textContent = Math.round(totalAmount).toLocaleString('en-IN');
+    }
+
+    function formatCardNumber(input) {
+      let value = input.value.replace(/\D/g, '');
+      value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+      input.value = value;
+    }
+
+    function formatExpiryDate(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value.length >= 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+      }
+      input.value = value;
+    }
+
+    // Backend API function to process payment
+    async function processPaymentWithBackend(paymentData) {
+      try {
+        console.log('=== BACKEND PAYMENT PROCESSING ===');
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          console.error('No auth token found!');
+          throw new Error('Please login to continue');
+        }
+        console.log('Auth token found');
+
+        // Validate required data before making request
+        console.log('Validating payment data...');
+        console.log('currentBooking:', currentBooking);
+        console.log('currentBooking.id:', currentBooking.id);
+        console.log('paymentData.amount:', paymentData.amount);
+        console.log('paymentData.method:', paymentData.method);
+        
+        if (!currentBooking || !currentBooking.id) {
+          throw new Error('Booking ID is missing. Please try refreshing the page.');
+        }
+        
+        if (!paymentData.amount) {
+          throw new Error('Payment amount is missing.');
+        }
+        
+        if (!paymentData.method) {
+          throw new Error('Payment method is not selected.');
+        }
+
+        const requestBody = {
+          bookingId: currentBooking.id,
+          amount: paymentData.amount,
+          paymentMethod: paymentData.method || paymentData.paymentMethod,
+          paymentDetails: {
+            cardNumber: paymentData.cardNumber || '',
+            cardType: 'Credit Card',
+            cardName: paymentData.cardName || '',
+            expiryDate: paymentData.expiryDate || '',
+            upiId: paymentData.upiId || '',
+            accountNumber: paymentData.accountNumber || '',
+            bankName: paymentData.bank || '',
+            walletProvider: paymentData.walletProvider || ''
+          },
+          emiEnabled: paymentData.emiMonths ? true : false,
+          emiDetails: paymentData.emiMonths ? {
+            months: paymentData.emiMonths,
+            interestRate: paymentData.interestRate,
+            firstEmiDate: paymentData.firstEmiDate
+          } : null
+        };
+
+        console.log('Request body:', requestBody);
+        console.log('Sending POST request to http://localhost:5000/api/payments/process');
+
+        const response = await fetch('http://localhost:5000/api/payments/process', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        console.log('Response status:', response.status);
+        const result = await response.json();
+        console.log('Response data:', result);
+        
+        if (!response.ok) {
+          throw new Error(result.message || 'Payment processing failed');
+        }
+
+        console.log('✅ Payment processed successfully via API');
+        
+        return {
+          id: result.data.transactionId,
+          transactionId: result.data.transactionId,
+          status: result.data.status,
+          amount: result.data.amount,
+          method: result.data.paymentMethod || paymentData.method,
+          paymentMethod: result.data.paymentMethod,
+          transaction: result.data
+        };
+      } catch (error) {
+        console.error('❌ Backend payment error:', error);
+        throw error;
+      }
+    }
+
+    function processPayment() {
+      console.log('=== PAYMENT PROCESS STARTED ===');
+      console.log('processPayment called');
+      console.log('currentBooking:', currentBooking);
+      console.log('selectedPaymentMethod:', selectedPaymentMethod);
+      console.log('authToken:', localStorage.getItem('authToken') ? 'Present' : 'Missing');
+      
+      try {
+        // Check if booking exists
+        if (!currentBooking || !currentBooking.id) {
+          console.error('No current booking found!');
+          showMessage('No booking information found. Please try again.', 'error');
+          return;
+        }
+
+        // Validate required fields based on payment method
+        console.log('Validating payment form...');
+        if (!validatePaymentForm()) {
+          console.log('Form validation failed');
+          return;
+        }
+        console.log('Form validation passed');
+
+        // Prepare payment data
+        const paymentData = {
+          method: selectedPaymentMethod,
+          amount: currentBooking.booking_amount || currentBooking.bookingAmount || 0
+        };
+        
+        console.log('Base payment data:', paymentData);
+        console.log('Booking amount from currentBooking.booking_amount:', currentBooking.booking_amount);
+        console.log('Booking amount from currentBooking.bookingAmount:', currentBooking.bookingAmount);
+
+        // Add EMI details if enabled
+        const emiCheckbox = document.getElementById('enableEMI');
+        const emiEnabled = emiCheckbox ? emiCheckbox.checked : false;
+        if (emiEnabled) {
+          paymentData.emiMonths = parseInt(document.getElementById('emiMonths').value);
+          paymentData.interestRate = parseFloat(document.getElementById('interestRate').value);
+          paymentData.firstEmiDate = new Date(Date.now() + 30*24*60*60*1000).toISOString(); // First EMI after 30 days
+        }
+
+        if (selectedPaymentMethod === 'card') {
+          paymentData.cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+          paymentData.expiryDate = document.getElementById('expiryDate').value;
+          paymentData.cvv = document.getElementById('cvv').value;
+          paymentData.cardName = document.getElementById('cardName').value;
+        } else if (selectedPaymentMethod === 'upi') {
+          paymentData.upiId = document.getElementById('upiId').value;
+        } else if (selectedPaymentMethod === 'netbanking') {
+          paymentData.bank = document.getElementById('bankSelect').value;
+        }
+
+        console.log('paymentData:', paymentData);
+
+        // Store payment data and show confirmation modal
+        pendingPaymentData = paymentData;
+        showPaymentConfirmation(paymentData);
+
+      } catch (error) {
+        console.error('❌ processPayment error:', error);
+        showMessage(error.message, 'error');
+      }
+    }
+
+    function showPaymentConfirmation(paymentData) {
+      const car = currentBooking;
+      const paymentMethodName = {
+        'card': 'Credit/Debit Card',
+        'upi': 'UPI',
+        'netbanking': 'Net Banking'
+      }[selectedPaymentMethod] || selectedPaymentMethod;
+
+      document.getElementById('confirmationDetails').innerHTML = `
+        <div style="margin-bottom: 20px; text-align: center;">
+          <h3 style="color: #333; margin: 0 0 10px 0; font-size: 18px;">${car.make} ${car.model} ${car.year}</h3>
+          <p style="color: #666; margin: 0; font-size: 14px;">Booking Amount</p>
+          <p style="color: #f9b233; margin: 5px 0 0 0; font-size: 32px; font-weight: bold;">₹${Math.round(paymentData.amount).toLocaleString('en-IN')}</p>
+        </div>
+        
+        <div style="border-top: 2px dashed #ddd; padding-top: 20px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+            <span style="color: #666; font-size: 15px;">💳 Payment Method:</span>
+            <span style="font-weight: bold; color: #333; font-size: 15px;">${paymentMethodName}</span>
+          </div>
+          
+          ${selectedPaymentMethod === 'card' ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+              <span style="color: #666; font-size: 15px;">Card Number:</span>
+              <span style="font-weight: bold; color: #333; font-size: 15px;">**** **** **** ${paymentData.cardNumber.slice(-4)}</span>
+            </div>
+          ` : ''}
+          
+          ${selectedPaymentMethod === 'upi' ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+              <span style="color: #666; font-size: 15px;">UPI ID:</span>
+              <span style="font-weight: bold; color: #333; font-size: 15px;">${paymentData.upiId}</span>
+            </div>
+          ` : ''}
+          
+          ${selectedPaymentMethod === 'netbanking' ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+              <span style="color: #666; font-size: 15px;">Bank:</span>
+              <span style="font-weight: bold; color: #333; font-size: 15px;">${paymentData.bank}</span>
+            </div>
+          ` : ''}
+          
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+            <span style="color: #666; font-size: 15px;">📅 Date:</span>
+            <span style="font-weight: bold; color: #333; font-size: 15px;">${new Date().toLocaleDateString('en-IN')}</span>
+          </div>
+        </div>
+        
+        ${paymentData.emiMonths ? `
+          <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #ffc107;">
+            <div style="font-size: 14px; color: #856404;">
+              <strong>EMI Enabled:</strong> ${paymentData.emiMonths} months @ ${paymentData.interestRate}% interest
+            </div>
+          </div>
+        ` : ''}
+      `;
+      
+      document.getElementById('confirmationModal').style.display = 'block';
+    }
+
+    function cancelPaymentConfirmation() {
+      document.getElementById('confirmationModal').style.display = 'none';
+      pendingPaymentData = null;
+    }
+
+    function confirmAndPay() {
+      // Hide confirmation modal
+      document.getElementById('confirmationModal').style.display = 'none';
+      
+      if (!pendingPaymentData) {
+        showMessage('Payment data not found. Please try again.', 'error');
+        return;
+      }
+
+      const paymentData = pendingPaymentData;
+      pendingPaymentData = null;
+
+      // Show loading
+      const payButton = document.getElementById('payButton');
+      if (!payButton) {
+        console.error('Pay button not found!');
+        showMessage('Payment button not found. Please refresh the page.', 'error');
+        return;
+      }
+      
+      console.log('Disabling pay button and showing loading...');
+      payButton.disabled = true;
+      payButton.innerHTML = '⏳ Processing...';
+
+      console.log('Calling backend API...');
+      // Call backend API to process payment
+      processPaymentWithBackend(paymentData)
+        .then(result => {
+          console.log('✅ Payment successful:', result);
+          
+          // Show success message and redirect to home
+          showSuccessMessageAndRedirect();
+        })
+        .catch(error => {
+          console.error('❌ Payment processing error:', error);
+          showMessage(error.message || 'Payment failed. Please try again.', 'error');
+          payButton.disabled = false;
+          payButton.innerHTML = `<i class="material-icons">credit_card</i> Pay ₹${Math.round(paymentData.amount).toLocaleString()}`;
+        });
+    }
+
+    function showSuccessMessageAndRedirect() {
+      // Create success message overlay
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s;
+      `;
+      
+      const messageBox = document.createElement('div');
+      messageBox.style.cssText = `
+        background: white;
+        padding: 40px 60px;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        animation: slideDown 0.3s;
+      `;
+      
+      messageBox.innerHTML = `
+        <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+        <h2 style="color: #28a745; margin: 0 0 15px 0; font-size: 28px; font-weight: bold;">Booking Confirmed!</h2>
+        <p style="color: #333; margin: 0; font-size: 18px;">Payment successful</p>
+      `;
+      
+      overlay.appendChild(messageBox);
+      document.body.appendChild(overlay);
+      
+      // Redirect to dashboard after 2 seconds to show updated bookings
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 2000);
+    }
+
+    function validatePaymentForm() {
+      if (selectedPaymentMethod === 'card') {
+        const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+        const expiryDate = document.getElementById('expiryDate').value;
+        const cvv = document.getElementById('cvv').value;
+        const cardName = document.getElementById('cardName').value;
+
+        if (!cardNumber || cardNumber.length !== 16) {
+          showMessage('Please enter a valid 16-digit card number', 'error');
+          return false;
+        }
+        if (!expiryDate || !expiryDate.includes('/')) {
+          showMessage('Please enter a valid expiry date (MM/YY)', 'error');
+          return false;
+        }
+        if (!cvv || cvv.length !== 3) {
+          showMessage('Please enter a valid 3-digit CVV', 'error');
+          return false;
+        }
+        if (!cardName || cardName.trim().length < 2) {
+          showMessage('Please enter cardholder name', 'error');
+          return false;
+        }
+      } else if (selectedPaymentMethod === 'upi') {
+        const upiId = document.getElementById('upiId').value;
+        if (!upiId || !upiId.includes('@')) {
+          showMessage('Please enter a valid UPI ID', 'error');
+          return false;
+        }
+      } else if (selectedPaymentMethod === 'netbanking') {
+        const bank = document.getElementById('bankSelect').value;
+        if (!bank) {
+          showMessage('Please select your bank', 'error');
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    function showSuccessModal(transaction) {
+      // Send email notification
+      sendBookingConfirmationEmail(transaction);
+      
+      document.getElementById('transactionDetails').innerHTML = `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span>Transaction ID:</span>
+          <span style="font-weight: bold;">${transaction.id}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span>Amount Paid:</span>
+          <span style="font-weight: bold;">${formatCurrency(transaction.amount)}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span>Payment Method:</span>
+          <span style="font-weight: bold; text-transform: capitalize;">${transaction.method}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span>Date:</span>
+          <span style="font-weight: bold;">${new Date().toLocaleDateString()}</span>
+        </div>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd; color: #28a745; font-size: 14px;">
+          <i class="material-icons">email</i> Confirmation email sent to ${currentBooking.buyerInfo.email}
+        </div>
+      `;
+      
+      document.getElementById('successModal').style.display = 'block';
+    }
+
+    function sendBookingConfirmationEmail(transaction) {
+      // Get booking and car details
+      const car = currentBooking;
+      const buyerEmail = currentBooking.buyer_email || (currentBooking.buyerInfo && currentBooking.buyerInfo.email) || '';
+      const buyerName = currentBooking.buyer_name || (currentBooking.buyerInfo && currentBooking.buyerInfo.fullName) || '';
+      const buyerPhone = currentBooking.buyer_phone || (currentBooking.buyerInfo && currentBooking.buyerInfo.phone) || '';
+      const buyerAddress = currentBooking.buyer_address || (currentBooking.buyerInfo && currentBooking.buyerInfo.address) || '';
+      
+      // Prepare email template parameters
+      const templateParams = {
+        to_email: buyerEmail,
+        to_name: buyerName,
+        car_name: `${car.make} ${car.model} ${car.year}`,
+        car_price: formatCurrency(car.price),
+        booking_amount: formatCurrency(transaction.amount),
+        payment_method: transaction.method.toUpperCase(),
+        transaction_id: transaction.id,
+        booking_date: new Date().toLocaleDateString(),
+        inspection_date: new Date(currentBooking.inspection_date || currentBooking.inspectionDate).toLocaleDateString(),
+        buyer_phone: buyerPhone,
+        buyer_address: buyerAddress,
+        support_phone: '+91 9082073676',
+        support_email: 'support@ridebazzar.com'
+      };
+      
+      // Send email using EmailJS
+      emailjs.send('service_lqycqtt', 'template_4iha8tj', templateParams)
+        .then(function(response) {
+          console.log('✅ Email sent successfully!', response.status, response.text);
+          showMessage('Confirmation email sent to ' + buyerEmail, 'success');
+        }, function(error) {
+          console.error('❌ Email sending failed:', error);
+          // Don't show error to user, just log it
+          console.log('Email could not be sent, but booking is confirmed');
+        });
+      
+      // Create email content for backup/logging
+      const emailContent = {
+        to: buyerEmail,
+        subject: `Booking Confirmation - ${car.make} ${car.model} (Transaction ID: ${transaction.id})`,
+        body: `
+Dear ${buyerName},
+
+Thank you for booking with RideBazzar! Your booking has been confirmed.
+
+BOOKING DETAILS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<i class="material-icons">directions_car</i> Car: ${car.make} ${car.model} ${car.year}
+<i class="material-icons">attach_money</i> Total Price: ${formatCurrency(car.price)}
+✅ Booking Amount Paid: ${formatCurrency(transaction.amount)}
+<i class="material-icons">credit_card</i> Payment Method: ${transaction.method.toUpperCase()}
+🆔 Transaction ID: ${transaction.id}
+<i class="material-icons">event</i> Booking Date: ${new Date().toLocaleDateString()}
+📍 Inspection Date: ${new Date(currentBooking.inspectionDate).toLocaleDateString()}
+
+BUYER INFORMATION:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<i class="material-icons">person</i> Name: ${buyerName}
+📧 Email: ${buyerEmail}
+<i class="material-icons">phone_android</i> Phone: ${buyerPhone}
+<i class="material-icons">home</i> Address: ${buyerAddress}
+
+NEXT STEPS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Our team will contact you within 24 hours
+2. Schedule vehicle inspection on ${new Date(currentBooking.inspectionDate).toLocaleDateString()}
+3. Complete remaining payment after inspection
+4. Receive your car with all documents
+
+IMPORTANT NOTES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Keep this email for your records
+• Your booking is valid for 7 days
+• Refund policy applies as per terms
+• Contact us for any queries
+
+Need Help?
+<i class="material-icons">phone</i> Call: +91 9082073676
+💬 WhatsApp: +91 9082073676
+📧 Email: support@ridebazzar.com
+
+Thank you for choosing RideBazzar!
+
+Best Regards,
+RideBazzar Team
+www.ridebazzar.com
+        `
+      };
+      
+      // Simulate email sending (in production, this would call a backend API)
+      console.log('📧 EMAIL SENT:');
+      console.log('To:', emailContent.to);
+      console.log('Subject:', emailContent.subject);
+      console.log('Body:', emailContent.body);
+      
+      // Store email in localStorage for demo purposes
+      const emails = JSON.parse(localStorage.getItem('ridebazzar_emails') || '[]');
+      emails.push({
+        ...emailContent,
+        sentAt: new Date().toISOString(),
+        transactionId: transaction.id,
+        bookingId: currentBooking.id
+      });
+      localStorage.setItem('ridebazzar_emails', JSON.stringify(emails));
+      
+      // Show notification
+      showMessage('Booking confirmation email sent successfully!', 'success');
+    }
+
+    function goToProfile() {
+      window.location.href = 'dashboard.html?tab=bookings';
+    }
+
+    function showMessage(message, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.style = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${type === 'success' ? '#28a745' : '#dc3545'};
+        color: white;
+        border-radius: 8px;
+        font-weight: bold;
+        z-index: 1001;
+        animation: slideIn 0.3s ease-out;
+      `;
+      messageDiv.textContent = message;
+      document.body.appendChild(messageDiv);
+
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 3000);
+    }
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+  </style>
+  
+  <script>
+    // Authentication functions
+    function showLoginModal() {
+      // Redirect to home page with login modal
+      window.location.href = 'home.html#login';
+    }
+
+    function logoutUser() {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      window.location.href = 'home.html';
+    }
+
+    // Update navbar on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('authToken');
+      const loginBtn = document.getElementById('loginNavBtn');
+      const logoutBtn = document.getElementById('logoutNavBtn');
+      const profileBtn = document.getElementById('profileNavBtn');
+
+      if (token) {
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        if (profileBtn) profileBtn.style.display = 'inline-block';
+      } else {
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (profileBtn) profileBtn.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
+
