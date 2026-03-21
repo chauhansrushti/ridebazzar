@@ -3008,10 +3008,6 @@
           brandCounts[brand] = (brandCounts[brand] || 0) + 1;
         });
         
-        // Calculate total inventory value
-        const totalValue = cars.reduce((sum, car) => sum + (parseFloat(car.price) || 0), 0);
-        const avgPrice = totalCars > 0 ? totalValue / totalCars : 0;
-        
         // Format currency without commas
         const formatCurrencyPlain = (value) => {
           return Math.round(value).toString();
@@ -3033,10 +3029,6 @@
                 <h3>Sold Cars</h3>
                 <p style="font-size: 32px; font-weight: bold; margin: 10px 0;">${soldCars}</p>
               </div>
-              <div style="background: linear-gradient(135deg, #ffa938, #ff8c00); padding: 20px; border-radius: 8px; color: white;">
-                <h3>Total Value</h3>
-                <p style="font-size: 32px; font-weight: bold; margin: 10px 0;">₹${formatCurrencyPlain(totalValue)}</p>
-              </div>
             </div>
             
             <div style="margin-bottom: 30px;">
@@ -3053,7 +3045,6 @@
             
             <h3>Inventory Statistics</h3>
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 15px;">
-              <p><strong>Average Car Price:</strong> ₹${formatCurrencyPlain(avgPrice)}</p>
               <p><strong>Pending Approval:</strong> ${pendingCars} cars</p>
               <p><strong>Available for Sale:</strong> ${availableCars} cars</p>
               <p><strong>Successfully Sold:</strong> ${soldCars} cars</p>
