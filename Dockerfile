@@ -18,5 +18,5 @@ WORKDIR /app
 # Expose port
 EXPOSE 3000
 
-# Start command
-CMD ["npm", "start"]
+# Start command (using shell form so 'cd' works in npm scripts)
+CMD npm start
