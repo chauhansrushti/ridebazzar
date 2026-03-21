@@ -606,14 +606,21 @@
           imgHeight = '280px'; // Larger on mobile
         }
         
+        // Array of fallback colors for cars without images
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8'];
+        const bgColor = colors[idx % colors.length];
+        
         card.innerHTML = `
-          <div style="position:relative; overflow:hidden; background:#f0f0f0;">
-            <img src="${imgSrc}" alt="Car Image" style="width:100%;height:${imgHeight};object-fit:cover;display:block;background:#f0f0f0;" onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.parentElement.innerHTML += '<div style=\"position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:48px;\">🚗</div>'">
+          <div style="position:relative; overflow:hidden; background:${bgColor}; min-height:${imgHeight};">
+            <img src="${imgSrc}" alt="Car Image" style="width:100%;height:${imgHeight};object-fit:cover;display:block;" onerror="this.style.display='none';">
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:80px; background:${bgColor}; display:${imgSrc && imgSrc !== 'images/logo.png' ? 'none' : 'flex'};">
+              🚗
+            </div>
             <button onclick="event.stopPropagation(); toggleFavoriteFromCard('${car.id}')" 
-                    style="position:absolute; top:12px; right:12px; width:40px; height:40px; border-radius:50%; border:none; background:rgba(255,255,255,0.95); cursor:pointer; font-size:20px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                    style="position:absolute; top:12px; right:12px; width:40px; height:40px; border-radius:50%; border:none; background:rgba(255,255,255,0.95); cursor:pointer; font-size:20px; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:10;">
               ${carManager.isCarInFavorites(car.id) ? '<i class="material-icons">favorite</i>' : '<i class="material-icons">favorite_border</i>'}
             </button>
-            <div style="position:absolute; bottom:12px; left:12px; padding:6px 12px; background:rgba(0,0,0,0.7); color:#fff; border-radius:20px; font-size:12px; font-weight:bold;">
+            <div style="position:absolute; bottom:12px; left:12px; padding:6px 12px; background:rgba(0,0,0,0.7); color:#fff; border-radius:20px; font-size:12px; font-weight:bold; z-index:10;">
               ${car.status.toUpperCase()}
             </div>
           </div>
