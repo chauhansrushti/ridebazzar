@@ -190,11 +190,11 @@ const seedTestData = async () => {
       // Update existing test cars with images if they don't have them
       try {
         const testCarsWithImages = [
-          { make: 'Maruti', model: 'Swift', images: ['data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23FF6B6B%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2248%22 fill=%22white%22%3E🚗%3C/text%3E%3C/svg%3E'] },
-          { make: 'Hyundai', model: 'Creta', images: ['data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%224ECDC4%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2248%22 fill=%22white%22%3E🚗%3C/text%3E%3C/svg%3E'] },
-          { make: 'Honda', model: 'City', images: ['data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%2245B7D1%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2248%22 fill=%22white%22%3E🚗%3C/text%3E%3C/svg%3E'] },
-          { make: 'Tata', model: 'Nexon', images: ['data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23FFA07A%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2248%22 fill=%22white%22%3E🚗%3C/text%3E%3C/svg%3E'] },
-          { make: 'Mahindra', model: 'XUV700', images: ['data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%2398D8C8%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2248%22 fill=%22white%22%3E🚗%3C/text%3E%3C/svg%3E'] },
+          { make: 'Maruti', model: 'Swift', images: ['images/bmw.jpg'] },
+          { make: 'Hyundai', model: 'Creta', images: ['images/volkswagen.avif'] },
+          { make: 'Honda', model: 'City', images: ['images/amd.jpg'] },
+          { make: 'Tata', model: 'Nexon', images: ['images/toyota.avif'] },
+          { make: 'Mahindra', model: 'XUV700', images: ['images/mumbai3.avif'] },
         ];
         
         for (const testCar of testCarsWithImages) {
