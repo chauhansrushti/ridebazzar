@@ -1,7 +1,6 @@
 {
   "build": {
-    "builder": "nixpacks",
-    "buildCommand": "cd backend && npm install"
+    "builder": "nixpacks"
   },
   "start": "cd backend && node server.js",
   "environment": {

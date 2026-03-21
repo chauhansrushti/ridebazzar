@@ -1,0 +1,17 @@
+{
+  "name": "ridebazzar",
+  "version": "1.0.0",
+  "description": "Car rental and trading platform",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "install": "cd backend && npm install",
+    "dev": "cd backend && npm run dev"
+  },
+  "keywords": ["car", "rental", "trading"],
+  "author": "chauhansrushti",
+  "license": "MIT",
+  "engines": {
+    "node": "18.x"
+  }
+}
