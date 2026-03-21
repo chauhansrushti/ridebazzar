@@ -10,8 +10,53 @@ const bookingRoutes = require('./routes/bookings');
 const paymentRoutes = require('./routes/payments');
 const inquiryRoutes = require('./routes/inquiries');
 const messagesRoutes = require('./routes/messages');
+const db = require('./config/database');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
+
+// Initialize database on startup
+const initializeDatabase = async () => {
+  try {
+    console.log('🔄 Checking database...');
+    
+    // Check if users table exists
+    const [tables] = await db.execute("SHOW TABLES LIKE 'users'");
+    
+    if (tables.length === 0) {
+      console.log('📋 Creating database tables from schema...');
+      
+      const schemaPath = path.join(__dirname, 'database', 'schema.sql');
+      const schema = fs.readFileSync(schemaPath, 'utf8');
+      
+      // Split by semicolon and execute each statement
+      const statements = schema
+        .split(';')
+        .map(stmt => stmt.trim())
+        .filter(stmt => stmt && !stmt.startsWith('--')); // Remove empty and comment lines
+      
+      for (const statement of statements) {
+        if (statement) {
+          await db.execute(statement);
+        }
+      }
+      
+      console.log('✅ Database tables created successfully');
+    } else {
+      console.log('✅ Database tables already exist');
+    }
+  } catch (error) {
+    console.error('❌ Database initialization failed:', error.message);
+    console.error('Error details:', error);
+    // Don't exit, let the app continue
+  }
+};
+
+// Initialize database before starting server
+initializeDatabase().catch(err => {
+  console.error('Failed to initialize database:', err);
+});
 
 // Security middleware
 app.use(helmet({
