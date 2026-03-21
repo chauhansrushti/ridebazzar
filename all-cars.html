@@ -467,7 +467,6 @@
       const location = document.getElementById('filterLocation').value.trim();
       
       const filters = {
-        status: 'available',
         limit: 100
       };
       
@@ -542,7 +541,7 @@
     }
 
     async function renderAllCars() {
-      const cars = await carManager.getAllCars({ status: 'available', limit: 100 });
+      const cars = await carManager.getAllCars({ limit: 100 });
       renderCars(cars);
       updateResultsCount(cars.length);
     }
