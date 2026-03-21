@@ -720,6 +720,7 @@
           <h3>🧪 API Endpoint Tests</h3>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
             <button class="admin-btn" onclick="testStatusEndpoint()" style="background: #28a745;">Test Status</button>
+            <button class="admin-btn" onclick="testConfigCheck()" style="background: #17a2b8;">Test Config</button>
             <button class="admin-btn" onclick="testDiagnosticsEndpoint()">Test Diagnostics</button>
             <button class="admin-btn" onclick="testTokenVerification()">Test Token</button>
             <button class="admin-btn" onclick="testUsersEndpoint()">Test /users</button>
@@ -2713,6 +2714,45 @@
           `;
         } else {
           resultsDiv.innerHTML = `<h4 style="color: red;">❌ Error: ${result.message || 'Unknown error'}</h4>`;
+        }
+      } catch (error) {
+        resultsDiv.innerHTML = `<h4 style="color: red;">❌ Network Error: ${error.message}</h4>`;
+      }
+    }
+
+    async function testConfigCheck() {
+      const resultsDiv = document.getElementById('debugResults');
+      resultsDiv.innerHTML = '<p>Checking Railway configuration...</p>';
+
+      try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
+        const configUrl = addCacheBuster(`${config.API_BASE_URL}/config-check`);
+        const response = await fetch(configUrl);
+        const result = await response.json();
+
+        if (result.success) {
+          const cfg = result.config;
+          let jwtStatus = '❌ JWT_SECRET NOT CONFIGURED';
+          if (cfg.jwtSecretConfigured) {
+            jwtStatus = `✅ JWT_SECRET configured (${cfg.jwtSecretLength} chars)<br>Hash: ${cfg.jwtSecretHash}`;
+          }
+          
+          resultsDiv.innerHTML = `
+            <h4>⚙️ Server Configuration</h4>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace;">
+              <p><strong>Environment:</strong> ${cfg.nodeEnv}</p>
+              <p><strong>Port:</strong> ${cfg.port}</p>
+              <p><strong>JWT Secret:</strong><br>${jwtStatus}</p>
+              <p><strong>Database Host:</strong> ${cfg.dbHost}</p>
+              <p><strong>Database User:</strong> ${cfg.dbUserConfigured ? '✅ Configured' : '❌ Not configured'}</p>
+              <p><strong>Database Name:</strong> ${cfg.dbNameConfigured ? '✅ Configured' : '❌ Not configured'}</p>
+              <p style="font-size: 12px; margin-top: 15px; color: #666;">
+                <strong>Note:</strong> If JWT_SECRET length is not 31 characters, token verification will fail!
+              </p>
+            </div>
+          `;
+        } else {
+          resultsDiv.innerHTML = `<h4 style="color: red;">❌ Error: ${result.error}</h4>`;
         }
       } catch (error) {
         resultsDiv.innerHTML = `<h4 style="color: red;">❌ Network Error: ${error.message}</h4>`;

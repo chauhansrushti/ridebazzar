@@ -342,6 +342,39 @@ app.get('/api/status', (req, res) => {
   }
 });
 
+// Configuration check endpoint - shows what's configured
+app.get('/api/config-check', (req, res) => {
+  try {
+    const jwtSecret = process.env.JWT_SECRET;
+    const dbHost = process.env.DB_HOST;
+    const dbUser = process.env.DB_USER;
+    const dbName = process.env.DB_NAME;
+    
+    res.json({
+      success: true,
+      config: {
+        nodeEnv: process.env.NODE_ENV,
+        port: process.env.PORT,
+        jwtSecretConfigured: !!jwtSecret,
+        jwtSecretLength: jwtSecret ? jwtSecret.length : 0,
+        // Hash the secret to verify it matches on both ends
+        jwtSecretHash: jwtSecret ? require('crypto').createHash('sha256').update(jwtSecret).digest('hex').substring(0, 16) : 'NOT_CONFIGURED',
+        dbHostConfigured: !!dbHost,
+        dbHost: dbHost || 'NOT_CONFIGURED',
+        dbUserConfigured: !!dbUser,
+        dbNameConfigured: !!dbName,
+        timestamp: new Date().toISOString(),
+        hint: 'If jwtSecretLength != expected, JWT tokens will fail verification'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Diagnostics endpoint - check admin user and JWT config
 app.get('/api/diagnostics', async (req, res) => {
   try {
