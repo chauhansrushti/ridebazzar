@@ -719,6 +719,7 @@
         <div style="margin-bottom: 20px;">
           <h3>🧪 API Endpoint Tests</h3>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <button class="admin-btn" onclick="testStatusEndpoint()" style="background: #28a745;">Test Status</button>
             <button class="admin-btn" onclick="testDiagnosticsEndpoint()">Test Diagnostics</button>
             <button class="admin-btn" onclick="testTokenVerification()">Test Token</button>
             <button class="admin-btn" onclick="testUsersEndpoint()">Test /users</button>
@@ -2695,13 +2696,37 @@
       document.getElementById('configEnv').textContent = window.location.hostname === 'localhost' ? 'Development' : 'Production';
     }
 
+    async function testStatusEndpoint() {
+      const resultsDiv = document.getElementById('debugResults');
+      resultsDiv.innerHTML = '<p>Testing /api/status (basic backend connectivity)...</p>';
+
+      try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
+        const statusUrl = addCacheBuster(`${config.API_BASE_URL}/status`);
+        const response = await fetch(statusUrl);
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          resultsDiv.innerHTML = `
+            <h4>✅ Backend is RUNNING</h4>
+            <pre style="background: #e8f5e9; padding: 10px; border-radius: 5px;">${JSON.stringify(result, null, 2)}</pre>
+          `;
+        } else {
+          resultsDiv.innerHTML = `<h4 style="color: red;">❌ Error: ${result.message || 'Unknown error'}</h4>`;
+        }
+      } catch (error) {
+        resultsDiv.innerHTML = `<h4 style="color: red;">❌ Network Error: ${error.message}</h4>`;
+      }
+    }
+
     async function testDiagnosticsEndpoint() {
       const resultsDiv = document.getElementById('debugResults');
       resultsDiv.innerHTML = '<p>Testing /api/diagnostics...</p>';
 
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
-        const response = await fetch(`${config.API_BASE_URL}/diagnostics`);
+        const diagUrl = addCacheBuster(`${config.API_BASE_URL}/diagnostics`);
+        const response = await fetch(diagUrl);
         const result = await response.json();
 
         if (result.success) {
@@ -2746,12 +2771,13 @@
         } else {
           resultsDiv.innerHTML = `
             <h4 style="color: red;">❌ Token Verification Failed</h4>
-            <p><strong>Error:</strong> ${result.error}</p>
-            <p><strong>Details:</strong> ${result.details}</p>
+            <p><strong>Message:</strong> ${result.message}</p>
+            <p><strong>Error Type:</strong> ${result.error || 'Unknown'}</p>
+            <p><strong>Details:</strong> ${result.details || result.message}</p>
           `;
         }
       } catch (error) {
-        resultsDiv.innerHTML = `<h4 style="color: red;">❌ Network Error: ${error.message}</h4>`;
+        resultsDiv.innerHTML = `<h4 style="color: red;">❌ Network Error: ${error.message}</h4><p>Check browser console for details.</p>`;
       }
     }
 
