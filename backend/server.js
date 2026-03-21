@@ -68,10 +68,19 @@ const initializeDatabase = async () => {
 // Seed test data if database is empty
 const seedTestData = async () => {
   try {
-    const [cars] = await db.execute('SELECT COUNT(*) as count FROM cars');
+    // Check if cars table has data
+    let carCount = 0;
+    try {
+      const [cars] = await db.execute('SELECT COUNT(*) as count FROM cars');
+      carCount = cars[0].count;
+    } catch (err) {
+      // Table doesn't exist or other error - will be created by initializeDatabase
+      console.log('📊 Cars table check failed (will be created): ' + err.message.substring(0, 50));
+      return;
+    }
     
-    if (cars[0].count > 0) {
-      console.log(`✅ Database already has ${cars[0].count} cars`);
+    if (carCount > 0) {
+      console.log(`✅ Database already has ${carCount} cars`);
       return; // Data already exists
     }
 
@@ -89,9 +98,10 @@ const seedTestData = async () => {
         ['admin', 'admin@ridebazzar.com', hashedPassword, 'Admin User', true, true]
       );
       adminId = result.insertId;
-      console.log('  ✓ Admin user created');
+      console.log('  ✓ Admin user created (ID: ' + adminId + ')');
     } else {
       adminId = adminUsers[0].id;
+      console.log('  ✓ Admin user already exists (ID: ' + adminId + ')');
     }
 
     // Insert test cars
@@ -133,14 +143,9 @@ const seedTestData = async () => {
     console.log('✅ Test data seeded successfully\n');
 
   } catch (error) {
-    console.warn('⚠️  Could not seed test data:', error.message);
+    console.error('❌ Error seeding test data:', error.message);
   }
 };
-
-// Initialize database before starting server
-initializeDatabase().catch(err => {
-  console.error('Failed to initialize database:', err);
-});
 
 // Security middleware
 app.use(helmet({
