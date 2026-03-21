@@ -597,7 +597,19 @@
           }
         };
         
-        const imgSrc = (car.images && car.images.length > 0) ? car.images[0] : 'images/logo.png';
+        // Get image URL - prepend API base URL for relative paths
+        let imgSrc = 'images/logo.png';
+        if (car.images && car.images.length > 0) {
+          const imagePath = car.images[0];
+          // If it's a local path (starts with images/), prepend API URL
+          if (imagePath.startsWith('images/')) {
+            const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : `${window.location.origin}:5000`;
+            imgSrc = apiBase + '/' + imagePath;
+          } else {
+            imgSrc = imagePath; // Use external URLs as-is
+          }
+        }
+        
         const formattedCar = formatCarForDisplay(car);
         
         // Responsive image height
@@ -613,7 +625,7 @@
         card.innerHTML = `
           <div style="position:relative; overflow:hidden; background:${bgColor}; min-height:${imgHeight};">
             <img src="${imgSrc}" alt="Car Image" style="width:100%;height:${imgHeight};object-fit:cover;display:block;" onerror="this.style.display='none';">
-            <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:80px; background:${bgColor}; display:${imgSrc && imgSrc !== 'images/logo.png' ? 'none' : 'flex'};">
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:80px; background:${bgColor}; display:${!imgSrc || imgSrc.includes('logo.png') ? 'flex' : 'none'};">
               🚗
             </div>
             <button onclick="event.stopPropagation(); toggleFavoriteFromCard('${car.id}')" 

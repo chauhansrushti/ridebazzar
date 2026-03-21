@@ -785,8 +785,17 @@
       const mainImage = document.getElementById('mainImage');
       const thumbnailGallery = document.getElementById('thumbnailGallery');
 
+      // Helper function to get full image URL
+      const getImageUrl = (imagePath) => {
+        if (imagePath.startsWith('images/')) {
+          const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : `${window.location.origin}:5000`;
+          return apiBase + '/' + imagePath;
+        }
+        return imagePath;
+      };
+
       // Set main image
-      mainImage.src = images[0];
+      mainImage.src = getImageUrl(images[0]);
       currentImageIndex = 0;
 
       // Add hover effect for zoom animation
@@ -802,7 +811,7 @@
       if (images.length > 1) {
         images.forEach((image, index) => {
           const thumbnail = document.createElement('img');
-          thumbnail.src = image;
+          thumbnail.src = getImageUrl(image);
           thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
           thumbnail.onclick = () => switchMainImage(index);
           thumbnailGallery.appendChild(thumbnail);

@@ -547,7 +547,18 @@
         grid.innerHTML = combinedCars.map((car, index) => {
           try {
             const formattedCar = formatCarForDisplay(car);
-            const imgSrc = (car.images && car.images.length > 0) ? car.images[0] : 'images/logo.png';
+            
+            // Helper function to get full image URL
+            const getImageUrl = (imagePath) => {
+              if (imagePath.startsWith('images/')) {
+                const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : `${window.location.origin}:5000`;
+                return apiBase + '/' + imagePath;
+              }
+              return imagePath;
+            };
+            
+            const baseImgSrc = (car.images && car.images.length > 0) ? car.images[0] : 'images/logo.png';
+            const imgSrc = getImageUrl(baseImgSrc);
             const isSelected = selectedCars.some(selected => selected && String(selected.id) === String(car.id));
             const source = apiCarIds.has(String(car.id)) ? '(Database)' : '(Local)';
             const statusBadge = car.status ? `<span style="display: inline-block; padding: 2px 6px; background: ${car.status === 'available' ? '#28a745' : '#ffc107'}; color: white; border-radius: 3px; font-size: 10px; margin-top: 3px;">${car.status.toUpperCase()}</span>` : '';
