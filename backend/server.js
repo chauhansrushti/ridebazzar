@@ -316,6 +316,106 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Diagnostics endpoint - check admin user and JWT config
+app.get('/api/diagnostics', async (req, res) => {
+  try {
+    console.log('📋 Diagnostics requested...');
+    
+    // Check if admin user exists
+    const [adminUsers] = await db.execute('SELECT id, username, email FROM users WHERE username = ?', ['admin']);
+    const adminExists = adminUsers.length > 0;
+    
+    // Check if JWT_SECRET is set
+    const jwtSecretSet = !!process.env.JWT_SECRET;
+    const jwtSecretLength = process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0;
+    
+    // Count total users
+    const [userCount] = await db.execute('SELECT COUNT(*) as count FROM users');
+    const totalUsers = userCount[0].count;
+    
+    // Count total cars
+    const [carCount] = await db.execute('SELECT COUNT(*) as count FROM cars');
+    const totalCars = carCount[0].count;
+    
+    res.json({
+      success: true,
+      diagnostics: {
+        adminUserExists: adminExists,
+        adminId: adminUsers[0]?.id || null,
+        totalUsers,
+        totalCars,
+        jwtSecretConfigured: jwtSecretSet,
+        jwtSecretLength,
+        nodeEnv: process.env.NODE_ENV,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Diagnostics error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Diagnostics check failed',
+      error: error.message
+    });
+  }
+});
+
+// Admin login endpoint (explicit for debugging)
+app.post('/api/admin-login', async (req, res) => {
+  try {
+    console.log('🔐 Admin login attempt...');
+    const { username, password } = req.body;
+    
+    if (username !== 'admin' || password !== 'admin123') {
+      console.log('❌ Invalid admin credentials');
+      return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
+    }
+    
+    // Find admin user
+    const [users] = await db.execute('SELECT * FROM users WHERE username = ?', ['admin']);
+    
+    if (users.length === 0) {
+      console.log('❌ Admin user not found in database');
+      return res.status(401).json({ success: false, message: 'Admin user not found' });
+    }
+    
+    const adminUser = users[0];
+    
+    // Verify password with bcrypt
+    const bcrypt = require('bcryptjs');
+    const isPasswordValid = await bcrypt.compare(password, adminUser.password);
+    
+    if (!isPasswordValid) {
+      console.log('❌ Admin password mismatch');
+      return res.status(401).json({ success: false, message: 'Invalid password' });
+    }
+    
+    // Generate token
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      { userId: adminUser.id, username: adminUser.username, role: 'admin' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    
+    console.log('✅ Admin login successful, token generated');
+    
+    const { password: _, ...userWithoutPassword } = adminUser;
+    
+    res.json({
+      success: true,
+      message: 'Admin login successful',
+      data: {
+        token,
+        user: userWithoutPassword
+      }
+    });
+  } catch (error) {
+    console.error('Admin login error:', error);
+    res.status(500).json({ success: false, message: 'Admin login failed' });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
