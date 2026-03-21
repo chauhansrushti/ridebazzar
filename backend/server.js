@@ -96,18 +96,18 @@ const seedTestData = async () => {
 
     // Insert test cars
     const testCars = [
-      { make: 'Maruti', model: 'Swift', year: 2022, price: 650000, status: 'available', description: 'Well maintained Swift' },
-      { make: 'Hyundai', model: 'Creta', year: 2021, price: 1200000, status: 'sold', description: 'Excellent Creta with low mileage' },
-      { make: 'Honda', model: 'City', year: 2023, price: 1100000, status: 'available', description: 'Brand new Honda City' },
-      { make: 'Tata', model: 'Nexon', year: 2020, price: 950000, status: 'available', description: 'Reliable Nexon' },
-      { make: 'Mahindra', model: 'XUV700', year: 2022, price: 1700000, status: 'sold', description: 'Premium XUV700' },
+      { make: 'Maruti', model: 'Swift', year: 2022, price: 650000, status: 'available', description: 'Well maintained Swift', fuel_type: 'Petrol', transmission: 'Manual', condition_status: 'Excellent', mileage: 25000, color: 'Red', contact: '9999999999', location: 'Mumbai' },
+      { make: 'Hyundai', model: 'Creta', year: 2021, price: 1200000, status: 'available', description: 'Excellent Creta with low mileage', fuel_type: 'Diesel', transmission: 'Automatic', condition_status: 'Excellent', mileage: 15000, color: 'Blue', contact: '9999999998', location: 'Delhi' },
+      { make: 'Honda', model: 'City', year: 2023, price: 1100000, status: 'available', description: 'Brand new Honda City', fuel_type: 'Petrol', transmission: 'Automatic', condition_status: 'Excellent', mileage: 5000, color: 'White', contact: '9999999997', location: 'Bangalore' },
+      { make: 'Tata', model: 'Nexon', year: 2020, price: 950000, status: 'available', description: 'Reliable Nexon', fuel_type: 'Petrol', transmission: 'Manual', condition_status: 'Good', mileage: 45000, color: 'Black', contact: '9999999996', location: 'Mumbai' },
+      { make: 'Mahindra', model: 'XUV700', year: 2022, price: 1700000, status: 'available', description: 'Premium XUV700', fuel_type: 'Diesel', transmission: 'Automatic', condition_status: 'Excellent', mileage: 20000, color: 'Silver', contact: '9999999995', location: 'Hyderabad' },
     ];
 
     const carIds = [];
     for (const car of testCars) {
       const [result] = await db.execute(
-        'INSERT INTO cars (make, model, year, price, status, seller_id, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
-        [car.make, car.model, car.year, car.price, car.status, adminId, car.description]
+        'INSERT INTO cars (make, model, year, price, status, seller_id, description, fuel_type, transmission, condition_status, mileage, color, contact, location, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+        [car.make, car.model, car.year, car.price, car.status, adminId, car.description, car.fuel_type, car.transmission, car.condition_status, car.mileage, car.color, car.contact, car.location]
       );
       carIds.push(result.insertId);
       console.log(`  ✓ Added ${car.make} ${car.model}`);
