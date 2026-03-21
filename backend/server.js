@@ -134,15 +134,21 @@ app.use((err, req, res, next) => {
 
 // 404 handler - serve home.html for any unknown routes (SPA fallback)
 app.use('*', (req, res) => {
-  const filePath = path.join(__dirname, '..', req.path);
-  
-  // Try to serve the file first
+  // If request has a file extension, return 404
   if (req.path.includes('.')) {
-    // If it has a file extension, return 404
     return res.status(404).json({ error: 'Route not found' });
   }
   
-  // For requests without extension, try to serve as HTML file with .html extension
+  // For root path, serve home.html directly
+  if (req.path === '/') {
+    return res.sendFile(path.join(__dirname, '..', 'home.html'), (homeErr) => {
+      if (homeErr) {
+        res.status(404).json({ error: 'home.html not found' });
+      }
+    });
+  }
+  
+  // For other paths without extension, try to serve as HTML file with .html extension
   const htmlPath = path.join(__dirname, '..', req.path + '.html');
   res.sendFile(htmlPath, (err) => {
     if (err) {
