@@ -607,8 +607,8 @@
         }
         
         card.innerHTML = `
-          <div style="position:relative; overflow:hidden;">
-            <img src="${imgSrc}" alt="Car Image" style="width:100%;height:${imgHeight};object-fit:cover;display:block;">
+          <div style="position:relative; overflow:hidden; background:#f0f0f0;">
+            <img src="${imgSrc}" alt="Car Image" style="width:100%;height:${imgHeight};object-fit:cover;display:block;background:#f0f0f0;" onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.parentElement.innerHTML += '<div style=\"position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:48px;\">🚗</div>'">
             <button onclick="event.stopPropagation(); toggleFavoriteFromCard('${car.id}')" 
                     style="position:absolute; top:12px; right:12px; width:40px; height:40px; border-radius:50%; border:none; background:rgba(255,255,255,0.95); cursor:pointer; font-size:20px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
               ${carManager.isCarInFavorites(car.id) ? '<i class="material-icons">favorite</i>' : '<i class="material-icons">favorite_border</i>'}
