@@ -27,54 +27,140 @@ const initializeDatabase = async () => {
     console.log(`  Tables check result: found ${tables.length} existing tables`);
     
     if (tables.length === 0) {
-      console.log('📋 Users table NOT found. Creating all tables from schema.sql...');
+      console.log('📋 Users table NOT found. Creating all tables directly...');
       
-      const schemaPath = path.join(__dirname, 'database', 'schema.sql');
-      console.log(`  Reading schema from: ${schemaPath}`);
-      const schema = fs.readFileSync(schemaPath, 'utf8');
+      // CREATE TABLES directly as hardcoded SQL (no file dependency)
+      const createTables = [
+        `CREATE TABLE IF NOT EXISTS users (
+          id INT PRIMARY KEY AUTO_INCREMENT,
+          username VARCHAR(50) UNIQUE NOT NULL,
+          email VARCHAR(100) UNIQUE NOT NULL,
+          password VARCHAR(255) NOT NULL,
+          full_name VARCHAR(100),
+          phone VARCHAR(15),
+          location VARCHAR(100),
+          profile_picture VARCHAR(255),
+          bio TEXT,
+          is_verified BOOLEAN DEFAULT FALSE,
+          is_active BOOLEAN DEFAULT TRUE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          INDEX idx_username (username),
+          INDEX idx_email (email)
+        )`,
+        
+        `CREATE TABLE IF NOT EXISTS cars (
+          id INT PRIMARY KEY AUTO_INCREMENT,
+          seller_id INT NOT NULL,
+          make VARCHAR(50) NOT NULL,
+          model VARCHAR(50) NOT NULL,
+          year YEAR NOT NULL,
+          price DECIMAL(10, 2) NOT NULL,
+          mileage INT,
+          fuel_type ENUM('Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG') NOT NULL,
+          transmission ENUM('Manual', 'Automatic') NOT NULL,
+          condition_status ENUM('Excellent', 'Good', 'Fair', 'Poor') NOT NULL,
+          color VARCHAR(30),
+          description TEXT,
+          images LONGTEXT,
+          contact VARCHAR(15),
+          location VARCHAR(100),
+          status ENUM('available', 'pending', 'sold') DEFAULT 'available',
+          views_count INT DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE,
+          INDEX idx_seller_id (seller_id),
+          INDEX idx_status (status),
+          INDEX idx_created_at (created_at)
+        )`,
+        
+        `CREATE TABLE IF NOT EXISTS bookings (
+          id INT PRIMARY KEY AUTO_INCREMENT,
+          car_id INT NOT NULL,
+          buyer_id INT NOT NULL,
+          seller_id INT NOT NULL,
+          booking_date DATE NOT NULL,
+          status ENUM('pending', 'confirmed', 'cancelled', 'completed') DEFAULT 'pending',
+          notes TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE,
+          FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE,
+          INDEX idx_car_id (car_id),
+          INDEX idx_buyer_id (buyer_id),
+          INDEX idx_seller_id (seller_id)
+        )`,
+        
+        `CREATE TABLE IF NOT EXISTS transactions (
+          id INT PRIMARY KEY AUTO_INCREMENT,
+          car_id INT NOT NULL,
+          buyer_id INT NOT NULL,
+          seller_id INT NOT NULL,
+          amount DECIMAL(10, 2) NOT NULL,
+          payment_method VARCHAR(50),
+          payment_status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+          transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE,
+          FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE,
+          INDEX idx_car_id (car_id),
+          INDEX idx_buyer_id (buyer_id),
+          INDEX idx_seller_id (seller_id)
+        )`,
+        
+        `CREATE TABLE IF NOT EXISTS inquiries (
+          id INT PRIMARY KEY AUTO_INCREMENT,
+          car_id INT NOT NULL,
+          user_id INT NOT NULL,
+          message TEXT,
+          status ENUM('open', 'replied', 'closed') DEFAULT 'open',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+          INDEX idx_car_id (car_id),
+          INDEX idx_user_id (user_id)
+        )`,
+        
+        `CREATE TABLE IF NOT EXISTS messages (
+          id INT PRIMARY KEY AUTO_INCREMENT,
+          sender_id INT NOT NULL,
+          receiver_id INT NOT NULL,
+          message TEXT NOT NULL,
+          is_read BOOLEAN DEFAULT FALSE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+          INDEX idx_sender_id (sender_id),
+          INDEX idx_receiver_id (receiver_id)
+        )`
+      ];
       
-      // Split by semicolon and execute each statement
-      const statements = schema
-        .split(';')
-        .map(stmt => stmt.trim())
-        .filter(stmt => {
-          // Remove empty, comment lines, USE statements, and CREATE DATABASE statements
-          const isValid = stmt && 
-                         !stmt.startsWith('--') && 
-                         !stmt.toUpperCase().startsWith('USE ') &&
-                         !stmt.toUpperCase().startsWith('CREATE DATABASE');
-          return isValid;
-        });
-      
-      console.log(`  Found ${statements.length} SQL statements to execute`);
+      console.log(`  Executing ${createTables.length} CREATE TABLE statements...`);
       
       let executed = 0;
-      let skipped = 0;
-      for (const statement of statements) {
-        if (statement) {
-          try {
-            await db.execute(statement);
+      for (const statement of createTables) {
+        try {
+          await db.execute(statement);
+          const match = statement.match(/CREATE TABLE.*?(\w+)\s*\(/i);
+          if (match) {
+            console.log(`    ✅ Created table: ${match[1]}`);
             executed++;
-            if (statement.toUpperCase().includes('CREATE TABLE')) {
-              const match = statement.match(/CREATE TABLE\s+`?(\w+)`?/i);
-              if (match) console.log(`    ✓ Created table: ${match[1]}`);
-            }
-          } catch (err) {
-            skipped++;
-            console.warn(`    ⚠️  Skipped: ${err.message.substring(0, 60)}`);
           }
+        } catch (err) {
+          console.warn(`    ⚠️  Error: ${err.message.substring(0, 60)}`);
         }
       }
       
-      console.log(`  ✅ Schema execution complete: ${executed} succeeded, ${skipped} skipped`);
-      console.log('✅ Database tables initialized successfully');
+      console.log(`✅ Database tables initialized: ${executed}/${createTables.length} tables created`);
     } else {
       console.log('✅ Database tables already exist (users table found)');
     }
   } catch (error) {
     console.error('❌ Database initialization failed:', error.message);
-    console.error('Error details:', error);
-    // Don't exit, let the app continue
+    throw error;  // THROW error so server doesn't continue without tables
   }
   console.log('🔧 initializeDatabase() complete\n');
 };
