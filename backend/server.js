@@ -18,16 +18,19 @@ const app = express();
 
 // Initialize database on startup
 const initializeDatabase = async () => {
+  console.log('\n🔧 initializeDatabase() starting...');
   try {
-    console.log('🔄 Checking database...');
+    console.log('🔄 Checking if tables exist...');
     
     // Check if users table exists
     const [tables] = await db.execute("SHOW TABLES LIKE 'users'");
+    console.log(`  Tables check result: found ${tables.length} existing tables`);
     
     if (tables.length === 0) {
-      console.log('📋 Creating database tables from schema...');
+      console.log('📋 Users table NOT found. Creating all tables from schema.sql...');
       
       const schemaPath = path.join(__dirname, 'database', 'schema.sql');
+      console.log(`  Reading schema from: ${schemaPath}`);
       const schema = fs.readFileSync(schemaPath, 'utf8');
       
       // Split by semicolon and execute each statement
@@ -43,54 +46,70 @@ const initializeDatabase = async () => {
           return isValid;
         });
       
+      console.log(`  Found ${statements.length} SQL statements to execute`);
+      
+      let executed = 0;
+      let skipped = 0;
       for (const statement of statements) {
         if (statement) {
           try {
             await db.execute(statement);
+            executed++;
+            if (statement.toUpperCase().includes('CREATE TABLE')) {
+              const match = statement.match(/CREATE TABLE\s+`?(\w+)`?/i);
+              if (match) console.log(`    ✓ Created table: ${match[1]}`);
+            }
           } catch (err) {
-            // Log but continue with other statements
-            console.warn(`⚠️ Statement skipped: ${err.message.substring(0, 80)}`);
+            skipped++;
+            console.warn(`    ⚠️  Skipped: ${err.message.substring(0, 60)}`);
           }
         }
       }
       
-      console.log('✅ Database tables created successfully');
+      console.log(`  ✅ Schema execution complete: ${executed} succeeded, ${skipped} skipped`);
+      console.log('✅ Database tables initialized successfully');
     } else {
-      console.log('✅ Database tables already exist');
+      console.log('✅ Database tables already exist (users table found)');
     }
   } catch (error) {
     console.error('❌ Database initialization failed:', error.message);
     console.error('Error details:', error);
     // Don't exit, let the app continue
   }
+  console.log('🔧 initializeDatabase() complete\n');
 };
 
 // Seed test data if database is empty
 const seedTestData = async () => {
+  console.log('\n🌱 seedTestData() starting...');
   try {
     // Check if cars table has data
     let carCount = 0;
     try {
+      console.log('📊 Attempting COUNT query on cars table...');
       const [cars] = await db.execute('SELECT COUNT(*) as count FROM cars');
       carCount = cars[0].count;
+      console.log(`✅ Cars count query succeeded: ${carCount} cars in database`);
     } catch (err) {
-      // Table doesn't exist or other error - will be created by initializeDatabase
-      console.log('📊 Cars table check failed (will be created): ' + err.message.substring(0, 50));
+      // Table doesn't exist or other error
+      console.error('❌ Cars count query failed:', err.message);
+      console.log('⚠️  Skipping seeding (tables may not be ready)');
       return;
     }
     
     if (carCount > 0) {
-      console.log(`✅ Database already has ${carCount} cars`);
+      console.log(`✅ Database already has ${carCount} cars. Skipping seed.`);
       return; // Data already exists
     }
 
-    console.log('📊 Seeding test data...');
+    console.log('📊 Database is empty. Starting seed process...');
     
     // Check if admin user exists
     const [adminUsers] = await db.execute('SELECT id FROM users WHERE username = ?', ['admin']);
     let adminId = 1;
     
     if (adminUsers.length === 0) {
+      console.log('  👤 Creating admin user...');
       const bcrypt = require('bcryptjs');
       const hashedPassword = await bcrypt.hash('admin123', 10);
       const [result] = await db.execute(
@@ -98,10 +117,10 @@ const seedTestData = async () => {
         ['admin', 'admin@ridebazzar.com', hashedPassword, 'Admin User', true, true]
       );
       adminId = result.insertId;
-      console.log('  ✓ Admin user created (ID: ' + adminId + ')');
+      console.log(`  ✓ Admin user created (ID: ${adminId})`);
     } else {
       adminId = adminUsers[0].id;
-      console.log('  ✓ Admin user already exists (ID: ' + adminId + ')');
+      console.log(`  ✓ Admin user already exists (ID: ${adminId})`);
     }
 
     // Insert test cars
@@ -113,37 +132,48 @@ const seedTestData = async () => {
       { make: 'Mahindra', model: 'XUV700', year: 2022, price: 1700000, status: 'available', description: 'Premium XUV700', fuel_type: 'Diesel', transmission: 'Automatic', condition_status: 'Excellent', mileage: 20000, color: 'Silver', contact: '9999999995', location: 'Hyderabad' },
     ];
 
+    console.log(`  🚗 Inserting ${testCars.length} test cars...`);
     const carIds = [];
     for (const car of testCars) {
-      const [result] = await db.execute(
-        'INSERT INTO cars (make, model, year, price, status, seller_id, description, fuel_type, transmission, condition_status, mileage, color, contact, location, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
-        [car.make, car.model, car.year, car.price, car.status, adminId, car.description, car.fuel_type, car.transmission, car.condition_status, car.mileage, car.color, car.contact, car.location]
-      );
-      carIds.push(result.insertId);
-      console.log(`  ✓ Added ${car.make} ${car.model}`);
-    }
-
-    // Add test bookings
-    if (carIds.length >= 2) {
-      await db.execute(
-        'INSERT INTO bookings (car_id, buyer_id, seller_id, booking_amount, total_amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-        [carIds[1], adminId, adminId, 100000, testCars[1].price, 'confirmed']
-      );
-      console.log('  ✓ Booking 1 created');
-
-      if (carIds.length >= 5) {
-        await db.execute(
-          'INSERT INTO bookings (car_id, buyer_id, seller_id, booking_amount, total_amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-          [carIds[4], adminId, adminId, 100000, testCars[4].price, 'confirmed']
+      try {
+        const [result] = await db.execute(
+          'INSERT INTO cars (make, model, year, price, status, seller_id, description, fuel_type, transmission, condition_status, mileage, color, contact, location, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+          [car.make, car.model, car.year, car.price, car.status, adminId, car.description, car.fuel_type, car.transmission, car.condition_status, car.mileage, car.color, car.contact, car.location]
         );
-        console.log('  ✓ Booking 2 created');
+        carIds.push(result.insertId);
+        console.log(`    ✓ Added ${car.make} ${car.model}`);
+      } catch (carErr) {
+        console.error(`    ✗ Failed to add ${car.make} ${car.model}:`, carErr.message);
       }
     }
 
-    console.log('✅ Test data seeded successfully\n');
+    console.log(`  📋 Creating ${Math.min(2, carIds.length)} test bookings...`);
+    // Add test bookings
+    if (carIds.length >= 2) {
+      try {
+        await db.execute(
+          'INSERT INTO bookings (car_id, buyer_id, seller_id, booking_amount, total_amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+          [carIds[1], adminId, adminId, 100000, testCars[1].price, 'confirmed']
+        );
+        console.log('    ✓ Booking 1 created');
+
+        if (carIds.length >= 5) {
+          await db.execute(
+            'INSERT INTO bookings (car_id, buyer_id, seller_id, booking_amount, total_amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+            [carIds[4], adminId, adminId, 100000, testCars[4].price, 'confirmed']
+          );
+          console.log('    ✓ Booking 2 created');
+        }
+      } catch (bookErr) {
+        console.error('    ✗ Failed to create bookings:', bookErr.message);
+      }
+    }
+
+    console.log('✅ Test data seeding completed successfully!\n');
 
   } catch (error) {
-    console.error('❌ Error seeding test data:', error.message);
+    console.error('❌ Unexpected error in seedTestData:', error.message);
+    console.error('Stack:', error.stack);
   }
 };
 
