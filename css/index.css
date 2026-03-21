@@ -140,6 +140,7 @@
       flex-direction: column;
       gap: 15px;
       align-items: center;
+      margin-bottom: 10px;
     }
 
     .view-btn {
