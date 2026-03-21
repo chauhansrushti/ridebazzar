@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - RideBazzar</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="js/config.js"></script>
     <style>
         * {
             margin: 0;
@@ -592,6 +593,20 @@
 
     <script src="js/auth-api.js"></script>
     <script>
+        // Get API base URL from config or set default
+        function getApiBaseUrl() {
+            if (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) {
+                return CONFIG.API_BASE_URL;
+            }
+            // Try loading config if not already loaded
+            if (typeof window.getRideBazzarConfig === 'function') {
+                const config = window.getRideBazzarConfig();
+                return config.API_BASE_URL;
+            }
+            // Fallback to current origin
+            return window.location.origin + '/api';
+        }
+
         // Eye tracking animation
         const leftPupil = document.getElementById('leftPupil');
         const rightPupil = document.getElementById('rightPupil');
@@ -657,8 +672,11 @@
             const messageDiv = document.getElementById('message');
 
             try {
-                // Using auth-api.js login function
-                const response = await fetch('http://localhost:5000/api/auth/login', {
+                const apiUrl = getApiBaseUrl() + '/auth/login';
+                console.log('Logging in to:', apiUrl);
+                
+                // Using proper API URL
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: email, password: password })
@@ -683,11 +701,12 @@
                     messageDiv.className = 'message error';
                     messageDiv.textContent = '❌ ' + (data.message || 'Invalid credentials');
                     messageDiv.style.display = 'block';
+                    console.error('Login failed:', data);
                 }
             } catch (error) {
                 console.error('Login error:', error);
                 messageDiv.className = 'message error';
-                messageDiv.textContent = '❌ Error connecting to server';
+                messageDiv.textContent = '❌ Error connecting to server. Check browser console for details.';
                 messageDiv.style.display = 'block';
             }
         });
