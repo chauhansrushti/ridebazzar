@@ -323,12 +323,184 @@
             border: 1px solid #f5c6cb;
         }
 
+        /* Mobile Responsive Design */
+        @media (max-width: 1024px) {
+            .left-side {
+                flex: 0 0 40%;
+            }
+        }
+
         @media (max-width: 968px) {
             .left-side {
-                display: none;
+                display: none !important;
             }
             .right-side {
                 flex: 1;
+            }
+        }
+
+        /* Tablet and Small Screens */
+        @media (max-width: 768px) {
+            body {
+                height: auto;
+                overflow: auto;
+            }
+
+            .login-container {
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .right-side {
+                padding: 30px 20px;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .login-form-container {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .logo-section h1 {
+                font-size: 28px;
+            }
+
+            .logo-section p {
+                font-size: 13px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-group label {
+                font-size: 13px;
+            }
+
+            .form-group input {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+
+            .login-btn, .google-login {
+                padding: 14px;
+                font-size: 15px;
+            }
+
+            .form-options {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+
+        /* Mobile Phones - Extra Small */
+        @media (max-width: 480px) {
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                height: auto;
+                overflow: auto;
+            }
+
+            .login-container {
+                display: block;
+                height: auto;
+            }
+
+            .right-side {
+                padding: 20px;
+                width: 100%;
+            }
+
+            .login-form-container {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .logo-section {
+                margin-bottom: 30px;
+            }
+
+            .logo-section i {
+                font-size: 40px;
+            }
+
+            .logo-section h1 {
+                font-size: 24px;
+                margin-bottom: 3px;
+            }
+
+            .logo-section p {
+                font-size: 12px;
+            }
+
+            .form-group {
+                margin-bottom: 18px;
+            }
+
+            .form-group label {
+                font-size: 12px;
+                margin-bottom: 6px;
+            }
+
+            .form-group input {
+                padding: 11px 12px;
+                font-size: 13px;
+                border-radius: 6px;
+            }
+
+            .input-wrapper {
+                position: relative;
+            }
+
+            .password-toggle {
+                font-size: 16px;
+            }
+
+            .form-options {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                margin-bottom: 20px;
+                gap: 10px;
+            }
+
+            .remember-me {
+                width: 100%;
+            }
+
+            .forgot-password {
+                font-size: 13px;
+                align-self: flex-end;
+            }
+
+            .login-btn {
+                padding: 13px;
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+
+            .google-login {
+                padding: 12px;
+                font-size: 13px;
+                margin-bottom: 25px;
+            }
+
+            .google-icon {
+                width: 18px;
+                height: 18px;
+            }
+
+            .signup-link {
+                font-size: 13px;
+            }
+
+            .message {
+                padding: 10px;
+                font-size: 12px;
             }
         }
     </style>

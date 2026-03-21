@@ -180,11 +180,241 @@
       margin-bottom: 20px;
     }
     @media (max-width: 768px) {
-      .profile-tabs {
-        flex-direction: column;
+      .dashboard-container {
+        margin: 15px auto;
+        padding: 0 15px;
       }
+
+      .profile-header {
+        padding: 25px;
+        margin-bottom: 20px;
+      }
+
+      .profile-avatar {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 15px auto;
+      }
+
+      .profile-avatar i {
+        font-size: 50px;
+      }
+
+      .profile-header h1 {
+        font-size: 20px;
+      }
+
+      .profile-header p {
+        font-size: 13px;
+      }
+
+      .profile-tabs {
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 3px;
+        gap: 3px;
+      }
+
+      .tab-button {
+        min-width: 110px;
+        padding: 12px 15px;
+        font-size: 12px;
+      }
+
+      .tab-button .material-icons {
+        font-size: 16px;
+      }
+
+      .tab-content {
+        padding: 20px;
+        min-height: 400px;
+      }
+
       .stats-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+
+      .stat-card {
+        padding: 15px;
+        border-top: 3px solid #f9b233;
+      }
+
+      .stat-number {
+        font-size: 1.8em;
+      }
+
+      .stat-label {
+        font-size: 12px;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 8px;
+        font-size: 13px;
+      }
+
+      .car-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+      }
+
+      .empty-state {
+        padding: 40px 20px;
+      }
+
+      .empty-state-icon {
+        font-size: 48px;
+      }
+
+      #editCarModal > div {
+        max-width: 95%;
+        margin: 20px auto;
+        padding: 20px;
+      }
+    }
+
+    /* Extra Small Phones */
+    @media (max-width: 480px) {
+      .dashboard-container {
+        margin: 10px auto;
+        padding: 0 10px;
+      }
+
+      .profile-header {
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+
+      .profile-avatar {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 12px auto;
+      }
+
+      .profile-avatar i {
+        font-size: 35px;
+      }
+
+      .profile-header h1 {
+        font-size: 16px;
+        margin: 10px 0 5px;
+      }
+
+      .profile-header p {
+        font-size: 11px;
+        margin: 0;
+      }
+
+      .profile-tabs {
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding: 2px;
+        gap: 2px;
+      }
+
+      .profile-tabs::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      .profile-tabs::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      .profile-tabs::-webkit-scrollbar-thumb {
+        background: #f9b233;
+        border-radius: 2px;
+      }
+
+      .tab-button {
+        min-width: 95px;
+        padding: 10px 12px;
+        font-size: 11px;
+        gap: 4px;
+      }
+
+      .tab-button .material-icons {
+        font-size: 14px;
+      }
+
+      .tab-button i {
+        display: none;
+      }
+
+      .tab-content {
+        padding: 15px;
+        min-height: 300px;
+        border-radius: 8px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .stat-card {
+        padding: 12px;
+        border-top: 2px solid #f9b233;
+      }
+
+      .stat-number {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        font-size: 11px;
+      }
+
+      .data-table {
+        font-size: 12px;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 6px;
+        font-size: 11px;
+      }
+
+      .status-badge {
+        padding: 2px 8px;
+        font-size: 10px;
+      }
+
+      .car-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .car-card {
+        border-radius: 8px;
+      }
+
+      .empty-state {
+        padding: 30px 15px;
+      }
+
+      .empty-state-icon {
+        font-size: 40px;
+        margin-bottom: 15px;
+      }
+
+      .empty-state h3 {
+        font-size: 14px;
+      }
+
+      #editCarModal > div {
+        max-width: 100%;
+        margin: 10px auto;
+        padding: 15px;
+        border-radius: 8px;
+      }
+
+      #editCarModal span {
+        font-size: 24px;
+        top: 10px;
+        right: 10px;
       }
     }
   </style>

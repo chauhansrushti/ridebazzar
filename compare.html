@@ -147,9 +147,11 @@
     @media (max-width: 768px) {
       .compare-container {
         padding: 0 10px;
+        margin: 15px auto;
       }
       .compare-header {
         padding: 20px 15px;
+        margin-bottom: 20px;
       }
       .compare-header h1 {
         font-size: 1.5em;
@@ -164,6 +166,7 @@
       .comparison-table {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        margin-bottom: 20px;
       }
       .comparison-row {
         display: flex;
@@ -185,19 +188,143 @@
         width: 100%;
         border-right: none;
         border-bottom: 1px solid #eee;
-        padding: 15px;
+        padding: 12px;
         text-align: left;
         display: flex;
         align-items: center;
         gap: 10px;
+        font-size: 13px;
       }
       .comparison-cell:last-child {
         border-bottom: none;
       }
-      .comparison-cell::before {
-        content: "Car " counter(car-num) ": ";
-        font-weight: 600;
-        color: #666;
+      .car-selection-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        padding: 15px;
+      }
+      .selectable-car {
+        padding: 12px;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .compare-container {
+        padding: 0 8px;
+        margin: 10px auto;
+      }
+      .compare-header {
+        padding: 15px 12px;
+        margin-bottom: 15px;
+      }
+      .compare-header h1 {
+        font-size: 1.3em;
+      }
+      .selector-card {
+        padding: 15px;
+        font-size: 13px;
+      }
+      .comparison-row {
+        border-bottom: 2px solid #ccc;
+      }
+      .comparison-label {
+        padding: 10px;
+        font-size: 12px;
+      }
+      .comparison-cell {
+        padding: 10px;
+        font-size: 12px;
+        gap: 8px;
+      }
+      .remove-car-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 14px;
+      }
+      .car-selection-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 10px;
+      }
+      .selectable-car {
+        padding: 10px;
+        font-size: 12px;
+      }
+      .modal-content {
+        max-width: 95%;
+        margin: 30px auto;
+        border-radius: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .compare-container {
+        padding: 0 5px;
+        margin: 5px auto;
+      }
+      .compare-header {
+        padding: 12px 10px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+      }
+      .compare-header h1 {
+        font-size: 1.1em;
+        margin: 0;
+      }
+      .car-selector {
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      .selector-card {
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 12px;
+      }
+      .comparison-table {
+        margin-bottom: 15px;
+        border-radius: 8px;
+      }
+      .comparison-row {
+        border-bottom: 2px solid #bbb;
+      }
+      .comparison-header-row .comparison-label {
+        font-size: 11px;
+        padding: 8px;
+      }
+      .comparison-label {
+        padding: 8px;
+        font-size: 11px;
+        background: #f9b233;
+      }
+      .comparison-cell {
+        padding: 8px;
+        font-size: 11px;
+        gap: 6px;
+      }
+      .remove-car-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+        top: 5px;
+        right: 5px;
+      }
+      .car-selection-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 8px;
+      }
+      .selectable-car {
+        padding: 8px;
+        font-size: 11px;
+      }
+      .modal-content {
+        max-width: 98%;
+        margin: 20px auto;
+        border-radius: 6px;
+        max-height: 100vh;
+      }
+    }
         counter-increment: car-num;
       }
       .comparison-row {

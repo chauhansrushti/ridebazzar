@@ -121,10 +121,194 @@
       border-radius: 8px;
       box-shadow: 0 2px 12px #0003;
     }
+    @media (max-width: 768px) {
+      .post-car-container {
+        margin: 15px auto;
+        padding: 30px 20px;
+        border-radius: 12px;
+      }
+
+      .post-car-container h2 {
+        font-size: 1.8em;
+        margin-bottom: 20px;
+      }
+
+      .form-section h3 {
+        font-size: 1.2em;
+        margin-bottom: 15px;
+      }
+
+      .post-car-container label {
+        font-size: 0.95em;
+        margin-bottom: 5px;
+      }
+
+      .post-car-container input[type="text"],
+      .post-car-container input[type="number"],
+      .post-car-container input[type="email"],
+      .post-car-container input[type="tel"],
+      .post-car-container input[type="file"],
+      .post-car-container select,
+      .post-car-container textarea {
+        font-size: 0.95em;
+        padding: 10px;
+        margin-bottom: 15px;
+      }
+
+      .post-car-container textarea {
+        min-height: 70px;
+      }
+
+      .form-row {
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .post-car-container button {
+        padding: 12px 0;
+        font-size: 1em;
+      }
+
+      .car-image-preview {
+        max-height: 150px;
+        margin: 0 auto 15px;
+      }
+
+      .form-section {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+      }
+    }
+
     @media (max-width: 600px) {
       .post-car-container {
-        padding: 18px 4vw;
-        max-width: 98vw;
+        padding: 18px 15px;
+        max-width: 100%;
+        margin: 10px auto;
+        border-radius: 8px;
+      }
+
+      .post-car-container h2 {
+        font-size: 1.4em;
+        margin-bottom: 15px;
+      }
+
+      .form-section h3 {
+        font-size: 1em;
+        margin-bottom: 12px;
+        font-weight: bold;
+      }
+
+      .post-car-container label {
+        font-size: 0.9em;
+        font-weight: 500;
+      }
+
+      .post-car-container input[type="text"],
+      .post-car-container input[type="number"],
+      .post-car-container input[type="email"],
+      .post-car-container input[type="tel"],
+      .post-car-container input[type="file"],
+      .post-car-container select,
+      .post-car-container textarea {
+        font-size: 0.9em;
+        padding: 9px;
+        margin-bottom: 12px;
+        border-radius: 5px;
+      }
+
+      .post-car-container textarea {
+        min-height: 60px;
+      }
+
+      .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin-bottom: 12px;
+      }
+
+      .form-row > div {
+        flex: 1;
+      }
+
+      .form-row > div input,
+      .form-row > div select {
+        margin-bottom: 12px !important;
+      }
+
+      .post-car-container button {
+        padding: 11px 0;
+        font-size: 0.95em;
+        margin-top: 8px;
+      }
+
+      .car-image-preview {
+        max-height: 120px;
+        margin: 0 auto 12px;
+      }
+
+      .form-section {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #555;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .post-car-container {
+        padding: 15px 12px;
+        margin: 8px auto;
+      }
+
+      .post-car-container h2 {
+        font-size: 1.2em;
+        margin-bottom: 12px;
+      }
+
+      .form-section h3 {
+        font-size: 0.95em;
+        margin-bottom: 10px;
+      }
+
+      .post-car-container label {
+        font-size: 0.85em;
+        margin-bottom: 4px;
+      }
+
+      .post-car-container input[type="text"],
+      .post-car-container input[type="number"],
+      .post-car-container input[type="email"],
+      .post-car-container input[type="tel"],
+      .post-car-container input[type="file"],
+      .post-car-container select,
+      .post-car-container textarea {
+        font-size: 0.85em;
+        padding: 8px;
+        margin-bottom: 10px;
+      }
+
+      .post-car-container textarea {
+        min-height: 50px;
+      }
+
+      .form-row {
+        gap: 0;
+      }
+
+      .post-car-container button {
+        padding: 10px 0;
+        font-size: 0.9em;
+      }
+
+      .car-image-preview {
+        max-height: 100px;
+        margin: 0 auto 10px;
+      }
+
+      .form-section {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
       }
     }
   </style>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Loader Test</title>
+  <style>
+    body { font-family: Arial; margin: 20px; background: #f5f5f5; }
+    .test { margin: 20px 0; padding: 15px; background: white; border-radius: 5px; }
+    .pass { border-left: 4px solid #28a745; }
+    .fail { border-left: 4px solid #dc3545; }
+    pre { background: #f8f9fa; padding: 10px; overflow-x: auto; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Admin Dashboard Loader Test</h1>
+  
+  <div class="test">
+    <h2>Config Status</h2>
+    <pre id="configStatus">Loading...</pre>
+    <button onclick="testConfig()">Test Config</button>
+  </div>
+
+  <div class="test">
+    <h2>Public Users Endpoint</h2>
+    <pre id="usersTest">Loading...</pre>
+    <button onclick="testUsersEndpoint()">Test /api/public/users</button>
+  </div>
+
+  <div class="test">
+    <h2>Public Cars Endpoint</h2>
+    <pre id="carsTest">Loading...</pre>
+    <button onclick="testCarsEndpoint()">Test /api/public/cars</button>
+  </div>
+
+  <div class="test">
+    <h2>Public Bookings Endpoint</h2>
+    <pre id="bookingsTest">Loading...</pre>
+    <button onclick="testBookingsEndpoint()">Test /api/public/bookings</button>
+  </div>
+
+  <div class="test">
+    <h2>Public Stats Endpoint</h2>
+    <pre id="statsTest">Loading...</pre>
+    <button onclick="testStatsEndpoint()">Test /api/public/stats</button>
+  </div>
+
+  <div class="test">
+    <h2>Admin Page Load Simulation</h2>
+    <pre id="adminLoadTest">Ready...</pre>
+    <button onclick="simulateAdminLoad()">Simulate Admin.html load</button>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script>
+    async function testConfig() {
+      const el = document.getElementById('configStatus');
+      try {
+        const config = CONFIG;
+        el.textContent = JSON.stringify(config, null, 2);
+        el.parentElement.className = 'test pass';
+      } catch (e) {
+        el.textContent = 'ERROR: ' + e.message;
+        el.parentElement.className = 'test fail';
+      }
+    }
+
+    async function testUsersEndpoint() {
+      const el = document.getElementById('usersTest');
+      try {
+        const config = CONFIG;
+        const url = config.API_BASE_URL.endsWith('/api') 
+          ? config.API_BASE_URL + '/public/users' 
+          : config.API_BASE_URL + '/api/public/users';
+        
+        console.log('Calling:', url);
+        const response = await fetch(url + '?t=' + Date.now());
+        const data = await response.json();
+        
+        el.textContent = 'Status: ' + response.status + '\n' + JSON.stringify(data, null, 2);
+        el.parentElement.className = data.success ? 'test pass' : 'test fail';
+      } catch (e) {
+        el.textContent = 'ERROR: ' + e.message;
+        el.parentElement.className = 'test fail';
+      }
+    }
+
+    async function testCarsEndpoint() {
+      const el = document.getElementById('carsTest');
+      try {
+        const config = CONFIG;
+        const url = config.API_BASE_URL.endsWith('/api') 
+          ? config.API_BASE_URL + '/public/cars' 
+          : config.API_BASE_URL + '/api/public/cars';
+        
+        console.log('Calling:', url);
+        const response = await fetch(url + '?t=' + Date.now());
+        const data = await response.json();
+        
+        el.textContent = 'Status: ' + response.status + '\n' + (data.count || 0) + ' cars\n' + JSON.stringify(data, null, 2).substring(0, 200) + '...';
+        el.parentElement.className = data.success ? 'test pass' : 'test fail';
+      } catch (e) {
+        el.textContent = 'ERROR: ' + e.message;
+        el.parentElement.className = 'test fail';
+      }
+    }
+
+    async function testBookingsEndpoint() {
+      const el = document.getElementById('bookingsTest');
+      try {
+        const config = CONFIG;
+        const url = config.API_BASE_URL.endsWith('/api') 
+          ? config.API_BASE_URL + '/public/bookings' 
+          : config.API_BASE_URL + '/api/public/bookings';
+        
+        console.log('Calling:', url);
+        const response = await fetch(url + '?t=' + Date.now());
+        const data = await response.json();
+        
+        el.textContent = 'Status: ' + response.status + '\n' + (data.count || 0) + ' bookings\n' + JSON.stringify(data, null, 2).substring(0, 200) + '...';
+        el.parentElement.className = data.success ? 'test pass' : 'test fail';
+      } catch (e) {
+        el.textContent = 'ERROR: ' + e.message;
+        el.parentElement.className = 'test fail';
+      }
+    }
+
+    async function testStatsEndpoint() {
+      const el = document.getElementById('statsTest');
+      try {
+        const config = CONFIG;
+        const url = config.API_BASE_URL.endsWith('/api') 
+          ? config.API_BASE_URL + '/public/stats' 
+          : config.API_BASE_URL + '/api/public/stats';
+        
+        console.log('Calling:', url);
+        const response = await fetch(url + '?t=' + Date.now());
+        const data = await response.json();
+        
+        el.textContent = 'Status: ' + response.status + '\n' + JSON.stringify(data, null, 2);
+        el.parentElement.className = data.success ? 'test pass' : 'test fail';
+      } catch (e) {
+        el.textContent = 'ERROR: ' + e.message;
+        el.parentElement.className = 'test fail';
+      }
+    }
+
+    async function simulateAdminLoad() {
+      const el = document.getElementById('adminLoadTest');
+      try {
+        el.textContent = 'Simulating admin page load...\n\n';
+        
+        // Simulate what admin.html does
+        const config = CONFIG;
+        el.textContent += '1. CONFIG loaded: ' + JSON.stringify(config.API_BASE_URL) + '\n\n';
+        
+        // Check for /api prefix
+        if (!config.API_BASE_URL.includes('/api')) {
+          el.textContent += '2. WARNING: CONFIG.API_BASE_URL missing /api\n';
+          el.textContent += '   Should fix: ' + config.API_BASE_URL + ' => ' + config.API_BASE_URL + '/api\n\n';
+        } else {
+          el.textContent += '2. CONFIG.API_BASE_URL has /api ✓\n\n';
+        }
+        
+        // Try to call public/users
+        el.textContent += '3. Testing loadUsers()...\n';
+        const apiBase = config.API_BASE_URL.includes('/api') ? config.API_BASE_URL : config.API_BASE_URL + '/api';
+        const usersUrl = apiBase + '/public/users?t=' + Date.now();
+        el.textContent += '   URL: ' + usersUrl + '\n';
+        
+        const response = await fetch(usersUrl);
+        el.textContent += '   Status: ' + response.status + '\n';
+        
+        const contentType = response.headers.get('content-type');
+        el.textContent += '   Content-Type: ' + contentType + '\n';
+        
+        if (!contentType.includes('application/json')) {
+          el.textContent += '   ERROR: Not JSON!\n';
+          const html = await response.text();
+          el.textContent += '   Response: ' + html.substring(0, 100) + '...\n';
+          el.parentElement.className = 'test fail';
+          return;
+        }
+        
+        const data = await response.json();
+        el.textContent += '   Response: ' + JSON.stringify(data, null, 2).substring(0, 300) + '...\n';
+        el.parentElement.className = data.success ? 'test pass' : 'test fail';
+        
+      } catch (e) {
+        el.textContent = 'ERROR: ' + e.message + '\n' + e.stack;
+        el.parentElement.className = 'test fail';
+      }
+    }
+
+    // Run tests on load
+    window.addEventListener('load', () => {
+      testConfig();
+    });
+  </script>
+</body>
+</html>

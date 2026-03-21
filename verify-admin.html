@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .output {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Admin Dashboard Verification</h1>
+    
+    <div class="container">
+        <h2>System Configuration</h2>
+        <button onclick="showConfig()">Show Configuration</button>
+        <div id="configOutput" class="output"></div>
+    </div>
+
+    <div class="container">
+        <h2>API Endpoint Tests</h2>
+        <button onclick="testEndpoint('/api/public/users', 'Users')">Test /api/public/users</button>
+        <button onclick="testEndpoint('/api/public/cars', 'Cars')">Test /api/public/cars</button>
+        <button onclick="testEndpoint('/api/public/bookings', 'Bookings')">Test /api/public/bookings</button>
+        <button onclick="testEndpoint('/api/public/stats', 'Stats')">Test /api/public/stats</button>
+        <div id="endpointOutput" class="output"></div>
+    </div>
+
+    <div class="container">
+        <h2>Admin Dashboard Test</h2>
+        <button onclick="simulateAdminLoad()">Simulate Admin Load Sequence</button>
+        <div id="adminOutput" class="output"></div>
+    </div>
+
+    <div class="container">
+        <h2>Network Diagnostics</h2>
+        <button onclick="testConnectivity()">Test Connectivity</button>
+        <div id="networkOutput" class="output"></div>
+    </div>
+
+    <script>
+        // Load config similar to admin.html
+        function getRideBazzarConfig() {
+            const isProduction = window.location.hostname !== 'localhost' && 
+                                window.location.hostname !== '127.0.0.1';
+            
+            return {
+                API_BASE_URL: isProduction ? window.location.origin : 'http://localhost:5000',
+                AUTH_API: '/api/auth',
+                CARS_API: '/api/cars',
+                BOOKINGS_API: '/api/bookings',
+                USERS_API: '/api/users',
+                PAYMENTS_API: '/api/payments',
+                INQUIRIES_API: '/api/inquiries',
+                MESSAGES_API: '/api/messages',
+                PUBLIC_USERS: '/api/public/users',
+                PUBLIC_CARS: '/api/public/cars',
+                PUBLIC_BOOKINGS: '/api/public/bookings',
+                PUBLIC_STATS: '/api/public/stats'
+            };
+        }
+
+        function ensureApiPrefix(url) {
+            if (!url.includes('/api')) {
+                // Ensure the URL doesn't end with / and add /api
+                if (url.endsWith('/')) {
+                    return url + 'api';
+                } else {
+                    return url + '/api';
+                }
+            }
+            return url;
+        }
+
+        function addCacheBuster(url) {
+            return url + '?t=' + Date.now();
+        }
+
+        function log(output, message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            output.innerHTML += `[${timestamp}] ${prefix} ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        async function showConfig() {
+            const output = document.getElementById('configOutput');
+            output.innerHTML = '';
+            
+            const config = getRideBazzarConfig();
+            log(output, `Current hostname: ${window.location.hostname}`, 'info');
+            log(output, `Is production: ${window.location.hostname !== 'localhost'}`, 'info');
+            log(output, `API_BASE_URL: ${config.API_BASE_URL}`, 'info');
+            log(output, `Config object: ${JSON.stringify(config, null, 2)}`, 'info');
+        }
+
+        async function testEndpoint(endpoint, name) {
+            const output = document.getElementById('endpointOutput');
+            output.innerHTML = '';
+            
+            const config = getRideBazzarConfig();
+            let apiBase = config.API_BASE_URL;
+            if (!apiBase.includes('/api')) {
+                apiBase = ensureApiPrefix(apiBase);
+            }
+            
+            const url = addCacheBuster(`${apiBase}${endpoint}`);
+            log(output, `Testing: ${name}`, 'info');
+            log(output, `Full URL: ${url}`, 'info');
+            
+            try {
+                log(output, 'Fetching...', 'info');
+                const response = await fetch(url);
+                
+                log(output, `Response status: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+                
+                const contentType = response.headers.get('content-type');
+                log(output, `Content-Type: ${contentType}`, 'info');
+                
+                const text = await response.text();
+                log(output, `Response length: ${text.length} bytes`, 'info');
+                
+                if (!response.ok) {
+                    log(output, `Response body: ${text.substring(0, 200)}`, 'error');
+                    return;
+                }
+                
+                if (!contentType || !contentType.includes('application/json')) {
+                    log(output, `Non-JSON response! Body preview: ${text.substring(0, 100)}`, 'error');
+                    return;
+                }
+                
+                const data = JSON.parse(text);
+                log(output, `✅ Valid JSON response received`, 'success');
+                log(output, `Response: ${JSON.stringify(data, null, 2)}`, 'success');
+                
+            } catch (error) {
+                log(output, `Exception: ${error.message}`, 'error');
+                log(output, `Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        async function simulateAdminLoad() {
+            const output = document.getElementById('adminOutput');
+            output.innerHTML = '';
+            
+            log(output, '=== Starting Admin Load Simulation ===', 'info');
+            
+            const config = getRideBazzarConfig();
+            log(output, `1. Config loaded: API_BASE_URL = ${config.API_BASE_URL}`, 'info');
+            
+            // Simulate loadUsers()
+            try {
+                log(output, '2. Simulating loadUsers()...', 'info');
+                
+                let apiBase = config.API_BASE_URL;
+                if (!apiBase.includes('/api')) {
+                    apiBase = ensureApiPrefix(apiBase);
+                }
+                
+                const usersUrl = addCacheBuster(`${apiBase}/public/users`);
+                log(output, `   URL: ${usersUrl}`, 'info');
+                
+                const response = await fetch(usersUrl);
+                log(output, `   Status: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    log(output, `   ERROR: Non-JSON response: ${text.substring(0, 100)}`, 'error');
+                } else {
+                    const result = await response.json();
+                    log(output, `   Success: ${result.success}`, result.success ? 'success' : 'error');
+                    if (result.error) {
+                        log(output, `   Error field: ${result.error}`, 'error');
+                    } else if (result.data) {
+                        log(output, `   Data count: ${result.data.length} users`, 'success');
+                    }
+                }
+            } catch (error) {
+                log(output, `   Exception: ${error.message}`, 'error');
+            }
+        }
+
+        async function testConnectivity() {
+            const output = document.getElementById('networkOutput');
+            output.innerHTML = '';
+            
+            const config = getRideBazzarConfig();
+            const apiBase = config.API_BASE_URL;
+            
+            log(output, `Testing connectivity to: ${apiBase}`, 'info');
+            
+            // Try health check
+            try {
+                log(output, 'Testing /api/health endpoint...', 'info');
+                const response = await fetch(`${apiBase}/api/health?t=${Date.now()}`);
+                log(output, `Status: ${response.status}`, response.ok ? 'success' : 'error');
+                const data = await response.json();
+                log(output, `Response: ${JSON.stringify(data)}`, 'success');
+            } catch (error) {
+                log(output, `Failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            log(document.getElementById('configOutput'), 'Verification page loaded', 'info');
+            showConfig();
+        });
+    </script>
+</body>
+</html>
