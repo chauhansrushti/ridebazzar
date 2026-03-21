@@ -162,9 +162,12 @@ router.get('/', async (req, res) => {
 
     } catch (error) {
         console.error('Get cars error:', error);
+        console.error('Error message:', error.message);
+        console.error('Error code:', error.code);
         res.status(500).json({ 
             success: false, 
-            message: 'Internal server error' 
+            message: 'Internal server error',
+            debug: process.env.NODE_ENV === 'production' ? undefined : error.message
         });
     }
 });
