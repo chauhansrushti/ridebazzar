@@ -1039,91 +1039,22 @@
       
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
-        // Collect all activities from different sources
         const activities = [];
-        const token = localStorage.getItem('authToken');
         
-        // 1. Transactions from backend
+        // 1. Get cars from public endpoint
         try {
-          const transResponse = await fetch(`${config.PAYMENTS_API}/admin/all`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          
-          if (transResponse.ok) {
-            const transResult = await transResponse.json();
-            if (transResult.success && Array.isArray(transResult.data)) {
-              transResult.data.forEach(txn => {
-                activities.push({
-                  type: 'payment',
-                  icon: '💳',
-                  description: `Payment of ₹${parseFloat(txn.amount).toLocaleString('en-IN')} - ${txn.make} ${txn.model}`,
-                  user: txn.username || 'Unknown',
-                  timestamp: new Date(txn.created_at),
-                  status: 'Paid',
-                  color: '#28a745'
-                });
-              });
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching transactions:', error);
-        }
-        
-        // 2. Test Drives
-        const testDrives = JSON.parse(localStorage.getItem('ridebazzar_testdrives') || '[]');
-        testDrives.forEach(td => {
-          activities.push({
-            type: 'test_drive',
-            icon: '<i class="material-icons">event</i>',
-            description: `Test drive scheduled for ${td.carInfo?.make} ${td.carInfo?.model}`,
-            user: td.buyer,
-            timestamp: new Date(td.createdAt),
-            status: td.status,
-            color: td.status === 'pending' ? '#ff9800' : td.status === 'confirmed' ? '#28a745' : '#6c757d'
-          });
-        });
-        
-        // 3. Bookings from backend
-        try {
-          const bookingsResponse = await fetch(`${config.BOOKINGS_API}/my-bookings`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          
-          if (bookingsResponse.ok) {
-            const bookingsResult = await bookingsResponse.json();
-            if (bookingsResult.success && Array.isArray(bookingsResult.data)) {
-              bookingsResult.data.forEach(booking => {
-                activities.push({
-                  type: 'booking',
-                  icon: '📅',
-                  description: `Car booked - ${booking.car_make} ${booking.car_model}`,
-                  user: booking.buyer_username || booking.buyer,
-                  timestamp: new Date(booking.created_at || booking.booking_date),
-                  status: booking.status,
-                  color: booking.status === 'confirmed' ? '#28a745' : booking.status === 'cancelled' ? '#dc3545' : '#007bff'
-                });
-              });
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching bookings:', error);
-        }
-        
-        // 4. Cars from backend
-        try {
-          const carsResponse = await fetch(`${config.CARS_API}?limit=50`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const carsUrl = addCacheBuster(`${config.API_BASE_URL}/public/cars`);
+          const carsResponse = await fetch(carsUrl);
           
           if (carsResponse.ok) {
             const carsResult = await carsResponse.json();
-            if (carsResult.success && carsResult.data && Array.isArray(carsResult.data.cars)) {
-              carsResult.data.cars.forEach(car => {
+            if (carsResult.success && Array.isArray(carsResult.data)) {
+              carsResult.data.slice(0, 10).forEach(car => {
                 activities.push({
                   type: 'car_posted',
                   icon: '🚙',
                   description: `${car.make} ${car.model} ${car.year} posted`,
-                  user: car.seller_username || car.seller,
+                  user: car.seller_id || 'Unknown',
                   timestamp: new Date(car.created_at),
                   status: car.status,
                   color: car.status === 'sold' ? '#28a745' : car.status === 'available' ? '#007bff' : '#6c757d'
@@ -1135,11 +1066,36 @@
           console.error('Error fetching cars:', error);
         }
         
+        // 2. Get bookings from public endpoint
+        try {
+          const bookingsUrl = addCacheBuster(`${config.API_BASE_URL}/public/bookings`);
+          const bookingsResponse = await fetch(bookingsUrl);
+          
+          if (bookingsResponse.ok) {
+            const bookingsResult = await bookingsResponse.json();
+            if (bookingsResult.success && Array.isArray(bookingsResult.data)) {
+              bookingsResult.data.slice(0, 10).forEach(booking => {
+                activities.push({
+                  type: 'booking',
+                  icon: '📅',
+                  description: `Car booked (ID: ${booking.car_id})`,
+                  user: `User ${booking.buyer_id}`,
+                  timestamp: new Date(booking.created_at || booking.booking_date),
+                  status: booking.status,
+                  color: booking.status === 'confirmed' ? '#28a745' : booking.status === 'cancelled' ? '#dc3545' : '#007bff'
+                });
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching bookings:', error);
+        }
+        
         // Sort all activities by timestamp (most recent first)
         activities.sort((a, b) => b.timestamp - a.timestamp);
         
-        // Take the 20 most recent activities
-        const recentActivities = activities.slice(0, 20);
+        // Take the 15 most recent activities
+        const recentActivities = activities.slice(0, 15);
         
         if (recentActivities.length === 0) {
           activityDiv.innerHTML = '<p style="color: #666;">No recent activity found.</p>';
@@ -1150,12 +1106,12 @@
           <div style="max-height: 500px; overflow-y: auto;">
             ${recentActivities.map(activity => `
               <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: start; gap: 15px;">
-                <div style="font-size: 24px; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;">${activity.icon.includes('<i') ? activity.icon : activity.icon}</div>
+                <div style="font-size: 24px; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;">${activity.icon}</div>
                 <div style="flex: 1;">
                   <div style="display: flex; justify-content: space-between; align-items: start;">
                     <div>
                       <strong>${activity.description}</strong>
-                      <br><small style="color: #666;">by ${activity.user || 'Unknown'}</small>
+                      <br><small style="color: #666;">User: ${activity.user}</small>
                       <br><small style="color: #999;">${activity.timestamp.toLocaleString()}</small>
                     </div>
                     <span style="background: ${activity.color}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; text-transform: uppercase; white-space: nowrap;">
