@@ -120,6 +120,20 @@ router.get('/', async (req, res) => {
 
         const [cars] = await db.execute(query, params);
 
+        // Parse images JSON for each car
+        const parsedCars = cars.map(car => {
+            try {
+                if (car.images && typeof car.images === 'string') {
+                    car.images = JSON.parse(car.images);
+                } else if (!car.images) {
+                    car.images = [];
+                }
+            } catch (e) {
+                car.images = [];
+            }
+            return car;
+        });
+
         // Get total count for pagination
         let countQuery = 'SELECT COUNT(*) as total FROM cars WHERE 1=1';
         let countParams = [];
@@ -176,7 +190,7 @@ router.get('/', async (req, res) => {
         res.json({
             success: true,
             data: {
-                cars,
+                cars: parsedCars,
                 pagination: {
                     currentPage: pageNum,
                     totalPages: Math.ceil(totalCars / limitNum),
@@ -224,9 +238,21 @@ router.get('/:id', async (req, res) => {
             [carId]
         );
 
+        // Parse images JSON
+        const car = cars[0];
+        try {
+            if (car.images && typeof car.images === 'string') {
+                car.images = JSON.parse(car.images);
+            } else if (!car.images) {
+                car.images = [];
+            }
+        } catch (e) {
+            car.images = [];
+        }
+
         res.json({
             success: true,
-            data: cars[0]
+            data: car
         });
 
     } catch (error) {
