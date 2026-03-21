@@ -907,24 +907,29 @@
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
+        console.log('📊 loadStatistics - CONFIG:', config);
+        console.log('📊 loadStatistics - Token exists:', !!token);
+        
         // Fetch users count from backend
-        const usersResponse = await fetch(`${config.API_BASE_URL}/auth/users`, {
+        const usersResponse = await fetch(`${config.AUTH_API}/users`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const usersData = await usersResponse.json();
+        console.log('📊 Users API Response:', usersData);
         const userCount = usersData.success ? (usersData.data || []).length : 0;
         
         // Fetch cars from backend API
-        const carsResponse = await fetch(`${config.API_BASE_URL}/cars?limit=1000`, {
+        const carsResponse = await fetch(`${config.CARS_API}?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
+        console.log('📊 Cars API Response:', carsData);
         const cars = carsData.success && carsData.data ? (carsData.data.cars || []) : [];
         
         // Fetch bookings from backend API (use my-bookings and my-sales)
         let bookings = [];
         try {
-          const myBookingsResponse = await fetch(`${config.API_BASE_URL}/bookings/my-bookings`, {
+          const myBookingsResponse = await fetch(`${config.BOOKINGS_API}/my-bookings`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const myBookingsData = await myBookingsResponse.json();
@@ -974,7 +979,7 @@
         
         // 1. Transactions from backend
         try {
-          const transResponse = await fetch(`${config.API_BASE_URL}/payments/admin/all`, {
+          const transResponse = await fetch(`${config.PAYMENTS_API}/admin/all`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           
@@ -2796,7 +2801,7 @@
         const token = localStorage.getItem('authToken');
         
         // Fetch cars from backend
-        const carsResponse = await fetch(`${config.API_BASE_URL}/cars?limit=1000`, {
+        const carsResponse = await fetch(`${config.CARS_API}?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
@@ -2805,7 +2810,7 @@
         // Fetch bookings from backend
         let bookings = [];
         try {
-          const bookingsResponse = await fetch(`${config.API_BASE_URL}/bookings/admin/all-bookings`, {
+          const bookingsResponse = await fetch(`${config.BOOKINGS_API}/admin/all-bookings`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const bookingsData = await bookingsResponse.json();
@@ -2817,9 +2822,21 @@
         const soldCars = cars.filter(car => car.status === 'sold');
         const totalRevenue = soldCars.reduce((sum, car) => sum + (parseFloat(car.price) || 0), 0);
         
+        // Debug log for sold cars
+        console.log('💰 Sales Report Debug:');
+        console.log('  Total Cars:', cars.length);
+        console.log('  Sold Cars:', soldCars.length);
+        console.log('  Total Revenue:', totalRevenue);
+        console.log('  Sold car details:', soldCars);
+        
         // Get payment data from bookings
         const confirmedBookings = bookings.filter(b => b.status === 'confirmed');
         const bookingRevenue = confirmedBookings.reduce((sum, b) => sum + (parseFloat(b.final_amount) || 0), 0);
+        
+        // Currency formatter without commas
+        const formatCurrencyPlain = (value) => {
+          return Math.round(value).toString();
+        };
         
         const reportHTML = `
         <div style="padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
@@ -2831,7 +2848,7 @@
             </div>
             <div style="background: linear-gradient(135deg, #007bff, #0056b3); padding: 20px; border-radius: 8px; color: white;">
               <h3>Total Revenue</h3>
-              <p style="font-size: 32px; font-weight: bold; margin: 10px 0;">₹${totalRevenue.toLocaleString()}</p>
+              <p style="font-size: 32px; font-weight: bold; margin: 10px 0;">₹${formatCurrencyPlain(totalRevenue)}</p>
             </div>
             <div style="background: linear-gradient(135deg, #6f42c1, #5a32a3); padding: 20px; border-radius: 8px; color: white;">
               <h3>Confirmed Bookings</h3>
@@ -2854,7 +2871,7 @@
                 <tr>
                   <td style="padding: 12px; border-bottom: 1px solid #dee2e6;"><strong>${car.make} ${car.model}</strong> (${car.year})</td>
                   <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${car.seller_username || 'Unknown'}</td>
-                  <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">₹${parseFloat(car.price).toLocaleString()}</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">₹${formatCurrencyPlain(car.price)}</td>
                   <td style="padding: 12px; border-bottom: 1px solid #dee2e6;">${new Date(car.created_at).toLocaleDateString()}</td>
                 </tr>
               `).join('') : '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #666;">No cars sold yet</td></tr>'}
@@ -2877,16 +2894,21 @@
         const token = localStorage.getItem('authToken');
         
         // Fetch users from backend
-        const usersResponse = await fetch(`${config.API_BASE_URL}/auth/users`, {
+        const usersResponse = await fetch(`${config.AUTH_API}/users`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const usersData = await usersResponse.json();
+        
+        // Debug log
+        console.log('User Report - API Response:', usersData);
+        
         const users = usersData.success ? (usersData.data || []) : [];
+        console.log('User Report - Parsed Users:', users, 'Count:', users.length);
         
         // Fetch bookings from backend
         let bookings = [];
         try {
-          const bookingsResponse = await fetch(`${config.API_BASE_URL}/bookings/admin/all-bookings`, {
+          const bookingsResponse = await fetch(`${config.BOOKINGS_API}/admin/all-bookings`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const bookingsData = await bookingsResponse.json();
@@ -2960,7 +2982,7 @@
         const token = localStorage.getItem('authToken');
         
         // Fetch cars from backend
-        const carsResponse = await fetch(`${config.API_BASE_URL}/cars?limit=1000`, {
+        const carsResponse = await fetch(`${config.CARS_API}?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
@@ -2970,6 +2992,14 @@
         const availableCars = cars.filter(car => car.status === 'available').length;
         const soldCars = cars.filter(car => car.status === 'sold').length;
         const pendingCars = cars.filter(car => car.status === 'pending').length;
+        
+        // Debug log for sold cars
+        console.log('🚗 Inventory Report Debug:');
+        console.log('  Total Cars:', totalCars);
+        console.log('  Available Cars:', availableCars);
+        console.log('  Sold Cars:', soldCars);
+        console.log('  Pending Cars:', pendingCars);
+        console.log('  All car statuses:', cars.map(c => c.status));
         
         // Group by brand
         const brandCounts = {};
@@ -2981,6 +3011,11 @@
         // Calculate total inventory value
         const totalValue = cars.reduce((sum, car) => sum + (parseFloat(car.price) || 0), 0);
         const avgPrice = totalCars > 0 ? totalValue / totalCars : 0;
+        
+        // Format currency without commas
+        const formatCurrencyPlain = (value) => {
+          return Math.round(value).toString();
+        };
         
         const reportHTML = `
           <div style="padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
@@ -3000,7 +3035,7 @@
               </div>
               <div style="background: linear-gradient(135deg, #ffa938, #ff8c00); padding: 20px; border-radius: 8px; color: white;">
                 <h3>Total Value</h3>
-                <p style="font-size: 32px; font-weight: bold; margin: 10px 0;">₹${totalValue.toLocaleString()}</p>
+                <p style="font-size: 32px; font-weight: bold; margin: 10px 0;">₹${formatCurrencyPlain(totalValue)}</p>
               </div>
             </div>
             
@@ -3018,7 +3053,7 @@
             
             <h3>Inventory Statistics</h3>
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 15px;">
-              <p><strong>Average Car Price:</strong> ₹${avgPrice.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+              <p><strong>Average Car Price:</strong> ₹${formatCurrencyPlain(avgPrice)}</p>
               <p><strong>Pending Approval:</strong> ${pendingCars} cars</p>
               <p><strong>Available for Sale:</strong> ${availableCars} cars</p>
               <p><strong>Successfully Sold:</strong> ${soldCars} cars</p>
