@@ -237,21 +237,24 @@ app.use('*', (req, res) => {
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0'; // Bind to all interfaces
 
-// Start initialization and seeding
+// Start initialization and seeding, THEN start server
 (async () => {
   try {
+    console.log('⏳ Starting initialization...');
     await initializeDatabase();
     await seedTestData();
+    
+    // NOW start the server after initialization is complete
+    app.listen(PORT, HOST, () => {
+      console.log(`\n✅ RideBazzar Server running on port ${PORT}`);
+      console.log(`📡 API URL: http://localhost:${PORT}/api`);
+      console.log(`🏥 Health Check: http://localhost:${PORT}/api/health`);
+      console.log(`🌐 Server bound to: ${HOST}:${PORT}\n`);
+    });
   } catch (err) {
-    console.error('Setup error:', err);
+    console.error('❌ Setup error - Server failed to start:', err);
+    process.exit(1);
   }
 })();
-
-app.listen(PORT, HOST, () => {
-  console.log(`🚗 RideBazzar Server running on port ${PORT}`);
-  console.log(`📡 API URL: http://localhost:${PORT}/api`);
-  console.log(`🏥 Health Check: http://localhost:${PORT}/api/health`);
-  console.log(`🌐 Server bound to: ${HOST}:${PORT}`);
-});
 
 module.exports = app;
