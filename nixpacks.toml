@@ -1,0 +1,8 @@
+[build]
+nixpacks = ["nodejs-18", "bash"]
+
+[build.commands]
+install = "cd backend && npm install"
+
+[start]
+cmd = "cd backend && npm start"

@@ -5,13 +5,13 @@
   "main": "backend/server.js",
   "scripts": {
     "start": "cd backend && npm start",
-    "install": "cd backend && npm install",
     "dev": "cd backend && npm run dev"
   },
   "keywords": ["car", "rental", "trading"],
   "author": "chauhansrushti",
   "license": "MIT",
   "engines": {
-    "node": "18.x"
+    "node": "18.x",
+    "npm": "9.x"
   }
 }
