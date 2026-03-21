@@ -1,8 +1,8 @@
-[build]
-nixpacks = ["nodejs-18", "bash"]
+[providers]
+nodejs = "18"
 
-[build.commands]
-install = "cd backend && npm install"
+[build]
+cmds = ["cd backend && npm install"]
 
 [start]
 cmd = "cd backend && npm start"
