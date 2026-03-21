@@ -749,6 +749,12 @@
 
   <script src="js/auth-api.js"></script>
   <script>
+    // Cache-busting function for API calls
+    function addCacheBuster(url) {
+      const separator = url.includes('?') ? '&' : '?';
+      return url + separator + 't=' + Date.now();
+    }
+
     // Admin dashboard refresh intervals
     let adminActivityRefreshInterval = null;
     let adminStatsRefreshInterval = null;
@@ -991,26 +997,29 @@
         console.log('📊 loadStatistics - CONFIG:', config);
         console.log('📊 loadStatistics - Token exists:', !!token);
         
-        // Fetch users count from backend
-        const usersResponse = await fetch(`${config.AUTH_API}/users`, {
+        // Fetch users count from backend with cache-busting
+        const usersUrl = addCacheBuster(`${config.AUTH_API}/users`);
+        const usersResponse = await fetch(usersUrl, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const usersData = await usersResponse.json();
         console.log('📊 Users API Response:', usersData);
         const userCount = usersData.success ? (usersData.data || []).length : 0;
         
-        // Fetch cars from backend API
-        const carsResponse = await fetch(`${config.CARS_API}?limit=1000`, {
+        // Fetch cars from backend API with cache-busting
+        const carsUrl = addCacheBuster(`${config.CARS_API}?limit=1000`);
+        const carsResponse = await fetch(carsUrl, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
         console.log('📊 Cars API Response:', carsData);
         const cars = carsData.success && carsData.data ? (carsData.data.cars || []) : [];
         
-        // Fetch bookings from backend API (use my-bookings and my-sales)
+        // Fetch bookings from backend API with cache-busting (use my-bookings and my-sales)
         let bookings = [];
         try {
-          const myBookingsResponse = await fetch(`${config.BOOKINGS_API}/my-bookings`, {
+          const myBookingsUrl = addCacheBuster(`${config.BOOKINGS_API}/my-bookings`);
+          const myBookingsResponse = await fetch(myBookingsUrl, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const myBookingsData = await myBookingsResponse.json();
@@ -1212,7 +1221,8 @@
         
         console.log('🔑 Token found:', token.substring(0, 20) + '...');
         
-        const response = await fetch(`${config.AUTH_API}/users`, {
+        const usersUrl = addCacheBuster(`${config.AUTH_API}/users`);
+        const response = await fetch(usersUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -1303,8 +1313,9 @@
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
-        // Fetch cars from backend API
-        const response = await fetch(`${config.CARS_API}?limit=1000`, {
+        // Fetch cars from backend API with cache-busting
+        const carsUrl = addCacheBuster(`${config.CARS_API}?limit=1000`);
+        const response = await fetch(carsUrl, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -1414,17 +1425,19 @@
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
-        // Fetch cars from backend
-        const carsResponse = await fetch(`${config.CARS_API}?limit=1000`, {
+        // Fetch cars from backend with cache-busting
+        const carsUrl = addCacheBuster(`${config.CARS_API}?limit=1000`);
+        const carsResponse = await fetch(carsUrl, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
         const cars = carsData.success && carsData.data ? (carsData.data.cars || []) : [];
         
-        // Fetch bookings from backend (all bookings for admin)
+        // Fetch bookings from backend with cache-busting (all bookings for admin)
         let bookings = [];
         try {
-          const bookingsResponse = await fetch(`${config.BOOKINGS_API}/admin/all-bookings`, {
+          const bookingsUrl = addCacheBuster(`${config.BOOKINGS_API}/admin/all-bookings`);
+          const bookingsResponse = await fetch(bookingsUrl, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const bookingsData = await bookingsResponse.json();
@@ -1794,8 +1807,9 @@
           return;
         }
 
-        // Fetch all transactions from backend
-        const response = await fetch(`${config.PAYMENTS_API}/admin/all`, {
+        // Fetch all transactions from backend with cache-busting
+        const paymentsUrl = addCacheBuster(`${config.PAYMENTS_API}/admin/all`);
+        const response = await fetch(paymentsUrl, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -1876,8 +1890,9 @@
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
-        // Try to fetch test drives from backend
-        const response = await fetch(`${config.API_BASE_URL}/inquiries`, {
+        // Try to fetch test drives from backend with cache-busting
+        const inquiriesUrl = addCacheBuster(`${config.API_BASE_URL}/inquiries`);
+        const response = await fetch(inquiriesUrl, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -3085,17 +3100,19 @@
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
-        // Fetch cars from backend
-        const carsResponse = await fetch(`${config.CARS_API}?limit=1000`, {
+        // Fetch cars from backend with cache-busting
+        const carsUrl = addCacheBuster(`${config.CARS_API}?limit=1000`);
+        const carsResponse = await fetch(carsUrl, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
         const cars = carsData.success && carsData.data ? (carsData.data.cars || []) : [];
         
-        // Fetch bookings from backend
+        // Fetch bookings from backend with cache-busting
         let bookings = [];
         try {
-          const bookingsResponse = await fetch(`${config.BOOKINGS_API}/admin/all-bookings`, {
+          const bookingsUrl = addCacheBuster(`${config.BOOKINGS_API}/admin/all-bookings`);
+          const bookingsResponse = await fetch(bookingsUrl, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const bookingsData = await bookingsResponse.json();
@@ -3178,8 +3195,9 @@
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
-        // Fetch users from backend
-        const usersResponse = await fetch(`${config.AUTH_API}/users`, {
+        // Fetch users from backend with cache-busting
+        const usersUrl = addCacheBuster(`${config.AUTH_API}/users`);
+        const usersResponse = await fetch(usersUrl, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const usersData = await usersResponse.json();
@@ -3190,10 +3208,11 @@
         const users = usersData.success ? (usersData.data || []) : [];
         console.log('User Report - Parsed Users:', users, 'Count:', users.length);
         
-        // Fetch bookings from backend
+        // Fetch bookings from backend with cache-busting
         let bookings = [];
         try {
-          const bookingsResponse = await fetch(`${config.BOOKINGS_API}/admin/all-bookings`, {
+          const bookingsUrl = addCacheBuster(`${config.BOOKINGS_API}/admin/all-bookings`);
+          const bookingsResponse = await fetch(bookingsUrl, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const bookingsData = await bookingsResponse.json();
@@ -3266,8 +3285,9 @@
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
-        // Fetch cars from backend
-        const carsResponse = await fetch(`${config.CARS_API}?limit=1000`, {
+        // Fetch cars from backend with cache-busting
+        const carsUrl = addCacheBuster(`${config.CARS_API}?limit=1000`);
+        const carsResponse = await fetch(carsUrl, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
