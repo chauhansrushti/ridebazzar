@@ -5,17 +5,8 @@ WORKDIR /app
 # Copy root package.json
 COPY package.json ./
 
-# Copy all HTML files and static assets from root
-COPY *.html ./
-COPY css/ ./css/
-COPY js/ ./js/
-COPY images/ ./images/
-COPY aboutus/ ./aboutus/
-COPY carfinance/ ./carfinance/
-COPY hub/ ./hub/
-
-# Copy backend
-COPY backend ./backend
+# Copy all files and directories (respects .dockerignore)
+COPY . .
 
 # Install dependencies in backend
 WORKDIR /app/backend
@@ -26,6 +17,8 @@ WORKDIR /app
 
 # Expose port
 EXPOSE 3000
+
+CMD npm start
 
 # Start command (using shell form so 'cd' works in npm scripts)
 CMD npm start
