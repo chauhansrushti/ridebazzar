@@ -209,6 +209,36 @@ const seedTestData = async () => {
       console.log(`  ✓ Admin user already exists (ID: ${adminId})`);
     }
 
+    // Create test users (buyers/sellers)
+    console.log('  👥 Creating test users...');
+    const bcrypt = require('bcryptjs');
+    const testUsers = [
+      { username: 'john_buyer', email: 'john@example.com', password: 'password123', full_name: 'John Buyer', location: 'Mumbai' },
+      { username: 'sarah_seller', email: 'sarah@example.com', password: 'password123', full_name: 'Sarah Seller', location: 'Delhi' },
+      { username: 'robert_user', email: 'robert@example.com', password: 'password123', full_name: 'Robert User', location: 'Bangalore' }
+    ];
+    
+    const userIds = [adminId];
+    for (const testUser of testUsers) {
+      try {
+        const [existingUser] = await db.execute('SELECT id FROM users WHERE username = ?', [testUser.username]);
+        if (existingUser.length === 0) {
+          const hashedPass = await bcrypt.hash(testUser.password, 10);
+          const [result] = await db.execute(
+            'INSERT INTO users (username, email, password, full_name, location, is_verified, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [testUser.username, testUser.email, hashedPass, testUser.full_name, testUser.location, true, true]
+          );
+          userIds.push(result.insertId);
+          console.log(`    ✓ Created user: ${testUser.username}`);
+        } else {
+          userIds.push(existingUser[0].id);
+          console.log(`    ✓ User already exists: ${testUser.username}`);
+        }
+      } catch (userErr) {
+        console.error(`    ✗ Failed to create user ${testUser.username}:`, userErr.message);
+      }
+    }
+
     // Insert test cars
     const testCars = [
       { make: 'Maruti', model: 'Swift', year: 2022, price: 650000, status: 'available', description: 'Well maintained Swift', fuel_type: 'Petrol', transmission: 'Manual', condition_status: 'Excellent', mileage: 25000, color: 'Red', contact: '9999999999', location: 'Mumbai' },
