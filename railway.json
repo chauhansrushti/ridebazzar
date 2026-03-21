@@ -1,4 +1,5 @@
 {
-  "builder": "nixpacks",
-  "start": "npm start"
+  "build": {
+    "dockerfile": "Dockerfile"
+  }
 }
