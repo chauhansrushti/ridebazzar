@@ -421,6 +421,47 @@ app.post('/api/admin-login', async (req, res) => {
   }
 });
 
+// Test token verification endpoint
+app.post('/api/verify-token', (req, res) => {
+  try {
+    const { token } = req.body;
+    
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token is required',
+        test: 'Token provided in request body: false'
+      });
+    }
+    
+    console.log('🔐 Testing token verification...');
+    console.log('   Token length:', token.length);
+    console.log('   Token preview:', token.substring(0, 30) + '...');
+    console.log('   JWT_SECRET length:', process.env.JWT_SECRET?.length || 0);
+    console.log('   JWT_SECRET preview:', process.env.JWT_SECRET?.substring(0, 10) + '...');
+    
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    console.log('✅ Token is valid:', decoded);
+    
+    res.json({
+      success: true,
+      message: 'Token is valid',
+      decoded: decoded,
+      expiresAt: new Date(decoded.exp * 1000)
+    });
+  } catch (error) {
+    console.error('❌ Token verification failed:', error.message);
+    res.status(401).json({
+      success: false,
+      message: 'Token verification failed',
+      error: error.name,
+      details: error.message
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

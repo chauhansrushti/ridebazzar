@@ -276,11 +276,15 @@ router.post('/logout', auth, (req, res) => {
 // Get all users (Admin only)
 router.get('/users', auth, async (req, res) => {
     try {
+        console.log('👥 Fetching users for authenticated user:', req.user?.username);
+        
         // You can add admin role check here if needed
         // For now, any authenticated user can view users
         const [users] = await db.execute(
             'SELECT id, username, email, full_name, phone, location, role, is_active, is_verified, created_at FROM users ORDER BY created_at DESC'
         );
+
+        console.log(`✅ Fetched ${users.length} users successfully`);
 
         res.json({
             success: true,

@@ -1156,6 +1156,19 @@
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         // Fetch users from backend API
         const token = localStorage.getItem('authToken');
+        
+        if (!token) {
+          console.error('❌ No token found in localStorage');
+          usersDiv.innerHTML = '<p style="color: #dc3545; padding: 20px;">Error: Not authenticated. Attempting to re-login...</p>';
+          const reloginSuccess = await autoLoginAdmin();
+          if (reloginSuccess) {
+            return loadUsers(searchTerm); // Retry after re-login
+          }
+          return;
+        }
+        
+        console.log('🔑 Token found:', token.substring(0, 20) + '...');
+        
         const response = await fetch(`${config.AUTH_API}/users`, {
           method: 'GET',
           headers: {
@@ -1167,6 +1180,17 @@
         const result = await response.json();
         
         if (!result.success) {
+          console.error('❌ API Error:', result.message);
+          
+          // If token is invalid, try to re-login
+          if (result.message === 'Invalid token' || result.message === 'Token expired') {
+            usersDiv.innerHTML = '<p style="color: #ffc107; padding: 20px;">Token expired. Re-authenticating...</p>';
+            const reloginSuccess = await autoLoginAdmin();
+            if (reloginSuccess) {
+              return loadUsers(searchTerm); // Retry after re-login
+            }
+          }
+          
           usersDiv.innerHTML = `<p style="color: #dc3545; padding: 20px;">Error: ${result.message}</p>`;
           return;
         }
