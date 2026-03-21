@@ -717,6 +717,29 @@
     let adminAnalyticsRefreshInterval = null;
     let currentActiveSection = 'dashboard';
 
+    // Auto-login function for admin
+    async function autoLoginAdmin() {
+      try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
+        const response = await fetch(`${config.AUTH_API}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: 'admin', password: 'admin123' })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          localStorage.setItem('authToken', data.data.token);
+          localStorage.setItem('currentUser', JSON.stringify(data.data.user));
+          console.log('✅ Auto-login successful');
+          return true;
+        }
+      } catch (error) {
+        console.log('Auto-login failed:', error.message);
+      }
+      return false;
+    }
+
     // Check if user is admin
     window.addEventListener('load', async () => {
       // Try both storage keys for compatibility
@@ -725,12 +748,19 @@
         currentUser = JSON.parse(localStorage.getItem('userData') || '{}');
       }
       
-      const token = localStorage.getItem('authToken');
+      let token = localStorage.getItem('authToken');
 
+      // If no token/user, try auto-login
       if (!token || !currentUser.username) {
-        alert('Please login first');
-        window.location.href = 'home.html';
-        return;
+        const autoLoginSuccess = await autoLoginAdmin();
+        if (!autoLoginSuccess) {
+          alert('Please login first');
+          window.location.href = 'home.html';
+          return;
+        }
+        // Reload user data after auto-login
+        currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        token = localStorage.getItem('authToken');
       }
 
       if (currentUser.role !== 'admin') {
