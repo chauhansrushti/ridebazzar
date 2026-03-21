@@ -1011,6 +1011,7 @@
       console.log('Loading recent activity...');
       
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         // Collect all activities from different sources
         const activities = [];
         const token = localStorage.getItem('authToken');
@@ -1057,7 +1058,7 @@
         
         // 3. Bookings from backend
         try {
-          const bookingsResponse = await fetch('http://localhost:5000/api/bookings/my-bookings', {
+          const bookingsResponse = await fetch(`${config.BOOKINGS_API}/my-bookings`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           
@@ -1083,7 +1084,7 @@
         
         // 4. Cars from backend
         try {
-          const carsResponse = await fetch('http://localhost:5000/api/cars?limit=50', {
+          const carsResponse = await fetch(`${config.CARS_API}?limit=50`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           
@@ -1152,9 +1153,10 @@
       usersDiv.innerHTML = '<p style="color: #666; padding: 20px;">Loading users from database...</p>';
       
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         // Fetch users from backend API
         const token = localStorage.getItem('authToken');
-        const response = await fetch('http://localhost:5000/api/auth/users', {
+        const response = await fetch(`${config.AUTH_API}/users`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -1231,10 +1233,11 @@
       carsDiv.innerHTML = '<p style="color: #666; padding: 20px;">Loading cars from database...</p>';
       
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
         // Fetch cars from backend API
-        const response = await fetch(`http://localhost:5000/api/cars?limit=1000`, {
+        const response = await fetch(`${config.CARS_API}?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -1311,8 +1314,9 @@
       }
       
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
-        const response = await fetch(`http://localhost:5000/api/cars/${carId}`, {
+        const response = await fetch(`${config.CARS_API}/${carId}`, {
           method: 'DELETE',
           headers: { 
             'Authorization': `Bearer ${token}`,
@@ -1340,10 +1344,11 @@
       const analyticsDiv = document.getElementById('analyticsContent');
       
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         
         // Fetch cars from backend
-        const carsResponse = await fetch('http://localhost:5000/api/cars?limit=1000', {
+        const carsResponse = await fetch(`${config.CARS_API}?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const carsData = await carsResponse.json();
@@ -1352,7 +1357,7 @@
         // Fetch bookings from backend (all bookings for admin)
         let bookings = [];
         try {
-          const bookingsResponse = await fetch('http://localhost:5000/api/bookings/admin/all-bookings', {
+          const bookingsResponse = await fetch(`${config.BOOKINGS_API}/admin/all-bookings`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const bookingsData = await bookingsResponse.json();
@@ -1412,8 +1417,9 @@
     
     async function loadCarStatusChart() {
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
-        const response = await fetch('http://localhost:5000/api/cars?limit=1000', {
+        const response = await fetch(`${config.CARS_API}?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -1455,8 +1461,9 @@
     
     async function loadSalesTrendChart() {
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
-        const response = await fetch('http://localhost:5000/api/cars?limit=1000', {
+        const response = await fetch(`${config.CARS_API}?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -1511,8 +1518,9 @@
     
     async function loadRevenueChart() {
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
-        const response = await fetch('http://localhost:5000/api/cars?limit=1000', {
+        const response = await fetch(`${config.CARS_API}?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -1565,8 +1573,9 @@
     
     async function loadBrandChart() {
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
-        const response = await fetch('http://localhost:5000/api/cars?limit=1000', {
+        const response = await fetch(`${config.CARS_API}?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -1619,8 +1628,9 @@
     
     async function loadUserGrowthChart() {
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
-        const response = await fetch('http://localhost:5000/api/auth/users', {
+        const response = await fetch(`${config.AUTH_API}/users`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -1710,6 +1720,7 @@
       paymentsDiv.innerHTML = '<div style="text-align:center; padding:40px;"><i class="material-icons" style="font-size:48px; color:#ccc;">hourglass_empty</i><p>Loading transactions...</p></div>';
       
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         if (!token) {
           paymentsDiv.innerHTML = '<p style="color: #dc3545; padding: 20px;">Please login as admin to view transactions</p>';
@@ -1717,7 +1728,7 @@
         }
 
         // Fetch all transactions from backend
-        const response = await fetch('http://localhost:5000/api/payments/admin/all', {
+        const response = await fetch(`${config.PAYMENTS_API}/admin/all`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -2066,6 +2077,7 @@
       paymentsTable.innerHTML = '<div style="text-align:center; padding:40px;"><i class="material-icons" style="font-size:48px; color:#ccc;">hourglass_empty</i><p>Loading transactions...</p></div>';
       
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         const token = localStorage.getItem('authToken');
         if (!token) {
           paymentsTable.innerHTML = '<p style="color: #dc3545; padding: 20px;">Please login as admin to view transactions</p>';
@@ -2073,7 +2085,7 @@
         }
 
         // Fetch all transactions from backend
-        fetch('http://localhost:5000/api/payments/admin/all', {
+        fetch(`${config.PAYMENTS_API}/admin/all`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -2592,11 +2604,12 @@
       let userTestDrives = [];
       
       try {
+        const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
         // Get user data from backend
         const token = localStorage.getItem('authToken');
         
         // Fetch user info
-        const usersResponse = await fetch('http://localhost:5000/api/auth/users', {
+        const usersResponse = await fetch(`${config.AUTH_API}/users`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -2615,7 +2628,7 @@
         }
         
         // Fetch user's cars from backend (fresh data)
-        const carsResponse = await fetch('http://localhost:5000/api/cars?limit=1000', {
+        const carsResponse = await fetch(`${config.CARS_API}?limit=1000`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -2768,8 +2781,9 @@
     async function deleteUser(userId, username) {
       if (confirm(`Are you sure you want to delete user "${username}"? This will also delete all their cars and bookings.`)) {
         try {
+          const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
           const token = localStorage.getItem('authToken');
-          const response = await fetch(`http://localhost:5000/api/auth/users/${userId}`, {
+          const response = await fetch(`${config.AUTH_API}/users/${userId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${token}`,
