@@ -304,14 +304,7 @@ app.use(express.static(path.join(__dirname, '..')));
 // Static file serving - Serve uploads
 app.use('/uploads', express.static('uploads'));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/cars', carRoutes);
-app.use('/api/bookings', bookingRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/inquiries', inquiryRoutes);
-app.use('/api/messages', messagesRoutes);
-
+// IMPORTANT: Define custom endpoints BEFORE route handlers so they're checked first
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -374,6 +367,14 @@ app.get('/api/config-check', (req, res) => {
     });
   }
 });
+
+// Routes - Register AFTER custom endpoints
+app.use('/api/auth', authRoutes);
+app.use('/api/cars', carRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/messages', messagesRoutes);
 
 // Diagnostics endpoint - check admin user and JWT config
 app.get('/api/diagnostics', async (req, res) => {
