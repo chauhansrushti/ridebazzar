@@ -2834,7 +2834,8 @@
 
       try {
         const config = typeof CONFIG !== 'undefined' ? CONFIG : getRideBazzarConfig();
-        const response = await fetch(`${config.AUTH_API}/users`, {
+        const usersUrl = addCacheBuster(`${config.AUTH_API}/users`);
+        const response = await fetch(usersUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -2850,14 +2851,22 @@
             <pre style="background: #e8f5e9; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto;">${JSON.stringify(result.data, null, 2)}</pre>
           `;
         } else {
+          // Show detailed error information
           resultsDiv.innerHTML = `
             <h4 style="color: red;">❌ Error</h4>
+            <p><strong>HTTP Status:</strong> ${response.status} ${response.statusText}</p>
             <p><strong>Message:</strong> ${result.message}</p>
-            <p><strong>Response:</strong> ${response.status} ${response.statusText}</p>
+            <p><strong>Error Type:</strong> ${result.error || result.errorType || 'Unknown'}</p>
+            <p><strong>Details:</strong> ${result.details || result.hint || 'Check server logs'}</p>
+            ${result.error ? `<p><strong>Error Details:</strong> ${result.error}</p>` : ''}
           `;
         }
       } catch (error) {
-        resultsDiv.innerHTML = `<h4 style="color: red;">❌ Network Error: ${error.message}</h4>`;
+        resultsDiv.innerHTML = `
+          <h4 style="color: red;">❌ Network Error</h4>
+          <p><strong>Error:</strong> ${error.message}</p>
+          <p style="font-size: 12px; color: #666;">Check browser console (F12) for more details. Server logs might show more info.</p>
+        `;
       }
     }
 

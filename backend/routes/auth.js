@@ -277,9 +277,13 @@ router.post('/logout', auth, (req, res) => {
 router.get('/users', auth, async (req, res) => {
     try {
         console.log('👥 Fetching users for authenticated user:', req.user?.username);
+        console.log('   Request headers:', Object.keys(req.headers));
+        console.log('   User object:', req.user);
         
         // You can add admin role check here if needed
         // For now, any authenticated user can view users
+        console.log('   Executing query: SELECT users...');
+        
         const [users] = await db.execute(
             'SELECT id, username, email, full_name, phone, location, role, is_active, is_verified, created_at FROM users ORDER BY created_at DESC'
         );
@@ -292,10 +296,16 @@ router.get('/users', auth, async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Fetch users error:', error);
+        console.error('❌ Fetch users error:', error.message);
+        console.error('   Error type:', error.name);
+        console.error('   Error stack:', error.stack);
+        
         res.status(500).json({ 
             success: false, 
-            message: 'Internal server error' 
+            message: 'Failed to fetch users',
+            error: error.message,
+            errorType: error.name,
+            hint: error.message.includes('ER_ACCESS_DENIED') ? 'Database permission error' : 'Unknown error'
         });
     }
 });
