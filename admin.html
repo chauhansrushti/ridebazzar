@@ -27,7 +27,7 @@
           MESSAGES_API: API_BASE_URL + '/messages'
         };
       }
-      var CONFIG = getRideBazzarConfig();
+      CONFIG = getRideBazzarConfig();
     }
   </script>
   <style>
@@ -1834,14 +1834,14 @@
                 <strong>Confirmed:</strong> ${allTestDrives.filter(td => td.status === 'responded').length}
             </div>
             <div style="background: #d1ecf1; padding: 10px 20px; border-radius: 8px; border-left: 4px solid #17a2b8;">
-              <strong>Completed:</strong> ${enrichedTestDrives.filter(td => td.status === 'completed').length}
+              <strong>Completed:</strong> ${allTestDrives.filter(td => td.status === 'completed').length}
             </div>
             <div style="background: #f8d7da; padding: 10px 20px; border-radius: 8px; border-left: 4px solid #dc3545;">
-              <strong>Cancelled:</strong> ${enrichedTestDrives.filter(td => td.status === 'cancelled').length}
+              <strong>Cancelled:</strong> ${allTestDrives.filter(td => td.status === 'cancelled').length}
             </div>
           </div>
           <div style="color: #666;">
-            Total: <strong>${enrichedTestDrives.length}</strong> sessions
+            Total: <strong>${allTestDrives.length}</strong> sessions
           </div>
         </div>
         
@@ -1858,14 +1858,14 @@
             </tr>
           </thead>
           <tbody>
-            ${enrichedTestDrives.map(td => {
+            ${allTestDrives.map(td => {
               // Use carInfo from test drive data (already saved)
               const carData = td.carInfo || {};
               const carInfo = carData.make ? `${carData.make} ${carData.model} (${carData.year})` : 'Car information not available';
               const carPrice = carData.price ? `₹${parseFloat(carData.price).toLocaleString()}` : 'N/A';
               
               // Use the enriched seller name
-              const sellerName = td.sellerName || 'N/A';
+              const sellerName = td.seller || 'N/A';
               
               const statusColors = {
                 pending: '#ff9800',
@@ -1908,6 +1908,13 @@
           </tbody>
         </table>
       `;
+      } catch (error) {
+        console.error('Error loading test drives:', error);
+        const testDrivesTable = document.getElementById('testDrivesTable');
+        if (testDrivesTable) {
+          testDrivesTable.innerHTML = '<p style="color: #c33; padding: 20px; text-align: center;">Error loading test drives</p>';
+        }
+      }
     }
     
     function viewTestDriveDetails(testDriveId) {
