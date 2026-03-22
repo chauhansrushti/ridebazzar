@@ -32,7 +32,7 @@ const hubs = {
     {
       img: "../images/chandigarh1.avif",
       title: "ridebazzar Hub, Whitefield",
-      address: "Whitefield Main Road, Bangalore - 560066",
+      address: "Whitefield Main Road, Chandigarh - 560066",
       open: "9am - 8pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
@@ -40,7 +40,7 @@ const hubs = {
     {
       img: "../images/chandigarh2.jpg",
       title: "ridebazzar Hub, Koramangala",
-      address: "Koramangala 5th Block, Bangalore - 560095",
+      address: "Koramangala 5th Block, Chandigarh - 560095",
       open: "10am - 7pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
@@ -50,7 +50,7 @@ const hubs = {
      {
       img: "../images/delhi1.avif",
       title: "ridebazzar Hub, Whitefield",
-      address: "Whitefield Main Road, Bangalore - 560066",
+      address: "Whitefield Main Road, Delhi - 560066",
       open: "9am - 8pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
@@ -58,7 +58,7 @@ const hubs = {
     {
       img: "../images/delhi2.jpg",
       title: "ridebazzar Hub, Koramangala",
-      address: "Koramangala 5th Block, Bangalore - 560095",
+      address: "Koramangala 5th Block, Delhi - 560095",
       open: "10am - 7pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
@@ -68,7 +68,7 @@ const hubs = {
  {
       img: "../images/Hyderabad1.webp",
       title: "ridebazzar Hub, Whitefield",
-      address: "Whitefield Main Road, Bangalore - 560066",
+      address: "Whitefield Main Road, Hyderabad - 560066",
       open: "9am - 8pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
@@ -76,7 +76,7 @@ const hubs = {
     {
       img: "../images/Hyderabad2.avif",
       title: "ridebazzar Hub, Koramangala",
-      address: "Koramangala 5th Block, Bangalore - 560095",
+      address: "Koramangala 5th Block, Hyderabad - 560095",
       open: "10am - 7pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
@@ -86,7 +86,7 @@ const hubs = {
     {
       img: "../images/mumbai1.avif",
       title: "ridebazzar Hub, Whitefield",
-      address: "Whitefield Main Road, Bangalore - 560066",
+      address: "Whitefield Main Road, Mumbai - 560066",
       open: "9am - 8pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
@@ -94,7 +94,7 @@ const hubs = {
     {
       img: "../images/mumbai2.avif",
       title: "ridebazzar Hub, Koramangala",
-      address: "Koramangala 5th Block, Bangalore - 560095",
+      address: "Koramangala 5th Block, Mumbai - 560095",
       open: "10am - 7pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
@@ -102,7 +102,7 @@ const hubs = {
     {
       img: "../images/mumbai3.avif",
       title: "ridebazzar Hub, Koramangala",
-      address: "Koramangala 5th Block, Bangalore - 560095",
+      address: "Koramangala 5th Block, Mumbai - 560095",
       open: "10am - 7pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
@@ -110,7 +110,7 @@ const hubs = {
     {
       img: "../images/mumbai4.avif",
       title: "ridebazzar Hub, Koramangala",
-      address: "Koramangala 5th Block, Bangalore - 560095",
+      address: "Koramangala 5th Block, Mumbai - 560095",
       open: "10am - 7pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
@@ -120,7 +120,7 @@ const hubs = {
     {
       img: "../images/pune.jpg",
       title: "ridebazzar Hub, Koramangala",
-      address: "Koramangala 5th Block, Bangalore - 560095",
+      address: "Koramangala 5th Block, Pune - 560095",
       open: "10am - 7pm (Mon - Sun)",
       link: "../all-cars.html",
       linkText: "View Hub Details"
