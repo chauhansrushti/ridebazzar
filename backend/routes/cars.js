@@ -4,6 +4,77 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// DEBUG: Check database tables
+router.get('/debug/check-tables', async (req, res) => {
+    try {
+        console.log('🔍 Checking database tables...');
+        
+        // Check if cars table exists
+        const [carsTables] = await db.execute("SHOW TABLES LIKE 'cars'");
+        console.log('   Cars table found:', carsTables.length > 0);
+        
+        // Check if users table exists
+        const [usersTables] = await db.execute("SHOW TABLES LIKE 'users'");
+        console.log('   Users table found:', usersTables.length > 0);
+        
+        // Get cars table structure
+        if (carsTables.length > 0) {
+            const [carsColumns] = await db.execute("SHOW COLUMNS FROM cars");
+            console.log('   Cars columns:', carsColumns.map(c => c.Field).join(', '));
+        } else {
+            console.error('   ❌ CARS TABLE NOT FOUND!');
+            // Try to create it
+            console.log('   🔄 Attempting to create cars table...');
+            await db.execute(`
+                CREATE TABLE IF NOT EXISTS cars (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    seller_id INT NOT NULL,
+                    make VARCHAR(50) NOT NULL,
+                    model VARCHAR(50) NOT NULL,
+                    year YEAR NOT NULL,
+                    price DECIMAL(10, 2) NOT NULL,
+                    mileage INT,
+                    fuel_type ENUM('Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG') NOT NULL,
+                    transmission ENUM('Manual', 'Automatic') NOT NULL,
+                    condition_status ENUM('Excellent', 'Good', 'Fair', 'Poor') NOT NULL,
+                    color VARCHAR(30),
+                    description TEXT,
+                    images JSON,
+                    contact VARCHAR(15),
+                    location VARCHAR(100),
+                    booking_amount DECIMAL(10, 2) DEFAULT 0,
+                    emi_amount DECIMAL(10, 2) DEFAULT 0,
+                    status ENUM('available', 'booked', 'sold') DEFAULT 'available',
+                    views_count INT DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (seller_id) REFERENCES users (id) ON DELETE CASCADE,
+                    INDEX idx_seller (seller_id),
+                    INDEX idx_make_model (make, model),
+                    INDEX idx_price (price),
+                    INDEX idx_status (status),
+                    INDEX idx_location (location)
+                )
+            `);
+            console.log('   ✅ Cars table created');
+        }
+        
+        res.json({
+            success: true,
+            tables: {
+                cars: carsTables.length > 0,
+                users: usersTables.length > 0
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error checking tables:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // DEBUG: Simple test endpoint
 router.get('/test/debug', async (req, res) => {
     try {
@@ -33,6 +104,8 @@ router.get('/test/debug', async (req, res) => {
 // Get all cars with filters
 router.get('/', async (req, res) => {
     try {
+        console.log('📋 GET /api/cars - Fetching all cars');
+        
         const { 
             make, 
             model, 
@@ -50,6 +123,8 @@ router.get('/', async (req, res) => {
             sortBy = 'created_at',
             sortOrder = 'DESC'
         } = req.query;
+        
+        console.log('   Query params:', { make, model, status, fuelType, transmission, location, search, page, limit });
         
         // Convert to numbers explicitly
         const pageNum = Number(page) || 1;
@@ -201,13 +276,24 @@ router.get('/', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Get cars error:', error);
-        console.error('Error message:', error.message);
-        console.error('Error code:', error.code);
+        console.error('❌ Get cars error:', error);
+        console.error('   Error message:', error.message);
+        console.error('   Error code:', error.code);
+        console.error('   Error stack:', error.stack);
+        
+        // Check for specific database issues
+        if (error.code === 'ER_BAD_FIELD_ERROR' || error.code === 'ER_NO_REFERENCED_TABLE') {
+            console.error('   Issue: Database schema mismatch - table or column missing');
+        }
+        
         res.status(500).json({ 
             success: false, 
-            message: 'Internal server error',
-            debug: process.env.NODE_ENV === 'production' ? undefined : error.message
+            message: 'Failed to fetch cars',
+            debug: process.env.NODE_ENV === 'production' ? undefined : {
+                error: error.message,
+                code: error.code,
+                sqlState: error.sqlState
+            }
         });
     }
 });
