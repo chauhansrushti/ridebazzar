@@ -324,6 +324,154 @@
     -webkit-text-fill-color: black !important;
     color: black !important;
   }
+
+  /* Mobile Responsive - Tablet */
+  @media (max-width: 900px) {
+    #loginModal {
+      padding: 10px;
+    }
+
+    #loginModal > div.login-modal-content {
+      height: auto !important;
+      max-height: 90vh;
+      margin: 5vh auto !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      max-width: 95vw !important;
+    }
+
+    .modal-left-side {
+      display: none !important;
+      visibility: hidden !important;
+      width: 0 !important;
+      height: 0 !important;
+      flex: 0 !important;
+    }
+
+    #loginModal > div.login-modal-content > div:last-of-type {
+      flex: 1 !important;
+      padding: 20px !important;
+      width: 100% !important;
+      display: block !important;
+    }
+  }
+
+  /* Mobile Responsive - Small Phones */
+  @media (max-width: 600px) {
+    #loginModal {
+      padding: 10px;
+    }
+
+    #loginModal > div.login-modal-content {
+      max-width: 100%;
+      height: auto !important;
+      margin: 20px auto !important;
+      border-radius: 12px;
+      flex-direction: column !important;
+      width: 100vw !important;
+    }
+
+    .modal-left-side {
+      display: none !important;
+      visibility: hidden !important;
+      width: 0 !important;
+      height: 0 !important;
+      flex: 0 !important;
+    }
+
+    #loginModal > div.login-modal-content > div:last-of-type {
+      flex: 1 !important;
+      padding: 15px !important;
+      width: 100% !important;
+      display: block !important;
+      overflow: visible !important;
+    }
+
+    #loginFormContent, #registerFormContent {
+      padding: 0 !important;
+    }
+
+    #loginFormContent form div,
+    #registerFormContent form div {
+      margin-bottom: 12px !important;
+    }
+
+    #loginFormContent label,
+    #registerFormContent label {
+      font-size: 13px !important;
+      margin-bottom: 5px !important;
+    }
+
+    #loginFormContent input,
+    #registerFormContent input {
+      font-size: 14px !important;
+      padding: 10px !important;
+      width: 100% !important;
+    }
+
+    #loginFormContent button,
+    #registerFormContent button {
+      font-size: 14px !important;
+      padding: 12px !important;
+      width: 100% !important;
+    }
+
+    #authMessage {
+      margin: 10px 0 !important;
+      padding: 8px !important;
+      font-size: 12px !important;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 10px !important;
+      font-size: 14px !important;
+    }
+  }
+
+  /* Extra Small Phones */
+  @media (max-width: 400px) {
+    #loginModal {
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      padding: 0 !important;
+    }
+
+    #loginModal > div.login-modal-content {
+      width: calc(100vw - 20px) !important;
+      margin: 10px auto !important;
+      border-radius: 8px;
+      max-height: calc(100vh - 20px) !important;
+      height: auto !important;
+      flex-direction: column !important;
+    }
+
+    #loginModal span {
+      font-size: 24px !important;
+    }
+
+    .modal-left-side {
+      display: none !important;
+      visibility: hidden !important;
+      width: 0 !important;
+      height: 0 !important;
+      flex: 0 !important;
+    }
+
+    #loginModal > div.login-modal-content > div:last-of-type {
+      flex: 1 !important;
+      padding: 15px !important;
+      width: 100% !important;
+      display: block !important;
+      overflow-y: auto !important;
+    }
+
+    #loginFormContent > div:nth-child(1) {
+      display: none;
+    }
+  }
 </style>
 
 <footer style="background-color: #333; color: white; padding: 20px 0; text-align: center;">
