@@ -264,7 +264,158 @@
     </div>
   </div>
 
-<script>
+  <!-- CSS for tabs and messages + Mobile Responsive -->
+  <style>
+    .tab-button.active {
+      border-bottom-color: #f9b233 !important;
+      color: #f9b233;
+    }
+    .auth-message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .auth-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    /* Fix autofill and input visibility */
+    input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
+      color: black !important;
+      background-color: white !important;
+      -webkit-text-fill-color: black !important;
+    }
+    
+    input[type="text"]:-webkit-autofill,
+    input[type="password"]:-webkit-autofill,
+    input[type="email"]:-webkit-autofill,
+    input[type="tel"]:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0 1000px white inset !important;
+      -webkit-text-fill-color: black !important;
+      color: black !important;
+    }
+
+    /* Mobile Responsive - Tablet */
+    @media (max-width: 900px) {
+      #loginModal > div {
+        height: auto;
+        max-height: 90vh;
+        margin: 5vh auto;
+        flex-direction: column;
+      }
+
+      .modal-left-side {
+        display: none !important;
+        flex: 0 !important;
+        height: 0 !important;
+      }
+
+      #loginModal > div > div:nth-child(3) {
+        flex: 1 !important;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      #loginModal > div > div:nth-child(3) {
+        padding: 30px 25px !important;
+      }
+    }
+
+    /* Mobile Responsive - Small Phones */
+    @media (max-width: 600px) {
+      #loginModal {
+        padding: 10px;
+      }
+
+      #loginModal > div {
+        max-width: 100%;
+        height: auto;
+        margin: 40px auto;
+        border-radius: 12px;
+        flex-direction: column;
+      }
+
+      .modal-left-side {
+        display: none !important;
+      }
+
+      #loginModal > div > div:nth-child(3) {
+        flex: 1 !important;
+        padding: 20px !important;
+      }
+
+      #loginModal > div > div:nth-child(3) > div:nth-child(2) {
+        display: flex;
+        border-bottom: 2px solid #eee;
+        margin-bottom: 20px;
+      }
+
+      .tab-button {
+        flex: 1;
+        padding: 10px !important;
+        font-size: 14px !important;
+      }
+
+      #loginFormContent, #registerFormContent {
+        padding: 0 !important;
+      }
+
+      #loginFormContent form div,
+      #registerFormContent form div {
+        margin-bottom: 12px !important;
+      }
+
+      #loginFormContent label,
+      #registerFormContent label {
+        font-size: 13px !important;
+        margin-bottom: 5px !important;
+      }
+
+      #loginFormContent input,
+      #registerFormContent input {
+        font-size: 14px !important;
+        padding: 10px !important;
+      }
+
+      #loginFormContent button,
+      #registerFormContent button {
+        font-size: 14px !important;
+        padding: 12px !important;
+      }
+
+      #authMessage {
+        margin: 10px 0 !important;
+        padding: 8px !important;
+        font-size: 12px !important;
+      }
+    }
+
+    /* Extra Small Phones */
+    @media (max-width: 400px) {
+      #loginModal {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+
+      #loginModal > div {
+        margin: 10px auto;
+        border-radius: 8px;
+        max-height: calc(100vh - 20px);
+      }
+
+      #loginModal span {
+        font-size: 24px !important;
+      }
+
+      #loginFormContent > div:nth-child(1) {
+        display: none;
+      }
+    }
+  </style>
   const loanAmountInput = document.getElementById('loanAmount');
   const tenureInput = document.getElementById('tenure');
   const loanAmountDisplay = document.getElementById('loanAmountDisplay');
