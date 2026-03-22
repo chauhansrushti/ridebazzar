@@ -881,36 +881,68 @@
 
   <!-- Enhanced Login/Register Modal -->
   <div id="loginModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
-    <div style="background:#fff; max-width:450px; margin:40px auto; padding:0; border-radius:12px; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.3);">
-      <span onclick="hideLoginModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999;">&times;</span>
+    <div style="display:flex; background:#fff; max-width:900px; height:550px; margin:80px auto; border-radius:16px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden;" class="login-modal-content">
+      <span onclick="hideLoginModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999; z-index:10;">&times;</span>
       
-      <!-- Tab Headers -->
-      <div style="display:flex; border-bottom:1px solid #eee;">
-        <button id="loginTab" onclick="switchTab('login')" class="tab-button active" style="flex:1; padding:15px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid #f9b233;">Login</button>
-        <button id="registerTab" onclick="switchTab('register')" class="tab-button" style="flex:1; padding:15px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid transparent;">Register</button>
+      <!-- Left Side - Car with Eyes -->
+      <div style="flex:1; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;" class="modal-left-side">
+        <!-- Car Shape with Eyes -->
+        <div style="position:relative; z-index:2;">
+          <svg width="320" height="220" viewBox="0 0 320 220" style="filter:drop-shadow(0 10px 30px rgba(0,0,0,0.3));">
+            <rect x="40" y="120" width="240" height="60" rx="10" fill="#F9B233" />
+            <path d="M 80 120 L 110 80 L 210 80 L 240 120 Z" fill="#F9B233" />
+            <path d="M 190 85 L 210 85 L 235 115 L 210 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+            <path d="M 115 85 L 180 85 L 180 115 L 130 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+            <rect x="245" y="140" width="25" height="12" rx="3" fill="#333" />
+            <path d="M 100 155 Q 160 165 220 155" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round" />
+            <line x1="160" y1="120" x2="160" y2="175" stroke="#333" stroke-width="2" />
+            <circle cx="100" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+            <ellipse id="modalLeftPupil" cx="100" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+            <circle cx="100" cy="182" r="4" fill="white" opacity="0.8" />
+            <circle cx="220" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+            <ellipse id="modalRightPupil" cx="220" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+            <circle cx="220" cy="182" r="4" fill="white" opacity="0.8" />
+            <path d="M 72 180 Q 100 165 128 180" stroke="#333" stroke-width="2" fill="none" />
+            <path d="M 192 180 Q 220 165 248 180" stroke="#333" stroke-width="2" fill="none" />
+          </svg>
+        </div>
+        
+        <!-- Welcome Text -->
+        <div style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); text-align:center; color:white; z-index:3;">
+          <h2 style="font-size:28px; margin-bottom:10px; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">Welcome to RideBazzar</h2>
+          <p style="opacity:0.9; text-shadow:1px 1px 2px rgba(0,0,0,0.3);">Your trusted car marketplace</p>
+        </div>
       </div>
+      
+      <!-- Right Side - Login/Register Form -->
+      <div style="flex:1; padding:40px; overflow-y:auto;">
+        <!-- Tab Headers -->
+        <div style="display:flex; border-bottom:2px solid #eee; margin-bottom:30px;">
+          <button id="loginTab" onclick="switchTab('login')" class="tab-button active" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid #f9b233; color:#f9b233;">Login</button>
+          <button id="registerTab" onclick="switchTab('register')" class="tab-button" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid transparent; color:#999;">Register</button>
+        </div>
       
       <!-- Message Area -->
       <div id="authMessage" class="auth-message" style="display:none; margin:15px 30px; padding:10px; border-radius:6px; text-align:center; font-weight:bold;"></div>
       
       <!-- Login Form -->
       <div id="loginFormContent" style="padding:30px;">
-        <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
+        <form id="loginForm" onsubmit="return handleLoginSubmit(event);">
           <div style="margin-bottom:20px;">
             <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Username</label>
-            <input type="text" id="loginUsername" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+            <input type="text" id="loginUsername" name="loginUsername" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
           </div>
           <div style="margin-bottom:25px;">
             <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Password</label>
             <div style="position:relative;">
-              <input type="password" id="loginPassword" required style="width:100%; padding:12px 45px 12px 12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+              <input type="password" id="loginPassword" name="loginPassword" required style="width:100%; padding:12px 45px 12px 12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
               <span onclick="togglePassword('loginPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:20px; user-select:none;">👁️</span>
             </div>
             <div style="text-align:right; margin-top:8px;">
               <a href="#" onclick="event.preventDefault(); showForgotPasswordModal();" style="color:#f9b233; font-size:14px; text-decoration:none;">Forgot Password?</a>
             </div>
           </div>
-          <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:background 0.3s;">Login</button>
+          <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e6a429'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#f9b233'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Login</button>
         </form>
       </div>
       
@@ -935,13 +967,19 @@
           </div>
           <div style="margin-bottom:18px;">
             <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Password</label>
-            <input type="password" id="registerPassword" required minlength="6" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+            <div style="position:relative;">
+              <input type="password" id="registerPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
           </div>
           <div style="margin-bottom:25px;">
             <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Confirm Password</label>
-            <input type="password" id="registerConfirmPassword" required minlength="6" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+            <div style="position:relative;">
+              <input type="password" id="registerConfirmPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerConfirmPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
           </div>
-          <button type="submit" style="width:100%; padding:14px; background:#222; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:background 0.3s;">Register</button>
+          <button type="submit" style="width:100%; padding:14px; background:#222; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#000'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#222'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Register</button>
         </form>
       </div>
     </div>
