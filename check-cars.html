@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Available Cars</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .id-link {
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .id-link:hover {
+            color: #0056b3;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Available Cars in Production</h1>
+        
+        <div class="info">
+            <strong>This page shows all cars available in the production database.</strong><br>
+            Click on a car ID to test inquiry submission for that car.
+        </div>
+
+        <button onclick="fetchCars()">Load Cars from Production</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function fetchCars() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Loading cars...</p>';
+
+            try {
+                const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+                    ? 'http://localhost:5000' 
+                    : 'https://ridebazzar.up.railway.app';
+
+                console.log('Fetching from:', `${apiUrl}/api/cars`);
+
+                const response = await fetch(`${apiUrl}/api/cars`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success || !Array.isArray(data.data)) {
+                    throw new Error('Invalid response format: ' + JSON.stringify(data));
+                }
+
+                const cars = data.data;
+
+                if (cars.length === 0) {
+                    resultDiv.innerHTML = '<div class="error">❌ No cars found in production database!</div>';
+                    return;
+                }
+
+                let html = `<div class="result">
+                    <p><strong>Total cars in production: ${cars.length}</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Make</th>
+                                <th>Model</th>
+                                <th>Year</th>
+                                <th>Price</th>
+                                <th>Seller</th>
+                                <th>Status</th>
+                                <th>Test Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                cars.forEach(car => {
+                    const testUrl = `${window.location.origin}/car-details.html?id=${car.id}`;
+                    html += `<tr>
+                        <td><strong>${car.id}</strong></td>
+                        <td>${car.make || 'N/A'}</td>
+                        <td>${car.model || 'N/A'}</td>
+                        <td>${car.year || 'N/A'}</td>
+                        <td>₹${car.price ? car.price.toLocaleString('en-IN') : 'N/A'}</td>
+                        <td>${car.seller_username || 'N/A'}</td>
+                        <td>${car.status || 'N/A'}</td>
+                        <td><a class="id-link" href="${testUrl}" target="_blank">View</a></td>
+                    </tr>`;
+                });
+
+                html += '</tbody></table></div>';
+                resultDiv.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<div class="error">
+                    <strong>❌ Error loading cars:</strong><br>
+                    ${error.message}<br><br>
+                    This might mean:<br>
+                    • The backend is not running<br>
+                    • You're testing on a different environment<br>
+                    • There's a network issue
+                </div>`;
+            }
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            setTimeout(fetchCars, 500);
+        });
+    </script>
+</body>
+</html>
