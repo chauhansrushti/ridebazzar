@@ -4,6 +4,34 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// DEBUG: Check inquiries table
+router.get('/debug/check-table', async (req, res) => {
+  try {
+    const [tables] = await db.execute("SHOW TABLES LIKE 'inquiries'");
+    
+    if (tables.length === 0) {
+      return res.status(500).json({
+        success: false,
+        message: 'Inquiries table does not exist!',
+        tables
+      });
+    }
+
+    const [columns] = await db.execute('SHOW COLUMNS FROM inquiries');
+    
+    res.json({
+      success: true,
+      message: 'Inquiries table exists',
+      columns: columns.map(c => ({ field: c.Field, type: c.Type }))
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Submit an inquiry for a car
 router.post('/submit', auth, async (req, res) => {
   try {
@@ -59,16 +87,38 @@ router.post('/submit', auth, async (req, res) => {
 
     // Create inquiry
     console.log('Creating inquiry:', { carId, userId, seller_id: car.seller_id, message, phone });
-    const [result] = await db.execute(
-      `INSERT INTO inquiries (car_id, buyer_id, seller_id, message, phone, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-      [carId, userId, car.seller_id, message, phone, 'pending']
-    );
+    
+    let result;
+    try {
+      [result] = await db.execute(
+        `INSERT INTO inquiries (car_id, buyer_id, seller_id, message, phone, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [carId, userId, car.seller_id, message, phone, 'pending']
+      );
+    } catch (dbError) {
+      console.error('❌ Database insert error:', dbError);
+      console.error('Error code:', dbError.code);
+      console.error('Error message:', dbError.message);
+      
+      // Check if table exists
+      try {
+        const [tables] = await db.execute("SHOW TABLES LIKE 'inquiries'");
+        console.log('Inquiries table exists:', tables.length > 0);
+      } catch (e) {
+        console.error('Could not check table:', e.message);
+      }
+      
+      throw dbError;
+    }
 
     console.log('Inquiry created successfully:', { inquiryId: result.insertId });
 
-    // Increment car inquiry count
-    await db.execute('UPDATE cars SET inquiries = inquiries + 1 WHERE id = ?', [carId]);
+    // Try to increment car inquiry count (if column exists)
+    try {
+      await db.execute('UPDATE cars SET inquiries = inquiries + 1 WHERE id = ?', [carId]);
+    } catch (e) {
+      console.warn('Could not update inquiry count (column might not exist):', e.message);
+    }
 
     // Return success
     res.json({
