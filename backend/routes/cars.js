@@ -486,7 +486,7 @@ router.post('/', auth, async (req, res) => {
             imageCount: images.length
         });
 
-        // Validate images
+        // Validate image count only (checking lengths of huge base64 strings can crash the app)
         if (images.length > 5) {
             return res.status(400).json({ 
                 success: false, 
@@ -494,27 +494,7 @@ router.post('/', auth, async (req, res) => {
             });
         }
 
-        // Check image sizes (each base64 image should be reasonable)
-        let totalImageSize = 0;
-        for (let i = 0; i < images.length; i++) {
-            const imgSize = (images[i] || '').length;
-            totalImageSize += imgSize;
-            if (imgSize > 2 * 1024 * 1024) { // 2MB per image
-                return res.status(400).json({ 
-                    success: false, 
-                    message: `Image ${i + 1} is too large. Max 2MB per image.` 
-                });
-            }
-        }
-        
-        if (totalImageSize > 8 * 1024 * 1024) { // 8MB total
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Total image size exceeds 8MB. Please use smaller images.' 
-            });
-        }
-
-        console.log('   ✅ Image validation passed, total size:', (totalImageSize / 1024 / 1024).toFixed(2), 'MB');
+        console.log('   ✅ Image validation passed, count:', images.length);
 
         // Validate required fields
         if (!make || !model || !year || !price || !fuelType || !transmission || !conditionStatus) {
