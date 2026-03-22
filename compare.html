@@ -665,7 +665,17 @@
       selectedCars.forEach((car, index) => {
         const selector = selectors[index];
         if (car) {
-          const imgSrc = (car.images && car.images.length > 0) ? car.images[0] : 'images/logo.png';
+          // Helper function to get full image URL
+          const getImageUrl = (imagePath) => {
+            if (imagePath.startsWith('images/')) {
+              const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : `${window.location.origin}:5000`;
+              return apiBase + '/' + imagePath;
+            }
+            return imagePath;
+          };
+          
+          const rawImgSrc = (car.images && car.images.length > 0) ? car.images[0] : 'images/logo.png';
+          const imgSrc = getImageUrl(rawImgSrc);
           const formattedCar = formatCarForDisplay(car);
           
           selector.className = 'selector-card filled';
