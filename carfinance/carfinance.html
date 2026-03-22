@@ -299,11 +299,18 @@
 
     /* Mobile Responsive - Tablet */
     @media (max-width: 900px) {
-      #loginModal > div {
-        height: auto;
+      #loginModal {
+        display: block !important;
+        padding: 10px;
+      }
+
+      #loginModal > div.login-modal-content {
+        height: auto !important;
         max-height: 90vh;
-        margin: 5vh auto;
-        flex-direction: column;
+        margin: 5vh auto !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 95vw !important;
       }
 
       .modal-left-side {
@@ -314,29 +321,28 @@
         flex: 0 !important;
       }
 
-      #loginModal > div > div:nth-child(3) {
+      #loginModal > div.login-modal-content > div:last-of-type {
         flex: 1 !important;
-        max-height: 500px;
-        overflow-y: auto;
-      }
-
-      #loginModal > div > div:nth-child(3) {
-        padding: 30px 25px !important;
+        padding: 20px !important;
+        width: 100% !important;
+        display: block !important;
       }
     }
 
     /* Mobile Responsive - Small Phones */
     @media (max-width: 600px) {
       #loginModal {
+        display: block !important;
         padding: 10px;
       }
 
-      #loginModal > div {
+      #loginModal > div.login-modal-content {
         max-width: 100%;
-        height: auto;
-        margin: 40px auto;
+        height: auto !important;
+        margin: 20px auto !important;
         border-radius: 12px;
-        flex-direction: column;
+        flex-direction: column !important;
+        width: 100vw !important;
       }
 
       .modal-left-side {
@@ -347,25 +353,17 @@
         flex: 0 !important;
       }
 
-      #loginModal > div > div:nth-child(3) {
+      #loginModal > div.login-modal-content > div:last-of-type {
         flex: 1 !important;
-        padding: 20px !important;
-      }
-
-      #loginModal > div > div:nth-child(3) > div:nth-child(2) {
-        display: flex;
-        border-bottom: 2px solid #eee;
-        margin-bottom: 20px;
-      }
-
-      .tab-button {
-        flex: 1;
-        padding: 10px !important;
-        font-size: 14px !important;
+        padding: 15px !important;
+        width: 100% !important;
+        display: block !important;
+        overflow: visible !important;
       }
 
       #loginFormContent, #registerFormContent {
         padding: 0 !important;
+        display: block !important;
       }
 
       #loginFormContent form div,
@@ -383,12 +381,14 @@
       #registerFormContent input {
         font-size: 14px !important;
         padding: 10px !important;
+        width: 100% !important;
       }
 
       #loginFormContent button,
       #registerFormContent button {
         font-size: 14px !important;
         padding: 12px !important;
+        width: 100% !important;
       }
 
       #authMessage {
@@ -396,21 +396,32 @@
         padding: 8px !important;
         font-size: 12px !important;
       }
+
+      .tab-button {
+        flex: 1;
+        padding: 10px !important;
+        font-size: 14px !important;
+      }
     }
 
     /* Extra Small Phones */
     @media (max-width: 400px) {
       #loginModal {
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        display: block !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        padding: 0 !important;
       }
 
-      #loginModal > div {
-        margin: 10px auto;
+      #loginModal > div.login-modal-content {
+        width: calc(100vw - 20px) !important;
+        margin: 10px auto !important;
         border-radius: 8px;
-        max-height: calc(100vh - 20px);
+        max-height: calc(100vh - 20px) !important;
+        height: auto !important;
+        flex-direction: column !important;
       }
 
       #loginModal span {
@@ -423,6 +434,14 @@
         width: 0 !important;
         height: 0 !important;
         flex: 0 !important;
+      }
+
+      #loginModal > div.login-modal-content > div:last-of-type {
+        flex: 1 !important;
+        padding: 15px !important;
+        width: 100% !important;
+        display: block !important;
+        overflow-y: auto !important;
       }
 
       #loginFormContent > div:nth-child(1) {
