@@ -490,8 +490,12 @@
         // Fetch cars from backend API - Only available cars (same as all-cars page)
         let apiCars = [];
         try {
-          console.log('📡 Fetching from API: http://localhost:5000/api/cars');
-          const response = await fetch('http://localhost:5000/api/cars?status=available&limit=100');
+          // Use CONFIG API base URL or fallback to localhost
+          const apiUrl = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API : 'http://localhost:5000/api/cars';
+          const queryUrl = apiUrl.includes('?') ? `${apiUrl}&status=available&limit=100` : `${apiUrl}?status=available&limit=100`;
+          
+          console.log('📡 Fetching from API:', queryUrl);
+          const response = await fetch(queryUrl);
           console.log('Response status:', response.status);
           
           if (!response.ok) {
