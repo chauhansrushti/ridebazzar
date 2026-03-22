@@ -18,9 +18,11 @@ router.get('/debug/check-tables', async (req, res) => {
         console.log('   Users table found:', usersTables.length > 0);
         
         // Get cars table structure
+        let carsColumns = [];
         if (carsTables.length > 0) {
-            const [carsColumns] = await db.execute("SHOW COLUMNS FROM cars");
-            console.log('   Cars columns:', carsColumns.map(c => c.Field).join(', '));
+            const [columns] = await db.execute("SHOW COLUMNS FROM cars");
+            carsColumns = columns.map(c => ({ field: c.Field, type: c.Type }));
+            console.log('   Cars columns:', carsColumns.map(c => c.field).join(', '));
         } else {
             console.error('   ❌ CARS TABLE NOT FOUND!');
             // Try to create it
@@ -59,18 +61,31 @@ router.get('/debug/check-tables', async (req, res) => {
             console.log('   ✅ Cars table created');
         }
         
+        // Try a test query
+        console.log('   🔄 Testing SELECT query...');
+        try {
+            const [testQuery] = await db.execute('SELECT COUNT(*) as count FROM cars');
+            console.log('   ✅ Query successful, car count:', testQuery[0].count);
+        } catch (qError) {
+            console.error('   ❌ Query failed:', qError.message);
+            throw qError;
+        }
+        
         res.json({
             success: true,
             tables: {
                 cars: carsTables.length > 0,
                 users: usersTables.length > 0
-            }
+            },
+            carsColumns: carsColumns,
+            carsCount: (await db.execute('SELECT COUNT(*) as count FROM cars'))[0][0].count
         });
     } catch (error) {
         console.error('❌ Error checking tables:', error);
         res.status(500).json({
             success: false,
-            error: error.message
+            error: error.message,
+            code: error.code
         });
     }
 });
@@ -193,9 +208,14 @@ router.get('/', async (req, res) => {
         const offset = (pageNum - 1) * limitNum;
         query += ` LIMIT ${limitNum} OFFSET ${offset}`;
 
+        console.log('   🔄 Executing main query...');
+        console.log('   Query:', query.substring(0, 100) + '...');
+        
         const [cars] = await db.execute(query, params);
+        console.log('   ✅ Query succeeded, found', cars.length, 'cars');
 
         // Parse images JSON for each car
+        console.log('   🔄 Parsing images JSON...');
         const parsedCars = cars.map(car => {
             try {
                 if (car.images && typeof car.images === 'string') {
@@ -204,12 +224,15 @@ router.get('/', async (req, res) => {
                     car.images = [];
                 }
             } catch (e) {
+                console.warn('   ⚠️ Failed to parse images for car', car.id);
                 car.images = [];
             }
             return car;
         });
+        console.log('   ✅ Images parsed successfully');
 
         // Get total count for pagination
+        console.log('   🔄 Getting total count...');
         let countQuery = 'SELECT COUNT(*) as total FROM cars WHERE 1=1';
         let countParams = [];
 
@@ -261,6 +284,7 @@ router.get('/', async (req, res) => {
 
         const [countResult] = await db.execute(countQuery, countParams);
         const totalCars = countResult[0].total;
+        console.log('   ✅ Total cars:', totalCars);
 
         res.json({
             success: true,
