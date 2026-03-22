@@ -610,7 +610,9 @@
         let car = null;
         try {
           console.log(`📡 Fetching car from API...`);
-          const response = await fetch(`http://localhost:5000/api/cars/${carId}`);
+          // Use CONFIG API base URL or fallback to localhost
+          const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : 'http://localhost:5000';
+          const response = await fetch(`${apiBase}/api/cars/${carId}`);
           
           if (response.ok) {
             const result = await response.json();
