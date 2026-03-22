@@ -32,6 +32,9 @@ router.post('/debug/test-post', auth, async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
+// DEBUG: Simple cars query test
+router.get('/debug/test-simple', async (req, res) => {
     try {
         console.log('🧪 Running simple cars query test...');
         
