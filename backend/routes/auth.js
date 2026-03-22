@@ -416,6 +416,16 @@ router.post('/dev/init-test-users', async (req, res) => {
     try {
         console.log('🧪 Initializing test users...');
         
+        // First, ensure role column exists
+        try {
+            await db.execute('ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT "user"');
+            console.log('✅ Added role column to users table');
+        } catch (err) {
+            if (!err.message.includes('Duplicate column')) {
+                console.log('⚠️  Role column may already exist:', err.message);
+            }
+        }
+        
         const testUsers = [
             { username: 'srushti', email: 'srushtichauhan2006@gmail.com', password: 'srushti123', fullName: 'Srushti Chauhan', role: 'user' },
             { username: 'priti', email: 'priti@gmail.com', password: 'priti17', fullName: 'Priti', role: 'user' },
@@ -429,7 +439,7 @@ router.post('/dev/init-test-users', async (req, res) => {
             try {
                 // Check if user exists
                 const [existing] = await db.execute(
-                    'SELECT id, role FROM users WHERE username = ?',
+                    'SELECT id FROM users WHERE username = ?',
                     [user.username]
                 );
 
@@ -437,8 +447,7 @@ router.post('/dev/init-test-users', async (req, res) => {
                     results.push({ 
                         username: user.username, 
                         status: 'exists', 
-                        id: existing[0].id,
-                        role: existing[0].role
+                        id: existing[0].id
                     });
                     continue;
                 }
@@ -460,6 +469,7 @@ router.post('/dev/init-test-users', async (req, res) => {
                     password: user.password // Only in dev response
                 });
             } catch (error) {
+                console.error(`Error creating user ${user.username}:`, error.message);
                 results.push({ 
                     username: user.username, 
                     status: 'error', 
@@ -484,7 +494,7 @@ router.post('/dev/init-test-users', async (req, res) => {
                 id: u.id, 
                 username: u.username, 
                 email: u.email,
-                role: u.role,
+                role: u.role || 'user',
                 is_active: u.is_active 
             }))
         });
