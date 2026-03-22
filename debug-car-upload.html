@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Car Upload - RideBazzar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .debug-output {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .status.loading {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        .info-box strong {
+            color: #333;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Debug Car Upload</h1>
+        
+        <div class="info-box">
+            <strong>ℹ️ Purpose:</strong> This page helps debug issues with posting cars. It will show the exact API response and errors.
+        </div>
+
+        <form id="debugForm">
+            <div class="row">
+                <div class="form-group">
+                    <label for="make">Car Make *</label>
+                    <input type="text" id="make" value="Toyota" required>
+                </div>
+                <div class="form-group">
+                    <label for="model">Car Model *</label>
+                    <input type="text" id="model" value="Fortuner" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="year">Year *</label>
+                    <input type="number" id="year" value="2023" min="1990" max="2030" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price (₹) *</label>
+                    <input type="number" id="price" value="25000000" min="0" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="fuel">Fuel Type *</label>
+                    <select id="fuel" required>
+                        <option value="">Select Fuel Type</option>
+                        <option value="Petrol">Petrol</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="Electric">Electric</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="CNG">CNG</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transmission">Transmission *</label>
+                    <select id="transmission" required>
+                        <option value="">Select Transmission</option>
+                        <option value="Manual">Manual</option>
+                        <option value="Automatic">Automatic</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="condition">Condition *</label>
+                    <select id="condition" required>
+                        <option value="">Select Condition</option>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                        <option value="Poor">Poor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="mileage">Mileage (km)</label>
+                    <input type="number" id="mileage" value="50000" min="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" value="Mumbai, Maharashtra">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description">Well maintained Toyota Fortuner in excellent condition</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="contact">Contact Phone</label>
+                <input type="tel" id="contact" value="+919876543210">
+            </div>
+
+            <div class="form-group">
+                <label>Upload Images (Optional - NO images to test without them)</label>
+                <input type="file" id="images" accept="image/*" multiple>
+                <small>Leave empty to test without images</small>
+            </div>
+
+            <button type="submit" id="submitBtn">📤 Upload Car (No Images)</button>
+        </form>
+
+        <div id="status"></div>
+        <div id="output" class="debug-output" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('debugForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await uploadCar();
+        });
+
+        document.getElementById('images').addEventListener('change', (e) => {
+            const btn = document.getElementById('submitBtn');
+            if (e.target.files.length > 0) {
+                btn.textContent = '📤 Upload Car (WITH Images)';
+            } else {
+                btn.textContent = '📤 Upload Car (No Images)';
+            }
+        });
+
+        async function uploadCar() {
+            const status = document.getElementById('status');
+            const output = document.getElementById('output');
+            const btn = document.getElementById('submitBtn');
+
+            status.innerHTML = '<div class="status loading">⏳ Uploading car...</div>';
+            output.style.display = 'block';
+            output.innerHTML = 'Preparing request...\n';
+            btn.disabled = true;
+
+            try {
+                // Check authentication
+                const token = localStorage.getItem('authToken');
+                output.innerHTML += `✓ Auth token found: ${token ? token.substring(0, 20) + '...' : 'MISSING'}\n`;
+
+                if (!token) {
+                    throw new Error('❌ No auth token found. Please log in first!');
+                }
+
+                // Prepare car data
+                const carData = {
+                    make: document.getElementById('make').value,
+                    model: document.getElementById('model').value,
+                    year: parseInt(document.getElementById('year').value),
+                    price: parseFloat(document.getElementById('price').value),
+                    fuelType: document.getElementById('fuel').value,
+                    transmission: document.getElementById('transmission').value,
+                    conditionStatus: document.getElementById('condition').value,
+                    mileage: parseInt(document.getElementById('mileage').value) || null,
+                    location: document.getElementById('location').value,
+                    description: document.getElementById('description').value,
+                    contact: document.getElementById('contact').value,
+                    images: []
+                };
+
+                output.innerHTML += `✓ Car data prepared: ${JSON.stringify(carData, null, 2)}\n\n`;
+
+                // Handle images if provided
+                const imageFiles = document.getElementById('images').files;
+                if (imageFiles.length > 0) {
+                    output.innerHTML += `⏳ Processing ${imageFiles.length} images...\n`;
+                    
+                    for (let i = 0; i < imageFiles.length; i++) {
+                        const file = imageFiles[i];
+                        output.innerHTML += `  Reading image ${i + 1}: ${file.name} (${(file.size / 1024).toFixed(2)} KB)\n`;
+                        
+                        const base64 = await readFileAsBase64(file);
+                        carData.images.push(base64);
+                    }
+                    
+                    output.innerHTML += `✓ All images converted to base64\n`;
+                }
+
+                // Calculate payload size
+                const payload = JSON.stringify(carData);
+                const payloadSize = new Blob([payload]).size;
+                output.innerHTML += `\n📊 Payload size: ${(payloadSize / 1024).toFixed(2)} KB\n`;
+
+                if (payloadSize > 10 * 1024 * 1024) {
+                    throw new Error(`Payload too large: ${(payloadSize / 1024 / 1024).toFixed(2)} MB (max 10 MB)`);
+                }
+
+                // Make API call
+                output.innerHTML += `\n🔄 Sending POST request to /api/cars...\n`;
+
+                const apiUrl = `${window.location.origin}/api/cars`;
+                output.innerHTML += `   URL: ${apiUrl}\n`;
+                output.innerHTML += `   Auth: Bearer ${token.substring(0, 20)}...\n\n`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: payload
+                });
+
+                output.innerHTML += `\n✓ Response received\n`;
+                output.innerHTML += `   Status: ${response.status} ${response.statusText}\n`;
+                output.innerHTML += `   Content-Type: ${response.headers.get('content-type')}\n\n`;
+
+                const result = await response.json();
+                output.innerHTML += `📋 Response Body:\n${JSON.stringify(result, null, 2)}\n`;
+
+                if (result.success) {
+                    status.innerHTML = `<div class="status success">✅ Success! Car ID: ${result.data.carId}</div>`;
+                    output.innerHTML += `\n✅ Car posted successfully with ID: ${result.data.carId}`;
+                } else {
+                    status.innerHTML = `<div class="status error">❌ ${result.message || 'Unknown error'}</div>`;
+                    
+                    if (result.debug) {
+                        output.innerHTML += `\n\n🔍 Debug Info:\n${JSON.stringify(result.debug, null, 2)}`;
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                status.innerHTML = `<div class="status error">❌ ${error.message}</div>`;
+                output.innerHTML += `\n\n❌ ERROR: ${error.message}\n${error.stack || ''}`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
+</body>
+</html>
