@@ -902,7 +902,13 @@
           </div>
           <div style="margin-bottom:25px;">
             <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Password</label>
-            <input type="password" id="loginPassword" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+            <div style="position:relative;">
+              <input type="password" id="loginPassword" required style="width:100%; padding:12px 45px 12px 12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('loginPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:20px; user-select:none;">👁️</span>
+            </div>
+            <div style="text-align:right; margin-top:8px;">
+              <a href="#" onclick="event.preventDefault(); showForgotPasswordModal();" style="color:#f9b233; font-size:14px; text-decoration:none;">Forgot Password?</a>
+            </div>
           </div>
           <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:background 0.3s;">Login</button>
         </form>
@@ -941,6 +947,40 @@
     </div>
   </div>
 
+  <!-- Forgot Password Modal -->
+  <div id="forgotPasswordModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1001;">
+    <div style="background:#fff; max-width:400px; margin:80px auto; padding:30px; border-radius:12px; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+      <span onclick="hideForgotPasswordModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999;">&times;</span>
+      <h2 style="margin-top:0; color:#333; text-align:center;">Reset Password</h2>
+      <p style="color:#666; text-align:center; margin-bottom:25px;">Enter your email and we'll send you a reset code.</p>
+      <div id="forgotPasswordMessage" style="display:none; margin-bottom:15px; padding:10px; border-radius:6px; text-align:center; font-weight:bold;"></div>
+      <form id="forgotPasswordForm" onsubmit="event.preventDefault(); handleForgotPassword();">
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Email Address</label>
+          <input type="email" id="forgotEmail" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+        </div>
+        <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer;">Send Reset Code</button>
+      </form>
+      <div id="resetCodeSection" style="display:none; margin-top:20px;">
+        <form id="resetPasswordForm" onsubmit="event.preventDefault(); handleResetPassword();">
+          <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Reset Code</label>
+            <input type="text" id="resetCode" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+          </div>
+          <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">New Password</label>
+            <input type="password" id="newPassword" required minlength="6" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+          </div>
+          <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Confirm Password</label>
+            <input type="password" id="confirmNewPassword" required minlength="6" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#28a745; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer;">Reset Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Login Modal Functions
     function showLoginModal() {
@@ -949,6 +989,102 @@
     
     function hideLoginModal() {
       document.getElementById('loginModal').style.display = 'none';
+    }
+
+    function showForgotPasswordModal() {
+      document.getElementById('loginModal').style.display = 'none';
+      document.getElementById('forgotPasswordModal').style.display = 'block';
+    }
+    
+    function hideForgotPasswordModal() {
+      document.getElementById('forgotPasswordModal').style.display = 'none';
+      document.getElementById('resetCodeSection').style.display = 'none';
+      document.getElementById('forgotPasswordForm').style.display = 'block';
+      document.getElementById('forgotEmail').value = '';
+      document.getElementById('forgotPasswordMessage').style.display = 'none';
+    }
+    
+    let resetCodeStorage = null;
+    let resetEmailStorage = null;
+    
+    function handleForgotPassword() {
+      const email = document.getElementById('forgotEmail').value;
+      const message = document.getElementById('forgotPasswordMessage');
+      
+      const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+      resetCodeStorage = resetCode;
+      resetEmailStorage = email;
+      
+      emailjs.send('service_wl37npn', 'template_08atm5e', {
+        to_email: email,
+        to_name: email.split('@')[0],
+        reset_code: resetCode
+      })
+      .then(function(response) {
+        console.log('Reset email sent!', response);
+        message.style.display = 'block';
+        message.className = 'auth-message success';
+        message.innerHTML = '✅ Reset code sent to your email!';
+        
+        document.getElementById('forgotPasswordForm').style.display = 'none';
+        document.getElementById('resetCodeSection').style.display = 'block';
+      }, function(error) {
+        console.error('Email send failed:', error);
+        message.style.display = 'block';
+        message.className = 'auth-message error';
+        message.innerHTML = '❌ Failed to send email. Please try again.';
+      });
+    }
+    
+    function handleResetPassword() {
+      const code = document.getElementById('resetCode').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmNewPassword').value;
+      const message = document.getElementById('forgotPasswordMessage');
+      
+      if (newPassword !== confirmPassword) {
+        message.style.display = 'block';
+        message.className = 'auth-message error';
+        message.innerHTML = '❌ Passwords do not match!';
+        return;
+      }
+      
+      if (code !== resetCodeStorage) {
+        message.style.display = 'block';
+        message.className = 'auth-message error';
+        message.innerHTML = '❌ Invalid reset code!';
+        return;
+      }
+      
+      const authApiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/reset-password';
+      fetch(authApiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmailStorage, newPassword: newPassword })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          message.style.display = 'block';
+          message.className = 'auth-message success';
+          message.innerHTML = '✅ Password reset successfully! You can now login.';
+          
+          setTimeout(() => {
+            hideForgotPasswordModal();
+            showLoginModal();
+          }, 2000);
+        } else {
+          message.style.display = 'block';
+          message.className = 'auth-message error';
+          message.innerHTML = '❌ ' + (data.error || 'Failed to reset password');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        message.style.display = 'block';
+        message.className = 'auth-message error';
+        message.innerHTML = '❌ Error resetting password. Please try again.';
+      });
     }
 
     function switchTab(tab) {
