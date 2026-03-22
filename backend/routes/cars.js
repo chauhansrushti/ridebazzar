@@ -58,6 +58,9 @@ router.get('/debug/simple-test', async (req, res) => {
         });
     }
 });
+
+// DEBUG: Check database tables
+router.get('/debug/check-tables', async (req, res) => {
     try {
         console.log('🔍 Checking database tables...');
         
@@ -115,9 +118,11 @@ router.get('/debug/simple-test', async (req, res) => {
         
         // Try a test query
         console.log('   🔄 Testing SELECT query...');
+        let carCount = 0;
         try {
             const [testQuery] = await db.execute('SELECT COUNT(*) as count FROM cars');
-            console.log('   ✅ Query successful, car count:', testQuery[0].count);
+            carCount = testQuery[0].count;
+            console.log('   ✅ Query successful, car count:', carCount);
         } catch (qError) {
             console.error('   ❌ Query failed:', qError.message);
             throw qError;
@@ -130,7 +135,7 @@ router.get('/debug/simple-test', async (req, res) => {
                 users: usersTables.length > 0
             },
             carsColumns: carsColumns,
-            carsCount: (await db.execute('SELECT COUNT(*) as count FROM cars'))[0][0].count
+            carsCount: carCount
         });
     } catch (error) {
         console.error('❌ Error checking tables:', error);
