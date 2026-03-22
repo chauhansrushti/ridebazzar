@@ -201,7 +201,8 @@ function logoutUser() {
         // Also try to call server logout if available
         const token = localStorage.getItem('authToken');
         if (token) {
-            fetch('http://localhost:5000/api/auth/logout', {
+            const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000' : 'https://ridebazzar.up.railway.app';
+            fetch(`${apiUrl}/api/auth/logout`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

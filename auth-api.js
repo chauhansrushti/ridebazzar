@@ -1,7 +1,9 @@
 // Backend API Bridge for Authentication
 // This file connects the frontend to the Node.js backend
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'http://localhost:5000/api' 
+    : 'https://ridebazzar.up.railway.app/api';
 
 class BackendAuthManager {
   constructor() {

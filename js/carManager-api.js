@@ -147,7 +147,8 @@ class CarManager {
     async markCarAsSold(carId) {
         try {
             const token = localStorage.getItem('authToken');
-            const response = await fetch(`http://localhost:5000/api/cars/${carId}`, {
+            const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000' : 'https://ridebazzar.up.railway.app';
+            const response = await fetch(`${apiUrl}/api/cars/${carId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -334,7 +335,8 @@ class CarManager {
             }
 
             // Submit inquiry to backend
-            const response = await fetch('http://localhost:5000/api/inquiries/submit', {
+            const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000' : 'https://ridebazzar.up.railway.app';
+            const response = await fetch(`${apiUrl}/api/inquiries/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -401,7 +403,8 @@ class CarManager {
                 return [];
             }
 
-            const response = await fetch('http://localhost:5000/api/inquiries/received', {
+            const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000' : 'https://ridebazzar.up.railway.app';
+            const response = await fetch(`${apiUrl}/api/inquiries/received`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`

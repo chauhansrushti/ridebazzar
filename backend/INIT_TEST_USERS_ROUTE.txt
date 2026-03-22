@@ -1,0 +1,75 @@
+// This route should be added to backend/routes/auth.js
+// It provides a way to initialize test users for development/testing
+
+// Add this to the end of auth.js before module.exports
+
+// DEVELOPMENT ONLY: Initialize test users endpoint
+router.post('/dev/init-test-users', async (req, res) => {
+    // Only allow in development
+    if (process.env.NODE_ENV === 'production') {
+        return res.status(403).json({
+            success: false,
+            message: 'This endpoint is only available in development mode'
+        });
+    }
+
+    try {
+        const testUsers = [
+            { username: 'srushti', email: 'srushtichauhan2006@gmail.com', password: 'srushti123', fullName: 'Srushti Chauhan', role: 'user' },
+            { username: 'priti', email: 'priti@gmail.com', password: 'priti17', fullName: 'Priti', role: 'user' },
+            { username: 'neel', email: 'neel@gmail.com', password: 'neel123', fullName: 'Neel', role: 'user' },
+            { username: 'tanisha', email: 'tan@gmail.com', password: 'tan123', fullName: 'Tanisha', role: 'user' }
+        ];
+
+        const results = [];
+
+        for (const user of testUsers) {
+            try {
+                // Check if user exists
+                const [existing] = await db.execute(
+                    'SELECT id FROM users WHERE username = ?',
+                    [user.username]
+                );
+
+                if (existing.length > 0) {
+                    results.push({ username: user.username, status: 'exists', message: 'User already exists' });
+                    continue;
+                }
+
+                // Hash password
+                const hashedPassword = await bcrypt.hash(user.password, 10);
+
+                // Insert user
+                await db.execute(
+                    'INSERT INTO users (username, email, password, full_name, role, is_active) VALUES (?, ?, ?, ?, ?, 1)',
+                    [user.username, user.email, hashedPassword, user.fullName, user.role]
+                );
+
+                results.push({ username: user.username, status: 'created', message: 'User created successfully' });
+            } catch (error) {
+                results.push({ username: user.username, status: 'error', message: error.message });
+            }
+        }
+
+        // Get all users
+        const [allUsers] = await db.execute(
+            'SELECT id, username, email, role FROM users'
+        );
+
+        res.json({
+            success: true,
+            message: 'Test users initialization complete',
+            initialized: results,
+            totalUsers: allUsers.length,
+            allUsers: allUsers.map(u => ({ id: u.id, username: u.username, role: u.role }))
+        });
+
+    } catch (error) {
+        console.error('Test user initialization error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error initializing test users',
+            error: error.message
+        });
+    }
+});
