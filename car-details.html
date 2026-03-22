@@ -318,6 +318,18 @@
       .main-image {
         height: 300px;
       }
+      
+      /* Hide car gallery and details when login modal is open on mobile */
+      body.modal-open-mobile .car-gallery {
+        display: none;
+      }
+      body.modal-open-mobile .car-main {
+        display: none;
+      }
+      body.modal-open-mobile .top-navbar {
+        opacity: 0.5;
+        pointer-events: none;
+      }
     }
   </style>
 </head>
@@ -1489,10 +1501,16 @@
     // Authentication helper functions
     function showLoginModal() {
       document.getElementById('loginModal').style.display = 'block';
+      // Hide car content on mobile when modal opens
+      if (window.innerWidth <= 768) {
+        document.body.classList.add('modal-open-mobile');
+      }
     }
 
     function hideLoginModal() {
       document.getElementById('loginModal').style.display = 'none';
+      // Show car content when modal closes
+      document.body.classList.remove('modal-open-mobile');
     }
 
     async function handleLogin() {
