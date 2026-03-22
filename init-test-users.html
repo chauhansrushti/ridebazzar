@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialize Test Users - RideBazzar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .test-users {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .test-users h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .user-item strong {
+            color: #333;
+            min-width: 100px;
+        }
+
+        .user-item .password {
+            color: #666;
+            font-family: 'Courier New', monospace;
+            background: #f5f5f5;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-init {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-init:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-init:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-test {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-test:hover:not(:disabled) {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-test:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .api-url {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            color: #666;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+            line-height: 1.6;
+        }
+
+        #result.loading {
+            background: #e3f2fd;
+            color: #1976d2;
+            display: block;
+            animation: pulse 1s infinite;
+        }
+
+        #result.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            display: block;
+        }
+
+        #result.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+            display: block;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .user-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .status-badge {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .status-badge.created {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .status-badge.exists {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+
+        .status-badge.error {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .link-btn {
+            color: #667eea;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 12px;
+            padding: 0;
+        }
+
+        .link-btn:hover {
+            text-decoration: underline;
+        }
+
+        .endpoint-info {
+            background: #fafafa;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            border-left: 3px solid #ff9800;
+        }
+
+        .endpoint-info strong {
+            color: #333;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 5px;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Initialize Test Users</h1>
+        <p class="subtitle">Set up test users for RideBazzar development</p>
+
+        <div class="info-box">
+            <strong>ℹ️ Purpose:</strong> This page initializes test user accounts in the database. These test users will be used for development and testing the login system.
+        </div>
+
+        <div class="endpoint-info">
+            <strong>✓ Endpoint Status:</strong>
+            <div class="code-block">POST /api/auth/dev/init-test-users</div>
+            <p style="margin-top: 8px;">This endpoint accepts POST requests without authentication and creates test users if they don't already exist.</p>
+        </div>
+
+        <div class="test-users">
+            <h3>📋 Test Users to Create:</h3>
+            <div class="user-list">
+                <div class="user-item">
+                    <strong>srushti</strong>
+                    <span class="password">srushti123</span>
+                </div>
+                <div class="user-item">
+                    <strong>priti</strong>
+                    <span class="password">priti17</span>
+                </div>
+                <div class="user-item">
+                    <strong>neel</strong>
+                    <span class="password">neel123</span>
+                </div>
+                <div class="user-item">
+                    <strong>tanisha</strong>
+                    <span class="password">tan123</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-init" onclick="initializeTestUsers()" id="initBtn">
+                🆕 Initialize Test Users
+            </button>
+            <button class="btn-test" onclick="checkStatus()" id="checkBtn">
+                ✓ Check Status
+            </button>
+        </div>
+
+        <div id="result"></div>
+
+        <div class="footer">
+            <p>💡 After initialization, you can use the test credentials above to log in to the application.</p>
+        </div>
+    </div>
+
+    <script>
+        async function initializeTestUsers() {
+            const btn = document.getElementById('initBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            result.className = 'loading';
+            result.innerHTML = '⏳ Initializing test users...';
+
+            try {
+                // Use the current domain for the API call
+                const apiUrl = `${window.location.origin}/api/auth/dev/init-test-users`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    let html = `
+                        <strong>✅ Test Users Initialized Successfully!</strong>
+                        <p style="margin-top: 10px;"><strong>Summary:</strong></p>
+                        <ul style="margin-left: 15px; margin-top: 8px;">
+                            <li>Total Users: ${data.totalUsers}</li>
+                            <li>Status: All users ready for testing</li>
+                        </ul>
+                        <p style="margin-top: 12px;"><strong>User Details:</strong></p>
+                        <div style="max-height: 200px; overflow-y: auto; margin-top: 8px;">
+                    `;
+
+                    data.initialized.forEach(user => {
+                        const statusClass = user.status === 'created' ? 'created' : 
+                                          user.status === 'exists' ? 'exists' : 'error';
+                        const statusText = user.status === 'created' ? 'Created' : 
+                                         user.status === 'exists' ? 'Already Exists' : 'Error';
+                        
+                        html += `
+                            <div class="user-item">
+                                <strong>${user.username}</strong>
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                        </div>
+                        <p style="margin-top: 15px; font-size: 13px; color: #666;">
+                            ✨ You can now log in using any of the test user credentials above.
+                        </p>
+                    `;
+
+                    result.innerHTML = html;
+                    result.className = 'success';
+                } else {
+                    result.className = 'error';
+                    result.innerHTML = `
+                        <strong>❌ Initialization Failed</strong>
+                        <p style="margin-top: 8px;">${data.message}</p>
+                        <p style="margin-top: 8px; font-size: 12px; color: #888;">${data.error || ''}</p>
+                    `;
+                }
+            } catch (error) {
+                result.className = 'error';
+                result.innerHTML = `
+                    <strong>❌ Error</strong>
+                    <p style="margin-top: 8px;">${error.message}</p>
+                    <p style="margin-top: 8px; font-size: 12px; color: #888;">
+                        Make sure the backend server is running at: ${window.location.origin}
+                    </p>
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function checkStatus() {
+            const result = document.getElementById('result');
+            result.className = 'loading';
+            result.innerHTML = '⏳ Checking database status...';
+
+            try {
+                const apiUrl = `${window.location.origin}/api/auth/users`;
+                
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.success) {
+                    let html = `
+                        <strong>✅ Database Status</strong>
+                        <p style="margin-top: 10px;">Total Users: <strong>${data.data.length}</strong></p>
+                        <p style="margin-top: 8px;"><strong>Users in Database:</strong></p>
+                        <div style="max-height: 250px; overflow-y: auto; margin-top: 8px;">
+                    `;
+
+                    data.data.forEach(user => {
+                        html += `
+                            <div class="user-item">
+                                <div>
+                                    <strong>${user.username}</strong>
+                                    <span style="color: #999; margin-left: 8px;">${user.email}</span>
+                                </div>
+                                <span class="status-badge ${user.role === 'admin' ? 'created' : 'exists'}">
+                                    ${user.role.toUpperCase()}
+                                </span>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div>`;
+
+                    result.innerHTML = html;
+                    result.className = 'success';
+                } else {
+                    result.className = 'error';
+                    result.innerHTML = `<strong>❌ Failed to fetch users</strong><p style="margin-top: 8px;">${data.message}</p>`;
+                }
+            } catch (error) {
+                result.className = 'error';
+                result.innerHTML = `
+                    <strong>❌ Error fetching status</strong>
+                    <p style="margin-top: 8px;">${error.message}</p>
+                `;
+            }
+        }
+
+        // Display the API URL being used
+        window.addEventListener('load', () => {
+            console.log('API URL:', `${window.location.origin}/api/auth/dev/init-test-users`);
+        });
+    </script>
+</body>
+</html>

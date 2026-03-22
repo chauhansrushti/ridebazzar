@@ -411,4 +411,92 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
+// Initialize test users (Development/Testing endpoint)
+router.post('/dev/init-test-users', async (req, res) => {
+    try {
+        console.log('🧪 Initializing test users...');
+        
+        const testUsers = [
+            { username: 'srushti', email: 'srushtichauhan2006@gmail.com', password: 'srushti123', fullName: 'Srushti Chauhan', role: 'user' },
+            { username: 'priti', email: 'priti@gmail.com', password: 'priti17', fullName: 'Priti', role: 'user' },
+            { username: 'neel', email: 'neel@gmail.com', password: 'neel123', fullName: 'Neel', role: 'user' },
+            { username: 'tanisha', email: 'tan@gmail.com', password: 'tan123', fullName: 'Tanisha', role: 'user' }
+        ];
+
+        const results = [];
+
+        for (const user of testUsers) {
+            try {
+                // Check if user exists
+                const [existing] = await db.execute(
+                    'SELECT id, role FROM users WHERE username = ?',
+                    [user.username]
+                );
+
+                if (existing.length > 0) {
+                    results.push({ 
+                        username: user.username, 
+                        status: 'exists', 
+                        id: existing[0].id,
+                        role: existing[0].role
+                    });
+                    continue;
+                }
+
+                // Hash password
+                const hashedPassword = await bcrypt.hash(user.password, 10);
+
+                // Insert user
+                const [result] = await db.execute(
+                    'INSERT INTO users (username, email, password, full_name, role, is_active) VALUES (?, ?, ?, ?, ?, 1)',
+                    [user.username, user.email, hashedPassword, user.fullName, user.role]
+                );
+
+                results.push({ 
+                    username: user.username, 
+                    status: 'created', 
+                    id: result.insertId,
+                    role: user.role,
+                    password: user.password // Only in dev response
+                });
+            } catch (error) {
+                results.push({ 
+                    username: user.username, 
+                    status: 'error', 
+                    message: error.message 
+                });
+            }
+        }
+
+        // Get all users
+        const [allUsers] = await db.execute(
+            'SELECT id, username, email, role, is_active FROM users ORDER BY created_at DESC'
+        );
+
+        console.log(`✅ Test users initialization complete. Total users: ${allUsers.length}`);
+
+        res.json({
+            success: true,
+            message: 'Test users initialization complete',
+            initialized: results,
+            totalUsers: allUsers.length,
+            allUsers: allUsers.map(u => ({ 
+                id: u.id, 
+                username: u.username, 
+                email: u.email,
+                role: u.role,
+                is_active: u.is_active 
+            }))
+        });
+
+    } catch (error) {
+        console.error('❌ Test user initialization error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error initializing test users',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;
