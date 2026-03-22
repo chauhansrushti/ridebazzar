@@ -4,8 +4,34 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// DEBUG: Simple GET test without JOIN
-router.get('/debug/simple-test', async (req, res) => {
+// DEBUG: Test endpoint to log request body size
+router.post('/debug/test-post', auth, async (req, res) => {
+    try {
+        const bodySize = JSON.stringify(req.body).length;
+        const imageSizes = (req.body.images || []).map((img, i) => ({
+            index: i,
+            size: img ? img.length : 0
+        }));
+        
+        console.log('📊 POST Request Analysis:');
+        console.log('   Total body size:', (bodySize / 1024 / 1024).toFixed(2), 'MB');
+        console.log('   Image count:', req.body.images?.length || 0);
+        console.log('   Image sizes:', imageSizes);
+        console.log('   Fields:', Object.keys(req.body));
+        
+        res.json({
+            success: true,
+            analysis: {
+                totalBodySizeMB: (bodySize / 1024 / 1024).toFixed(2),
+                imageSizes,
+                fieldCount: Object.keys(req.body).length,
+                imageCount: req.body.images?.length || 0
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
     try {
         console.log('🧪 Running simple cars query test...');
         
@@ -456,8 +482,39 @@ router.post('/', auth, async (req, res) => {
         let images = req.body.images || [];
 
         console.log('   Received fields:', {
-            make, model, year, price, fuelType, transmission, conditionStatus
+            make, model, year, price, fuelType, transmission, conditionStatus,
+            imageCount: images.length
         });
+
+        // Validate images
+        if (images.length > 5) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Maximum 5 images allowed' 
+            });
+        }
+
+        // Check image sizes (each base64 image should be reasonable)
+        let totalImageSize = 0;
+        for (let i = 0; i < images.length; i++) {
+            const imgSize = (images[i] || '').length;
+            totalImageSize += imgSize;
+            if (imgSize > 2 * 1024 * 1024) { // 2MB per image
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `Image ${i + 1} is too large. Max 2MB per image.` 
+                });
+            }
+        }
+        
+        if (totalImageSize > 8 * 1024 * 1024) { // 8MB total
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Total image size exceeds 8MB. Please use smaller images.' 
+            });
+        }
+
+        console.log('   ✅ Image validation passed, total size:', (totalImageSize / 1024 / 1024).toFixed(2), 'MB');
 
         // Validate required fields
         if (!make || !model || !year || !price || !fuelType || !transmission || !conditionStatus) {
@@ -565,6 +622,12 @@ router.post('/', auth, async (req, res) => {
         console.error('   Error message:', error.message);
         console.error('   Error code:', error.code);
         console.error('   SQL State:', error.sqlState);
+        console.error('   Error:', error.toString());
+        
+        // Log the exact query that failed
+        if (error.sql) {
+            console.error('   SQL Query:', error.sql);
+        }
         
         // Specific error messages
         if (error.code === 'ER_DUP_ENTRY') {
@@ -579,13 +642,26 @@ router.post('/', auth, async (req, res) => {
                 message: 'Database schema error - contact support' 
             });
         }
+        if (error.code === 'ER_DATA_TOO_LONG') {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Data too long - reduce image size or description length' 
+            });
+        }
+        if (error.code === 'ER_TRUNCATED_WRONG_VALUE' || error.sqlState === '22007') {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid data format for one of the fields' 
+            });
+        }
         
         res.status(500).json({ 
             success: false, 
             message: 'Failed to create car listing',
             debug: process.env.NODE_ENV === 'production' ? undefined : {
                 error: error.message,
-                code: error.code
+                code: error.code,
+                sqlState: error.sqlState
             }
         });
     }
