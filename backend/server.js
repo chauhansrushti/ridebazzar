@@ -185,39 +185,17 @@ const seedTestData = async () => {
     }
     
     if (carCount > 0) {
-      console.log(`✅ Database already has ${carCount} cars. Checking for missing images...`);
+      console.log(`✅ Database already has ${carCount} cars. Clearing old test cars to reseed with latest...`);
       
-      // Update existing test cars with images if they don't have them
+      // Delete old test cars (ids 1-5) to allow fresh seeding
       try {
-        const testCarsWithImages = [
-          { make: 'BMW', model: 'XUV', images: ['images/bmw.jpg'] },
-          { make: 'Hyundai', model: 'Creta', images: ['images/volkswagen.avif'] },
-          { make: 'Honda', model: 'City', images: ['images/honda-city.png'] },
-          { make: 'Tata', model: 'Nexon', images: ['images/toyota.avif'] },
-          { make: 'Mahindra', model: 'XUV700', images: ['images/car login.jpg'] },
-        ];
-        
-        for (const testCar of testCarsWithImages) {
-          const [existingCars] = await db.execute(
-            'SELECT id, images FROM cars WHERE make = ? AND model = ?',
-            [testCar.make, testCar.model]
-          );
-          
-          if (existingCars.length > 0) {
-            const car = existingCars[0];
-            // ALWAYS update test cars with local image paths (remove old/broken images)
-            await db.execute(
-              'UPDATE cars SET images = ? WHERE id = ?',
-              [JSON.stringify(testCar.images), car.id]
-            );
-            console.log(`  📸 Updated images for ${testCar.make} ${testCar.model} to ${testCar.images[0]}`);
-          }
-        }
-      } catch (updateErr) {
-        console.warn('  ⚠️  Could not update car images:', updateErr.message);
+        await db.execute('DELETE FROM cars WHERE id IN (1, 2, 3, 4, 5)');
+        console.log(`  🗑️  Cleared old test cars (1-5)`);
+      } catch (delErr) {
+        console.warn('  ⚠️  Could not delete old cars:', delErr.message);
       }
       
-      return; // Data already exists
+      // Continue to reseed with new cars below
     }
 
     console.log('📊 Database is empty. Starting seed process...');
