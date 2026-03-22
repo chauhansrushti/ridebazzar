@@ -115,7 +115,8 @@
     }
     
     // Update password in backend
-    fetch('http://localhost:5000/api/auth/reset-password', {
+    const authApiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/reset-password';
+    fetch(authApiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: resetEmailStorage, newPassword: newPassword })
@@ -728,7 +729,11 @@
       }
 
       try {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
+        // Use CONFIG.AUTH_API for correct API URL on both localhost and production
+        const authApiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/login';
+        console.log('🔐 Login API URL:', authApiUrl);
+        
+        const response = await fetch(authApiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -839,7 +844,8 @@
       }
 
       try {
-        const response = await fetch('http://localhost:5000/api/auth/register', {
+        const authApiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/register';
+        const response = await fetch(authApiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -887,7 +893,8 @@
       try {
         const token = localStorage.getItem('authToken');
         if (token) {
-          await fetch('http://localhost:5000/api/auth/logout', {
+          const authApiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/logout';
+          await fetch(authApiUrl, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`

@@ -260,7 +260,7 @@
         try {
           // Try different API URLs in case of port issues
           const apiUrls = [
-            'http://localhost:5000/api/auth/login',
+(typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/login',
             'http://127.0.0.1:3000/api/auth/login',
             'http://127.0.0.1:5000/api/auth/login'
           ];
@@ -342,7 +342,8 @@
         const messageDiv = document.getElementById('registerMessage');
         
         try {
-          const response = await fetch('http://localhost:5000/api/auth/register', {
+          const authApiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/register';
+          const response = await fetch(authApiUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
