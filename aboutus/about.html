@@ -115,8 +115,21 @@
 <script>
   // Authentication functions
   function showLoginModal() {
-    // Redirect to home page with login modal
-    window.location.href = '../home.html#login';
+    // Show login modal on the same page instead of redirecting
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) {
+      loginModal.style.display = 'flex';
+      const loginTab = document.getElementById('loginTab');
+      const registerTab = document.getElementById('registerTab');
+      const loginForm = document.getElementById('loginFormContent');
+      const registerForm = document.getElementById('registerFormContent');
+      if (loginTab && registerTab && loginForm && registerForm) {
+        loginTab.style.borderBottomColor = '#f9b233';
+        registerTab.style.borderBottomColor = 'transparent';
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+      }
+    }
   }
 
   function logoutUser() {
