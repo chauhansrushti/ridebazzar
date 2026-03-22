@@ -684,7 +684,8 @@
             const messageDiv = document.getElementById('message');
 
             try {
-                const apiUrl = getApiBaseUrl() + '/auth/login';
+                // Use CONFIG.AUTH_API for the correct full path including /api
+                const apiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : getApiBaseUrl() + '/api/auth') + '/login';
                 console.log('🔐 Login attempt');
                 console.log('API URL:', apiUrl);
                 console.log('Username:', username);
@@ -733,7 +734,8 @@
         // Test connection to backend
         async function testConnection() {
             const messageDiv = document.getElementById('message');
-            const apiUrl = getApiBaseUrl();
+            // Use correct API URL with /api prefix
+            const apiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : getApiBaseUrl()) + '/api/public/users';
             
             messageDiv.className = 'message';
             messageDiv.textContent = '🔄 Testing connection...';
@@ -741,7 +743,7 @@
             
             try {
                 console.log('Testing API URL:', apiUrl);
-                const response = await fetch(apiUrl + '/public/users', {
+                const response = await fetch(apiUrl, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
