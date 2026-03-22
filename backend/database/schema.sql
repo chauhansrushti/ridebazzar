@@ -15,6 +15,7 @@ CREATE TABLE users (
     location VARCHAR(100),
     profile_picture VARCHAR(255),
     bio TEXT,
+    role VARCHAR(20) DEFAULT 'user',
     is_verified BOOLEAN DEFAULT FALSE,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

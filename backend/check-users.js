@@ -4,7 +4,7 @@ async function checkUsers() {
   const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
-    password: 'root',
+    password: 'SS@2006',
     database: 'ridebazzar'
   });
 
@@ -15,10 +15,10 @@ async function checkUsers() {
       console.log(`ID: ${u.id} | Username: ${u.username} | Email: ${u.email} | Role: ${u.role || 'user'}`);
     });
     
-    const [cars] = await pool.execute('SELECT id, make, model, seller_id FROM cars WHERE id = 7');
-    console.log('\n=== CAR ID 7 (the one you tried to delete) ===');
-    cars.forEach(c => {
-      console.log(`Car ID: ${c.id} | Make: ${c.make} | Model: ${c.model} | Seller ID: ${c.seller_id}`);
+    const [tableInfo] = await pool.execute('DESCRIBE users');
+    console.log('\n=== USERS TABLE STRUCTURE ===');
+    tableInfo.forEach(col => {
+      console.log(`${col.Field} - ${col.Type}${col.Null === 'NO' ? ' NOT NULL' : ''}`);
     });
   } catch(err) {
     console.error('Error:', err.message);

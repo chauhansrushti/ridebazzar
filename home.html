@@ -667,33 +667,6 @@
 
     // Login and Register Handler Functions
     
-    // Initialize default users if none exist
-    function initializeDefaultUsers() {
-      let users = JSON.parse(localStorage.getItem('ridebazzar_users') || '[]');
-      
-      // Check if priti user exists
-      const pritiExists = users.some(u => u.username === 'priti');
-      
-      if (!pritiExists) {
-        const defaultUser = {
-          id: Date.now().toString(),
-          username: 'priti',
-          email: 'priti@example.com',
-          password: 'priti',
-          phone: '1234567890',
-          role: 'user',
-          createdAt: new Date().toISOString()
-        };
-        
-        users.push(defaultUser);
-        localStorage.setItem('ridebazzar_users', JSON.stringify(users));
-        console.log('Created default user: priti/priti');
-      }
-    }
-    
-    // Initialize users on page load
-    initializeDefaultUsers();
-    
     function handleLoginSubmit(event) {
       event.preventDefault();
       event.stopPropagation();
@@ -773,41 +746,10 @@
           messageDiv.style.display = 'block';
         }
       } catch (error) {
-        console.warn('Backend not available, trying localStorage authentication');
-        
-        // Fallback to localStorage authentication
-        const users = JSON.parse(localStorage.getItem('ridebazzar_users') || '[]');
-        const user = users.find(u => 
-          (u.username === usernameOrEmail || u.email === usernameOrEmail) && 
-          u.password === password
-        );
-        
-        if (user) {
-          const userData = {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            role: user.role || 'user'
-          };
-          
-          localStorage.setItem('authToken', 'local_' + Date.now());
-          localStorage.setItem('userData', JSON.stringify(userData));
-          localStorage.setItem('currentUser', JSON.stringify(userData));
-          
-          messageDiv.textContent = 'Login successful!';
-          messageDiv.className = 'auth-message success';
-          messageDiv.style.display = 'block';
-          
-          setTimeout(() => {
-            hideLoginModal();
-            updateNavForLoggedInUser(userData);
-            window.location.href = 'dashboard.html';
-          }, 1000);
-        } else {
-          messageDiv.textContent = 'Invalid username or password';
-          messageDiv.className = 'auth-message error';
-          messageDiv.style.display = 'block';
-        }
+        console.error('Backend connection error:', error.message);
+        messageDiv.textContent = 'Unable to connect to server. Please check your internet connection or try again later.';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
       }
     }
 
