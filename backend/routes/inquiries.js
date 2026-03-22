@@ -87,6 +87,7 @@ router.post('/debug/fix-table', async (req, res) => {
       error: error.message
     });
   }
+});
 
 // Submit an inquiry for a car
 router.post('/submit', auth, async (req, res) => {
