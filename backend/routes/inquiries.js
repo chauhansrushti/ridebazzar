@@ -32,6 +32,62 @@ router.get('/debug/check-table', async (req, res) => {
   }
 });
 
+// DEBUG: Fix inquiries table - recreate with correct schema
+router.post('/debug/fix-table', async (req, res) => {
+  try {
+    console.log('🔧 Fixing inquiries table schema...');
+    
+    // Drop existing table if it exists
+    try {
+      await db.execute('DROP TABLE IF EXISTS inquiries;');
+      console.log('   ✅ Dropped old inquiries table');
+    } catch (e) {
+      console.log('   ℹ️ No old table to drop');
+    }
+
+    // Create inquiries table with correct schema
+    const createTableSQL = `CREATE TABLE IF NOT EXISTS inquiries (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      car_id INT NOT NULL,
+      buyer_id INT NOT NULL,
+      seller_id INT NOT NULL,
+      message TEXT NOT NULL,
+      phone VARCHAR(20) NOT NULL,
+      response TEXT,
+      status ENUM('pending', 'responded', 'closed') DEFAULT 'pending',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (car_id) REFERENCES cars (id) ON DELETE CASCADE,
+      FOREIGN KEY (buyer_id) REFERENCES users (id) ON DELETE CASCADE,
+      FOREIGN KEY (seller_id) REFERENCES users (id) ON DELETE CASCADE,
+      INDEX idx_car (car_id),
+      INDEX idx_buyer (buyer_id),
+      INDEX idx_seller (seller_id),
+      INDEX idx_status (status)
+    );`;
+
+    await db.execute(createTableSQL);
+    console.log('   ✅ Created new inquiries table with correct schema');
+
+    // Verify columns
+    const [columns] = await db.execute('SHOW COLUMNS FROM inquiries');
+    const columnNames = columns.map(c => c.Field);
+    console.log('   ✅ Columns:', columnNames.join(', '));
+
+    res.json({
+      success: true,
+      message: 'Inquiries table fixed successfully!',
+      columns: columns.map(c => ({ field: c.Field, type: c.Type }))
+    });
+  } catch (error) {
+    console.error('❌ Error fixing table:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fix inquiries table',
+      error: error.message
+    });
+  }
+
 // Submit an inquiry for a car
 router.post('/submit', auth, async (req, res) => {
   try {

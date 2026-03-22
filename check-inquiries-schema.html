@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Inquiries Table Schema</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Check Inquiries Table Schema</h1>
+        
+        <p>This will show what columns actually exist in the production inquiries table.</p>
+
+        <button onclick="checkSchema()">Check Inquiries Table Schema</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function checkSchema() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = 'Loading...';
+            resultDiv.className = 'result';
+            resultDiv.style.display = 'block';
+
+            try {
+                const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+                    ? 'http://localhost:5000' 
+                    : 'https://ridebazzar.up.railway.app';
+
+                console.log('Testing endpoint:', `${apiUrl}/api/inquiries/debug/check-table`);
+
+                const response = await fetch(`${apiUrl}/api/inquiries/debug/check-table`);
+                const data = await response.json();
+
+                console.log('Response:', data);
+
+                if (data.success) {
+                    let html = '<table><thead><tr><th>Column Name</th><th>Type</th></tr></thead><tbody>';
+                    
+                    data.columns.forEach(col => {
+                        html += `<tr><td>${col.field}</td><td>${col.type}</td></tr>`;
+                    });
+                    
+                    html += '</tbody></table>';
+                    
+                    resultDiv.innerHTML = html;
+                    resultDiv.className = 'result success';
+                    
+                    // Check for missing columns
+                    const requiredCols = ['buyer_id', 'seller_id', 'car_id', 'message', 'phone'];
+                    const existingCols = data.columns.map(c => c.field);
+                    const missingCols = requiredCols.filter(col => !existingCols.includes(col));
+                    
+                    if (missingCols.length > 0) {
+                        resultDiv.innerHTML += '<br><div class="result warning"><strong>⚠️ Missing Columns:</strong><br>' + missingCols.join(', ') + '</div>';
+                    }
+                } else {
+                    resultDiv.textContent = 'ERROR: ' + (data.message || data.error || 'Unknown error');
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Network Error:\n\n' + error.message;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            setTimeout(checkSchema, 500);
+        });
+    </script>
+</body>
+</html>

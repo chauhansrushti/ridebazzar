@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Inquiries Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #218838;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #28a745;
+            color: white;
+        }
+        .info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Inquiries Table Schema</h1>
+        
+        <div class="info">
+            <strong>Problem:</strong> The inquiries table is missing required columns (buyer_id, seller_id).<br>
+            <strong>Solution:</strong> Click the button below to recreate the table with the correct schema.
+        </div>
+
+        <button id="fixBtn" onclick="fixTable()" disabled>Checking table status...</button>
+        <button onclick="checkStatus()" style="background: #007bff; margin-left: 10px;">Check Status First</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            const resultDiv = document.getElementById('result');
+            const fixBtn = document.getElementById('fixBtn');
+            resultDiv.textContent = 'Checking table status...';
+            resultDiv.className = 'result';
+            resultDiv.style.display = 'block';
+            fixBtn.disabled = true;
+
+            try {
+                const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+                    ? 'http://localhost:5000' 
+                    : 'https://ridebazzar.up.railway.app';
+
+                const response = await fetch(`${apiUrl}/api/inquiries/debug/check-table`);
+                const data = await response.json();
+
+                if (data.success) {
+                    let html = '<p style="color: green;"><strong>✅ Table exists with columns:</strong></p><table><thead><tr><th>Column Name</th><th>Type</th></tr></thead><tbody>';
+                    
+                    data.columns.forEach(col => {
+                        html += `<tr><td>${col.field}</td><td>${col.type}</td></tr>`;
+                    });
+                    
+                    html += '</tbody></table>';
+                    
+                    // Check for missing columns
+                    const requiredCols = ['buyer_id', 'seller_id', 'car_id', 'message', 'phone'];
+                    const existingCols = data.columns.map(c => c.field);
+                    const missingCols = requiredCols.filter(col => !existingCols.includes(col));
+                    
+                    if (missingCols.length > 0) {
+                        html += '<p style="color: red; margin-top: 15px;"><strong>❌ Missing columns: ' + missingCols.join(', ') + '</strong></p>';
+                        html += '<p>Click "Fix Table" to repair the schema.</p>';
+                        fixBtn.disabled = false;
+                        fixBtn.textContent = 'Fix Table Now!';
+                    } else {
+                        html += '<p style="color: green; margin-top: 15px;"><strong>✅ All required columns exist! No fix needed.</strong></p>';
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = 'ERROR: ' + (data.message || data.error || 'Unknown error') + '\n\nThis might mean the inquiries table does not exist. Click "Fix Table" to recreate it.';
+                    resultDiv.className = 'result error';
+                    fixBtn.disabled = false;
+                    fixBtn.textContent = 'Create Table Now!';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Network Error:\n\n' + error.message + '\n\nMake sure the backend is running.';
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function fixTable() {
+            const resultDiv = document.getElementById('result');
+            const fixBtn = document.getElementById('fixBtn');
+            
+            resultDiv.textContent = 'Fixing table... This may take a moment...';
+            resultDiv.className = 'result';
+            resultDiv.style.display = 'block';
+            fixBtn.disabled = true;
+
+            try {
+                const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+                    ? 'http://localhost:5000' 
+                    : 'https://ridebazzar.up.railway.app';
+
+                console.log('Calling fix endpoint:', `${apiUrl}/api/inquiries/debug/fix-table`);
+
+                const response = await fetch(`${apiUrl}/api/inquiries/debug/fix-table`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Response:', data);
+
+                if (data.success) {
+                    let html = '<p style="color: green; font-size: 18px;"><strong>✅ SUCCESS! Inquiries table has been fixed!</strong></p>';
+                    html += '<p>New table columns:</p><table><thead><tr><th>Column Name</th><th>Type</th></tr></thead><tbody>';
+                    
+                    data.columns.forEach(col => {
+                        html += `<tr><td>${col.field}</td><td>${col.type}</td></tr>`;
+                    });
+                    
+                    html += '</tbody></table>';
+                    html += '<p style="margin-top: 15px; color: green;"><strong>You can now try submitting an inquiry again!</strong></p>';
+                    
+                    resultDiv.innerHTML = html;
+                    resultDiv.className = 'result success';
+                    fixBtn.textContent = 'Table Fixed Successfully!';
+                    fixBtn.disabled = true;
+                } else {
+                    resultDiv.textContent = 'ERROR fixing table:\n\n' + (data.message || data.error || 'Unknown error');
+                    resultDiv.className = 'result error';
+                    fixBtn.disabled = false;
+                    fixBtn.textContent = 'Try Again';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Network Error:\n\n' + error.message;
+                resultDiv.className = 'result error';
+                fixBtn.disabled = false;
+                fixBtn.textContent = 'Try Again';
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            setTimeout(checkStatus, 500);
+        });
+    </script>
+</body>
+</html>
