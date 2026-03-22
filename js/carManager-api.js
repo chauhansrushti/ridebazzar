@@ -352,13 +352,17 @@ class CarManager {
             const result = await response.json();
 
             if (!response.ok || !result.success) {
-                throw new Error(result.message || 'Failed to submit inquiry');
+                const errorMsg = result.message || result.error || 'Failed to submit inquiry';
+                const fullError = `${errorMsg}${result.error ? '\n(Backend Error: ' + result.error + ')' : ''}`;
+                console.error('Inquiry submission failed:', { status: response.status, result });
+                throw new Error(fullError);
             }
 
             console.log('Inquiry submitted successfully:', result.data);
             return result.data;
         } catch (error) {
             console.error('Error submitting inquiry:', error);
+            console.error('Error details:', error.message);
             throw error;
         }
     }

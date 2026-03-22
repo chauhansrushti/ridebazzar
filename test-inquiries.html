@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Inquiries Endpoint</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            color: #007bff;
+        }
+        h1 {
+            color: #333;
+        }
+        .info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Inquiries Endpoint Test</h1>
+        
+        <div class="info">
+            <strong>Test the inquiries table on production:</strong><br>
+            This will check if the inquiries table exists and has the correct columns.
+        </div>
+
+        <button onclick="checkInquiriesTable()">Check Inquiries Table</button>
+        
+        <div id="result" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        async function checkInquiriesTable() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = 'Loading...';
+            resultDiv.className = 'result loading';
+            resultDiv.style.display = 'block';
+
+            try {
+                const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+                    ? 'http://localhost:5000' 
+                    : 'https://ridebazzar.up.railway.app';
+
+                console.log('Testing endpoint:', `${apiUrl}/api/inquiries/debug/check-table`);
+
+                const response = await fetch(`${apiUrl}/api/inquiries/debug/check-table`);
+                const data = await response.json();
+
+                console.log('Response:', data);
+
+                if (data.success) {
+                    resultDiv.textContent = 'SUCCESS! Inquiries table exists.\n\n' + 
+                        'Columns:\n' + 
+                        data.columns.map(c => `  - ${c.field}: ${c.type}`).join('\n');
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = 'ERROR: ' + (data.message || data.error || 'Unknown error');
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Network Error:\n\n' + error.message + '\n\n' +
+                    'This usually means:\n' +
+                    '1. The backend is not running\n' +
+                    '2. The API URL is incorrect\n' +
+                    '3. CORS is not configured\n\n' +
+                    'Full error:\n' + error.stack;
+                resultDiv.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html>
