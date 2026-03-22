@@ -187,10 +187,20 @@ const seedTestData = async () => {
     if (carCount > 0) {
       console.log(`✅ Database already has ${carCount} cars. Clearing old test cars to reseed with latest...`);
       
-      // Delete old test cars (ids 1-5) to allow fresh seeding
+      // Delete all old test cars (BMW XUV, Hyundai Creta, Honda City, Tata Nexon, Mahindra XUV700)
       try {
-        await db.execute('DELETE FROM cars WHERE id IN (1, 2, 3, 4, 5)');
-        console.log(`  🗑️  Cleared old test cars (1-5)`);
+        const testCarMakesModels = [
+          ['BMW', 'XUV'],
+          ['Hyundai', 'Creta'],
+          ['Honda', 'City'],
+          ['Tata', 'Nexon'],
+          ['Mahindra', 'XUV700']
+        ];
+        
+        for (const [make, model] of testCarMakesModels) {
+          await db.execute('DELETE FROM cars WHERE make = ? AND model = ?', [make, model]);
+        }
+        console.log(`  🗑️  Cleared ALL old test cars (BMW, Hyundai, Honda, Tata, Mahindra)`);
       } catch (delErr) {
         console.warn('  ⚠️  Could not delete old cars:', delErr.message);
       }
@@ -198,7 +208,7 @@ const seedTestData = async () => {
       // Continue to reseed with new cars below
     }
 
-    console.log('📊 Database is empty. Starting seed process...');
+    console.log('� Reseeding test cars with fresh data...');
     
     // Check if admin user exists
     const [adminUsers] = await db.execute('SELECT id FROM users WHERE username = ?', ['admin']);
