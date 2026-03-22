@@ -438,23 +438,22 @@ router.post('/', auth, async (req, res) => {
         console.log('   User ID:', req.user?.userId);
         console.log('   Username:', req.user?.username);
         
-        const {
-            make,
-            model,
-            year,
-            price,
-            mileage,
-            fuelType,
-            transmission,
-            conditionStatus,
-            color,
-            description,
-            images,
-            contact,
-            location,
-            bookingAmount,
-            emiAmount
-        } = req.body;
+        // Extract and clean data
+        let make = (req.body.make || '').trim();
+        let model = (req.body.model || '').trim();
+        let year = req.body.year ? parseInt(req.body.year) : null;
+        let price = req.body.price ? parseFloat(req.body.price) : null;
+        let mileage = req.body.mileage ? parseInt(req.body.mileage) : null;
+        let fuelType = (req.body.fuelType || '').trim();
+        let transmission = (req.body.transmission || '').trim();
+        let conditionStatus = (req.body.conditionStatus || '').trim();
+        let color = (req.body.color || '').trim();
+        let description = (req.body.description || '').trim();
+        let contact = (req.body.contact || '').trim();
+        let location = (req.body.location || '').trim();
+        let bookingAmount = req.body.bookingAmount ? parseFloat(req.body.bookingAmount) : 0;
+        let emiAmount = req.body.emiAmount ? parseFloat(req.body.emiAmount) : 0;
+        let images = req.body.images || [];
 
         console.log('   Received fields:', {
             make, model, year, price, fuelType, transmission, conditionStatus
@@ -462,12 +461,54 @@ router.post('/', auth, async (req, res) => {
 
         // Validate required fields
         if (!make || !model || !year || !price || !fuelType || !transmission || !conditionStatus) {
-            console.warn('❌ Missing required fields');
+            console.warn('❌ Missing required fields', {
+                make: !!make,
+                model: !!model,
+                year: !!year,
+                price: !!price,
+                fuelType: !!fuelType,
+                transmission: !!transmission,
+                conditionStatus: !!conditionStatus
+            });
             return res.status(400).json({ 
                 success: false, 
-                message: 'Required fields: make, model, year, price, fuelType, transmission, conditionStatus' 
+                message: 'Missing required fields: make, model, year, price, fuelType, transmission, conditionStatus' 
             });
         }
+
+        // Validate data types
+        if (isNaN(year) || year < 1990 || year > 2030) {
+            return res.status(400).json({ success: false, message: 'Invalid year (must be 1990-2030)' });
+        }
+        if (isNaN(price) || price <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid price (must be > 0)' });
+        }
+
+        // Validate enum values
+        const validFuels = ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG'];
+        const validTransmissions = ['Manual', 'Automatic'];
+        const validConditions = ['Excellent', 'Good', 'Fair', 'Poor'];
+
+        if (!validFuels.includes(fuelType)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Invalid fuel type. Must be one of: ${validFuels.join(', ')}` 
+            });
+        }
+        if (!validTransmissions.includes(transmission)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Invalid transmission. Must be one of: ${validTransmissions.join(', ')}` 
+            });
+        }
+        if (!validConditions.includes(conditionStatus)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Invalid condition. Must be one of: ${validConditions.join(', ')}` 
+            });
+        }
+
+        console.log('✅ All validations passed');
 
         // Verify user exists in database
         const [userCheck] = await db.execute('SELECT id FROM users WHERE id = ?', [req.user.userId]);
@@ -487,32 +528,33 @@ router.post('/', auth, async (req, res) => {
             INSERT INTO cars (
                 seller_id, make, model, year, price, mileage, fuel_type, 
                 transmission, condition_status, color, description, images, 
-                contact, location, booking_amount, emi_amount
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                contact, location, booking_amount, emi_amount, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
-            req.user.userId,
-            make,
-            model,
-            year,
-            price,
-            mileage || null,
-            fuelType,
-            transmission,
-            conditionStatus,
-            color || null,
-            description || null,
-            JSON.stringify(images || []),
-            contact || null,
-            location || null,
-            bookingAmount || 0,
-            emiAmount || 0
+            req.user.userId,           // seller_id
+            make,                      // make
+            model,                     // model
+            year,                      // year
+            price,                     // price
+            mileage || null,           // mileage
+            fuelType,                  // fuel_type
+            transmission,              // transmission
+            conditionStatus,           // condition_status
+            color || null,             // color
+            description || null,       // description
+            JSON.stringify(images),    // images (always JSON string)
+            contact || null,           // contact
+            location || null,          // location
+            bookingAmount || 0,        // booking_amount
+            emiAmount || 0,            // emi_amount
+            'available'                // status (default to available)
         ]);
 
         console.log('✅ Car created successfully with ID:', result.insertId);
 
         res.status(201).json({
             success: true,
-            message: 'Car listed successfully',
+            message: 'Car listed successfully! ✅',
             data: {
                 carId: result.insertId
             }
@@ -522,15 +564,28 @@ router.post('/', auth, async (req, res) => {
         console.error('❌ Create car error:', error);
         console.error('   Error message:', error.message);
         console.error('   Error code:', error.code);
-        console.error('   Error stack:', error.stack);
+        console.error('   SQL State:', error.sqlState);
+        
+        // Specific error messages
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Duplicate entry error' 
+            });
+        }
+        if (error.code === 'ER_BAD_FIELD_ERROR') {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Database schema error - contact support' 
+            });
+        }
         
         res.status(500).json({ 
             success: false, 
-            message: 'Internal server error',
+            message: 'Failed to create car listing',
             debug: process.env.NODE_ENV === 'production' ? undefined : {
                 error: error.message,
-                code: error.code,
-                sqlState: error.sqlState
+                code: error.code
             }
         });
     }
