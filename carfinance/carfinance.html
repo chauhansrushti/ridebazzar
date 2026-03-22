@@ -31,7 +31,7 @@
       <a href="../post-car.html">Sell Car</a>
       <a href="../compare.html">Compare</a>
       <a href="../dashboard.html" id="profileNavBtn" style="display:none;">Dashboard</a>
-      <a href="#" id="loginNavBtn" onclick="showLoginModal()"style="display:none;">Login/Register</a>
+      <a href="#" id="loginNavBtn" onclick="showLoginModal()">Login/Register</a>
       <a href="#" id="logoutNavBtn" onclick="logoutUser()" style="display:none;">Logout</a>
       </div>
     </div>
@@ -124,6 +124,146 @@
     &copy; 2025 RideBazzar - Used Car Marketplace
   </footer>
 
+  <!-- Enhanced Login/Register Modal -->
+  <div id="loginModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+    <div style="display:flex; background:#fff; max-width:900px; height:550px; margin:80px auto; border-radius:16px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden;" class="login-modal-content">
+      <span onclick="hideLoginModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999; z-index:10;">&times;</span>
+      
+      <!-- Left Side - Car with Eyes -->
+      <div style="flex:1; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;" class="modal-left-side">
+        <!-- Car Shape with Eyes -->
+        <div style="position:relative; z-index:2;">
+          <svg width="320" height="220" viewBox="0 0 320 220" style="filter:drop-shadow(0 10px 30px rgba(0,0,0,0.3));">
+            <rect x="40" y="120" width="240" height="60" rx="10" fill="#F9B233" />
+            <path d="M 80 120 L 110 80 L 210 80 L 240 120 Z" fill="#F9B233" />
+            <path d="M 190 85 L 210 85 L 235 115 L 210 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+            <path d="M 115 85 L 180 85 L 180 115 L 130 115 Z" fill="#87CEEB" stroke="#333" stroke-width="2" />
+            <rect x="245" y="140" width="25" height="12" rx="3" fill="#333" />
+            <path d="M 100 155 Q 160 165 220 155" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round" />
+            <line x1="160" y1="120" x2="160" y2="175" stroke="#333" stroke-width="2" />
+            <circle cx="100" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+            <ellipse id="modalLeftPupil" cx="100" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+            <circle cx="100" cy="182" r="4" fill="white" opacity="0.8" />
+            <circle cx="220" cy="185" r="28" fill="white" stroke="#333" stroke-width="4" />
+            <ellipse id="modalRightPupil" cx="220" cy="185" rx="13" ry="15" fill="#2D2D2D" style="transition:all 0.1s ease;" />
+            <circle cx="220" cy="182" r="4" fill="white" opacity="0.8" />
+            <path d="M 72 180 Q 100 165 128 180" stroke="#333" stroke-width="2" fill="none" />
+            <path d="M 192 180 Q 220 165 248 180" stroke="#333" stroke-width="2" fill="none" />
+          </svg>
+        </div>
+        
+        <!-- Welcome Text -->
+        <div style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); text-align:center; color:white; z-index:3;">
+          <h2 style="font-size:28px; margin-bottom:10px; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">Welcome to RideBazzar</h2>
+          <p style="opacity:0.9; text-shadow:1px 1px 2px rgba(0,0,0,0.3);">Your trusted car marketplace</p>
+        </div>
+      </div>
+      
+      <!-- Right Side - Login/Register Form -->
+      <div style="flex:1; padding:40px; overflow-y:auto;">
+        <!-- Tab Headers -->
+        <div style="display:flex; border-bottom:2px solid #eee; margin-bottom:30px;">
+          <button id="loginTab" onclick="switchTab('login')" class="tab-button active" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid #f9b233; color:#f9b233;">Login</button>
+          <button id="registerTab" onclick="switchTab('register')" class="tab-button" style="flex:1; padding:12px; border:none; background:none; font-size:16px; font-weight:bold; cursor:pointer; border-bottom:3px solid transparent; color:#999;">Register</button>
+        </div>
+      
+      <!-- Message Area -->
+      <div id="authMessage" class="auth-message" style="display:none; margin:15px 30px; padding:10px; border-radius:6px; text-align:center; font-weight:bold;"></div>
+      
+      <!-- Login Form -->
+      <div id="loginFormContent" style="padding:30px;">
+        <form id="loginForm" onsubmit="return handleLoginSubmit(event);">
+          <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Username</label>
+            <input type="text" id="loginUsername" name="loginUsername" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:black;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="loginPassword" name="loginPassword" required style="width:100%; padding:12px 45px 12px 12px; border:2px solid #ddd; border-radius:8px; font-size:16px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('loginPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:20px; user-select:none;">👁️</span>
+            </div>
+            <div style="text-align:right; margin-top:8px;">
+              <a href="#" onclick="event.preventDefault(); showForgotPasswordModal();" style="color:#f9b233; font-size:14px; text-decoration:none;">Forgot Password?</a>
+            </div>
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e6a429'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#f9b233'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Login</button>
+        </form>
+      </div>
+      
+      <!-- Register Form -->
+      <div id="registerFormContent" style="padding:30px; display:none;">
+        <form id="registerForm" onsubmit="event.preventDefault(); handleRegister();">
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Username</label>
+            <input type="text" id="registerUsername" required style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Email</label>
+            <input type="email" id="registerEmail" required style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Phone</label>
+            <input type="tel" id="registerPhone" required placeholder="10-digit mobile number" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Location</label>
+            <input type="text" id="registerLocation" required placeholder="City, State" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="registerPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
+          </div>
+          <div style="margin-bottom:25px;">
+            <label style="display:block; margin-bottom:6px; font-weight:600; color:black;">Confirm Password</label>
+            <div style="position:relative;">
+              <input type="password" id="registerConfirmPassword" required minlength="6" style="width:100%; padding:10px 45px 10px 10px; border:2px solid #ddd; border-radius:6px; font-size:14px; color:black !important; background-color:white !important;">
+              <span onclick="togglePassword('registerConfirmPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none;">👁️</span>
+            </div>
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#222; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='#000'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.2)';" onmouseout="this.style.background='#222'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Forgot Password Modal -->
+  <div id="forgotPasswordModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1001;">
+    <div style="background:#fff; max-width:400px; margin:80px auto; padding:30px; border-radius:12px; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+      <span onclick="hideForgotPasswordModal()" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999;">&times;</span>
+      <h2 style="margin-top:0; color:#333; text-align:center;">Reset Password</h2>
+      <p style="color:#666; text-align:center; margin-bottom:25px;">Enter your email and we'll send you a reset code.</p>
+      <div id="forgotPasswordMessage" style="display:none; margin-bottom:15px; padding:10px; border-radius:6px; text-align:center; font-weight:bold;"></div>
+      <form id="forgotPasswordForm" onsubmit="event.preventDefault(); handleForgotPassword();">
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Email Address</label>
+          <input type="email" id="forgotEmail" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+        </div>
+        <button type="submit" style="width:100%; padding:14px; background:#f9b233; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer;">Send Reset Code</button>
+      </form>
+      <div id="resetCodeSection" style="display:none; margin-top:20px;">
+        <form id="resetPasswordForm" onsubmit="event.preventDefault(); handleResetPassword();">
+          <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Reset Code</label>
+            <input type="text" id="resetCode" required style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+          </div>
+          <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">New Password</label>
+            <input type="password" id="newPassword" required minlength="6" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+          </div>
+          <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">Confirm Password</label>
+            <input type="password" id="confirmNewPassword" required minlength="6" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:16px;">
+          </div>
+          <button type="submit" style="width:100%; padding:14px; background:#28a745; border:none; color:#fff; font-weight:bold; font-size:16px; border-radius:8px; cursor:pointer;">Reset Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
 <script>
   const loanAmountInput = document.getElementById('loanAmount');
   const tenureInput = document.getElementById('tenure');
@@ -174,14 +314,282 @@
   updateUI();
 
   // Authentication functions
-  function showLoginModal() {
-    const modal = document.getElementById('loginModal');
-    if (modal) {
-      modal.style.display = 'block';
+  function togglePassword(inputId, iconElement) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      iconElement.innerHTML = '👁️‍🗨️';
     } else {
-      // Fallback - redirect to home page with login hash
-      window.location.href = '../home.html#login';
+      input.type = 'password';
+      iconElement.innerHTML = '👁️';
     }
+  }
+  
+  function showLoginModal() {
+    document.getElementById('loginModal').style.display = 'block';
+  }
+  
+  function hideLoginModal() {
+    document.getElementById('loginModal').style.display = 'none';
+  }
+  
+  function showForgotPasswordModal() {
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('forgotPasswordModal').style.display = 'block';
+  }
+  
+  function hideForgotPasswordModal() {
+    document.getElementById('forgotPasswordModal').style.display = 'none';
+    document.getElementById('resetCodeSection').style.display = 'none';
+    document.getElementById('forgotPasswordForm').style.display = 'block';
+    document.getElementById('forgotEmail').value = '';
+    document.getElementById('forgotPasswordMessage').style.display = 'none';
+  }
+  
+  let resetCodeStorage = null;
+  let resetEmailStorage = null;
+  
+  function handleForgotPassword() {
+    const email = document.getElementById('forgotEmail').value;
+    const message = document.getElementById('forgotPasswordMessage');
+    
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    resetCodeStorage = resetCode;
+    resetEmailStorage = email;
+    
+    emailjs.send('service_wl37npn', 'template_08atm5e', {
+      to_email: email,
+      to_name: email.split('@')[0],
+      reset_code: resetCode
+    })
+    .then(function(response) {
+      console.log('Reset email sent!', response);
+      message.style.display = 'block';
+      message.className = 'auth-message success';
+      message.innerHTML = '✅ Reset code sent to your email!';
+      
+      document.getElementById('forgotPasswordForm').style.display = 'none';
+      document.getElementById('resetCodeSection').style.display = 'block';
+    }, function(error) {
+      console.error('Email send failed:', error);
+      message.style.display = 'block';
+      message.className = 'auth-message error';
+      message.innerHTML = '❌ Failed to send email. Please try again.';
+    });
+  }
+  
+  function handleResetPassword() {
+    const code = document.getElementById('resetCode').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmNewPassword').value;
+    const message = document.getElementById('forgotPasswordMessage');
+    
+    if (newPassword !== confirmPassword) {
+      message.style.display = 'block';
+      message.className = 'auth-message error';
+      message.innerHTML = '❌ Passwords do not match!';
+      return;
+    }
+    
+    if (code !== resetCodeStorage) {
+      message.style.display = 'block';
+      message.className = 'auth-message error';
+      message.innerHTML = '❌ Invalid reset code!';
+      return;
+    }
+    
+    const authApiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/reset-password';
+    fetch(authApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: resetEmailStorage, newPassword: newPassword })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        message.style.display = 'block';
+        message.className = 'auth-message success';
+        message.innerHTML = '✅ Password reset successfully! You can now login.';
+        
+        setTimeout(() => {
+          hideForgotPasswordModal();
+          showLoginModal();
+        }, 2000);
+      } else {
+        message.style.display = 'block';
+        message.className = 'auth-message error';
+        message.innerHTML = '❌ ' + (data.error || 'Failed to reset password');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      message.style.display = 'block';
+      message.className = 'auth-message error';
+      message.innerHTML = '❌ Error resetting password. Please try again.';
+    });
+  }
+  
+  function switchTab(tab) {
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginContent = document.getElementById('loginFormContent');
+    const registerContent = document.getElementById('registerFormContent');
+    const messageDiv = document.getElementById('authMessage');
+
+    messageDiv.style.display = 'none';
+
+    if (tab === 'login') {
+      loginTab.classList.add('active');
+      registerTab.classList.remove('active');
+      loginTab.style.color = '#f9b233';
+      loginTab.style.borderBottomColor = '#f9b233';
+      registerTab.style.color = '#999';
+      registerTab.style.borderBottomColor = 'transparent';
+      loginContent.style.display = 'block';
+      registerContent.style.display = 'none';
+    } else {
+      registerTab.classList.add('active');
+      loginTab.classList.remove('active');
+      registerTab.style.color = '#f9b233';
+      registerTab.style.borderBottomColor = '#f9b233';
+      loginTab.style.color = '#999';
+      loginTab.style.borderBottomColor = 'transparent';
+      registerContent.style.display = 'block';
+      loginContent.style.display = 'none';
+    }
+  }
+  
+  function handleLoginSubmit(event) {
+    event.preventDefault();
+    handleLogin();
+    return false;
+  }
+  
+  async function handleLogin() {
+    const usernameInput = document.getElementById('loginUsername');
+    const passwordInput = document.getElementById('loginPassword');
+    const messageDiv = document.getElementById('authMessage');
+
+    const usernameOrEmail = usernameInput ? usernameInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value.trim() : '';
+
+    if (!usernameOrEmail || !password) {
+      messageDiv.textContent = 'Username and password are required';
+      messageDiv.className = 'auth-message error';
+      messageDiv.style.display = 'block';
+      return;
+    }
+
+    try {
+      const authApiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/login';
+      console.log('🔐 Login API URL:', authApiUrl);
+      
+      const response = await fetch(authApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: usernameOrEmail,
+          password
+        })
+      });
+
+      const data = await response.json();
+      console.log('Login response:', data);
+
+      if (data.success) {
+        localStorage.setItem('authToken', data.data.token);
+        localStorage.setItem('userData', JSON.stringify(data.data.user));
+        localStorage.setItem('currentUser', JSON.stringify(data.data.user));
+        
+        messageDiv.textContent = 'Login successful!';
+        messageDiv.className = 'auth-message success';
+        messageDiv.style.display = 'block';
+
+        setTimeout(() => {
+          hideLoginModal();
+          updateNavForLoggedInUser(data.data.user);
+          
+          if (data.data.user.role === 'admin') {
+            window.location.href = '../admin.html';
+          } else {
+            window.location.href = '../dashboard.html';
+          }
+        }, 1000);
+      } else {
+        messageDiv.textContent = data.message || 'Login failed';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+      }
+    } catch (error) {
+      console.warn('Backend not available, trying localStorage authentication');
+      messageDiv.textContent = 'Network error. Please try again.';
+      messageDiv.className = 'auth-message error';
+      messageDiv.style.display = 'block';
+    }
+  }
+  
+  async function handleRegister() {
+    const username = document.getElementById('registerUsername').value;
+    const email = document.getElementById('registerEmail').value;
+    const phone = document.getElementById('registerPhone').value;
+    const location = document.getElementById('registerLocation').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('registerConfirmPassword').value;
+    const messageDiv = document.getElementById('authMessage');
+
+    if (password !== confirmPassword) {
+      messageDiv.textContent = 'Passwords do not match!';
+      messageDiv.className = 'auth-message error';
+      messageDiv.style.display = 'block';
+      return;
+    }
+
+    try {
+      const authApiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/register';
+      const response = await fetch(authApiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, phone, location, password })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        messageDiv.textContent = '✅ Registration successful! Logging in...';
+        messageDiv.className = 'auth-message success';
+        messageDiv.style.display = 'block';
+
+        setTimeout(() => {
+          localStorage.setItem('authToken', data.data.token);
+          localStorage.setItem('userData', JSON.stringify(data.data.user));
+          localStorage.setItem('currentUser', JSON.stringify(data.data.user));
+          hideLoginModal();
+          updateNavForLoggedInUser(data.data.user);
+          window.location.href = '../dashboard.html';
+        }, 1500);
+      } else {
+        messageDiv.textContent = data.message || 'Registration failed';
+        messageDiv.className = 'auth-message error';
+        messageDiv.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      messageDiv.textContent = 'Network error. Please try again.';
+      messageDiv.className = 'auth-message error';
+      messageDiv.style.display = 'block';
+    }
+  }
+  
+  function updateNavForLoggedInUser(user) {
+    const loginBtn = document.getElementById('loginNavBtn');
+    const logoutBtn = document.getElementById('logoutNavBtn');
+    const profileBtn = document.getElementById('profileNavBtn');
+
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (logoutBtn) logoutBtn.style.display = 'inline-block';
+    if (profileBtn) profileBtn.style.display = 'inline-block';
   }
 
   function logoutUser() {
@@ -247,125 +655,7 @@
       }
     }
 
-    // Login form handler
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-      loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('loginUsername').value;
-        const password = document.getElementById('loginPassword').value;
-        const messageDiv = document.getElementById('loginMessage');
-        
-        try {
-          // Try different API URLs in case of port issues
-          const apiUrls = [
-(typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/login',
-            'http://127.0.0.1:3000/api/auth/login',
-            'http://127.0.0.1:5000/api/auth/login'
-          ];
-          
-          let response = null;
-          let lastError = null;
-          
-          for (let url of apiUrls) {
-            try {
-              console.log('Trying URL:', url);
-              response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-              });
-              console.log('Success with URL:', url);
-              break;
-            } catch (err) {
-              console.log('Failed with URL:', url, err.message);
-              lastError = err;
-              continue;
-            }
-          }
-          
-          if (!response) {
-            throw lastError || new Error('All API URLs failed');
-          }
-          
-          console.log('Response status:', response.status);
-          console.log('Response headers:', response.headers);
-          
-          const data = await response.json();
-          console.log('Response data:', data);
-          
-          if (data.success) {
-            localStorage.setItem('authToken', data.data.token);
-            localStorage.setItem('userData', JSON.stringify(data.data.user));
-            messageDiv.innerHTML = '<p style="color: green;">Login successful!</p>';
-            setTimeout(() => {
-              modal.style.display = 'none';
-              location.reload();
-            }, 1000);
-          } else {
-            messageDiv.innerHTML = `<p style="color: red;">${data.message}</p>`;
-          }
-        } catch (error) {
-          console.error('Login error details:', error);
-          console.error('Error name:', error.name);
-          console.error('Error message:', error.message);
-          
-          if (error.name === 'TypeError' && error.message.includes('fetch')) {
-            messageDiv.innerHTML = '<p style="color: red;">Cannot connect to server. Please ensure the backend server is running on port 5000.</p>';
-          } else if (error.name === 'NetworkError') {
-            messageDiv.innerHTML = '<p style="color: red;">Network error. Please check your internet connection.</p>';
-          } else {
-            messageDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-          }
-        }
-      });
-    }
-
-    // Register form handler
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-      registerForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = {
-          username: document.getElementById('registerUsername').value,
-          email: document.getElementById('registerEmail').value,
-          password: document.getElementById('registerPassword').value,
-          fullName: document.getElementById('registerFullName').value,
-          phone: document.getElementById('registerPhone').value,
-          location: document.getElementById('registerLocation').value
-        };
-        
-        const messageDiv = document.getElementById('registerMessage');
-        
-        try {
-          const authApiUrl = (typeof CONFIG !== 'undefined' ? CONFIG.AUTH_API : 'http://localhost:5000/api/auth') + '/register';
-          const response = await fetch(authApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-          });
-          
-          const data = await response.json();
-          
-          if (data.success) {
-            messageDiv.innerHTML = '<p style="color: green;">Registration successful! Please login.</p>';
-            setTimeout(() => {
-              openTab({currentTarget: document.querySelector('.tab-button')}, 'loginTab');
-            }, 1500);
-          } else {
-            messageDiv.innerHTML = `<p style="color: red;">${data.message}</p>`;
-          }
-        } catch (error) {
-          console.error('Registration error:', error);
-          messageDiv.innerHTML = '<p style="color: red;">Network error. Please try again.</p>';
-        }
-      });
-    }
+    // Old login/register handlers removed - now using unified modal functions above
   });
+
 </script>
