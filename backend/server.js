@@ -192,9 +192,9 @@ const seedTestData = async () => {
         const testCarsWithImages = [
           { make: 'Maruti', model: 'Swift', images: ['images/bmw.jpg'] },
           { make: 'Hyundai', model: 'Creta', images: ['images/volkswagen.avif'] },
-          { make: 'Honda', model: 'City', images: ['images/amd.jpg'] },
+          { make: 'Honda', model: 'City', images: ['images/honda-city'] },
           { make: 'Tata', model: 'Nexon', images: ['images/toyota.avif'] },
-          { make: 'Mahindra', model: 'XUV700', images: ['images/mumbai3.avif'] },
+          { make: 'Mahindra', model: 'XUV700', images: ['images/car login.jpg'] },
         ];
         
         for (const testCar of testCarsWithImages) {
@@ -250,9 +250,9 @@ const seedTestData = async () => {
     const testCars = [
       { make: 'Maruti', model: 'Swift', year: 2022, price: 650000, status: 'available', description: 'Well maintained Swift', fuel_type: 'Petrol', transmission: 'Manual', condition_status: 'Excellent', mileage: 25000, color: 'Red', contact: '9999999999', location: 'Mumbai', images: ['images/bmw.jpg'] },
       { make: 'Hyundai', model: 'Creta', year: 2021, price: 1200000, status: 'available', description: 'Excellent Creta with low mileage', fuel_type: 'Diesel', transmission: 'Automatic', condition_status: 'Excellent', mileage: 15000, color: 'Blue', contact: '9999999998', location: 'Delhi', images: ['images/volkswagen.avif'] },
-      { make: 'Honda', model: 'City', year: 2023, price: 1100000, status: 'available', description: 'Brand new Honda City', fuel_type: 'Petrol', transmission: 'Automatic', condition_status: 'Excellent', mileage: 5000, color: 'White', contact: '9999999997', location: 'Bangalore', images: ['images/amd.jpg'] },
+      { make: 'Honda', model: 'City', year: 2023, price: 1100000, status: 'available', description: 'Brand new Honda City', fuel_type: 'Petrol', transmission: 'Automatic', condition_status: 'Excellent', mileage: 5000, color: 'White', contact: '9999999997', location: 'Bangalore', images: ['images/honda-city'] },
       { make: 'Tata', model: 'Nexon', year: 2020, price: 950000, status: 'available', description: 'Reliable Nexon', fuel_type: 'Petrol', transmission: 'Manual', condition_status: 'Good', mileage: 45000, color: 'Black', contact: '9999999996', location: 'Mumbai', images: ['images/toyota.avif'] },
-      { make: 'Mahindra', model: 'XUV700', year: 2022, price: 1700000, status: 'available', description: 'Premium XUV700', fuel_type: 'Diesel', transmission: 'Automatic', condition_status: 'Excellent', mileage: 20000, color: 'Silver', contact: '9999999995', location: 'Hyderabad', images: ['images/mumbai3.avif'] },
+      { make: 'Mahindra', model: 'XUV700', year: 2022, price: 1700000, status: 'available', description: 'Premium XUV700', fuel_type: 'Diesel', transmission: 'Automatic', condition_status: 'Excellent', mileage: 20000, color: 'Silver', contact: '9999999995', location: 'Hyderabad', images: ['images/car login.jpg'] },
     ];
 
     console.log(`  🚗 Inserting ${testCars.length} test cars...`);
