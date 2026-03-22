@@ -288,6 +288,83 @@ const seedTestData = async () => {
   }
 };
 
+// Ensure inquiries table has correct schema
+const ensureInquiriesTableSchema = async () => {
+  console.log('\n🔍 Checking inquiries table schema...');
+  try {
+    // Check if inquiries table exists
+    const [tables] = await db.execute("SHOW TABLES LIKE 'inquiries'");
+    
+    if (tables.length === 0) {
+      console.log('   ⚠️ Inquiries table does not exist. Creating...');
+      // Table doesn't exist, create it
+      await db.execute(`
+        CREATE TABLE inquiries (
+          id INT PRIMARY KEY AUTO_INCREMENT,
+          car_id INT NOT NULL,
+          buyer_id INT NOT NULL,
+          seller_id INT NOT NULL,
+          message TEXT NOT NULL,
+          phone VARCHAR(20) NOT NULL,
+          response TEXT,
+          status ENUM('pending', 'responded', 'closed') DEFAULT 'pending',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          FOREIGN KEY (car_id) REFERENCES cars (id) ON DELETE CASCADE,
+          FOREIGN KEY (buyer_id) REFERENCES users (id) ON DELETE CASCADE,
+          FOREIGN KEY (seller_id) REFERENCES users (id) ON DELETE CASCADE,
+          INDEX idx_car (car_id),
+          INDEX idx_buyer (buyer_id),
+          INDEX idx_seller (seller_id),
+          INDEX idx_status (status)
+        );
+      `);
+      console.log('   ✅ Inquiries table created successfully!');
+      return;
+    }
+
+    // Table exists, check if it has required columns
+    const [columns] = await db.execute('SHOW COLUMNS FROM inquiries');
+    const columnNames = columns.map(c => c.Field);
+    const requiredCols = ['buyer_id', 'seller_id', 'car_id', 'message', 'phone'];
+    const missingCols = requiredCols.filter(col => !columnNames.includes(col));
+
+    if (missingCols.length > 0) {
+      console.log(`   ⚠️ Missing columns: ${missingCols.join(', ')}`);
+      console.log('   🔧 Recreating inquiries table with correct schema...');
+      
+      // Drop old table and create new one
+      await db.execute('DROP TABLE inquiries;');
+      await db.execute(`
+        CREATE TABLE inquiries (
+          id INT PRIMARY KEY AUTO_INCREMENT,
+          car_id INT NOT NULL,
+          buyer_id INT NOT NULL,
+          seller_id INT NOT NULL,
+          message TEXT NOT NULL,
+          phone VARCHAR(20) NOT NULL,
+          response TEXT,
+          status ENUM('pending', 'responded', 'closed') DEFAULT 'pending',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          FOREIGN KEY (car_id) REFERENCES cars (id) ON DELETE CASCADE,
+          FOREIGN KEY (buyer_id) REFERENCES users (id) ON DELETE CASCADE,
+          FOREIGN KEY (seller_id) REFERENCES users (id) ON DELETE CASCADE,
+          INDEX idx_car (car_id),
+          INDEX idx_buyer (buyer_id),
+          INDEX idx_seller (seller_id),
+          INDEX idx_status (status)
+        );
+      `);
+      console.log('   ✅ Inquiries table recreated with correct schema!');
+    } else {
+      console.log(`   ✅ Inquiries table has all required columns: ${columnNames.join(', ')}`);
+    }
+  } catch (error) {
+    console.error('   ❌ Error checking/fixing inquiries table:', error.message);
+  }
+};
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: false,
@@ -723,6 +800,7 @@ const HOST = '0.0.0.0'; // Bind to all interfaces
     console.log('⏳ Starting initialization...');
     await initializeDatabase();
     await seedTestData();
+    await ensureInquiriesTableSchema();
     
     // NOW start the server after initialization is complete
     app.listen(PORT, HOST, () => {
