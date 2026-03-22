@@ -4,8 +4,60 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// DEBUG: Check database tables
-router.get('/debug/check-tables', async (req, res) => {
+// DEBUG: Simple GET test without JOIN
+router.get('/debug/simple-test', async (req, res) => {
+    try {
+        console.log('🧪 Running simple cars query test...');
+        
+        // Test 1: Simple SELECT without JOIN
+        console.log('   Test 1: Simple SELECT...');
+        const [simpleCars] = await db.execute('SELECT id, make, model FROM cars LIMIT 5');
+        console.log('   ✅ Simple SELECT succeeded:', simpleCars.length, 'cars');
+        
+        // Test 2: SELECT with all columns
+        console.log('   Test 2: SELECT with all columns...');
+        const [allCars] = await db.execute('SELECT * FROM cars LIMIT 5');
+        console.log('   ✅ All columns SELECT succeeded:', allCars.length, 'cars');
+        
+        // Test 3: SELECT with JOIN
+        console.log('   Test 3: SELECT with LEFT JOIN...');
+        const [joinCars] = await db.execute(`
+            SELECT c.id, c.make, c.model, u.username 
+            FROM cars c
+            LEFT JOIN users u ON c.seller_id = u.id
+            LIMIT 5
+        `);
+        console.log('   ✅ JOIN SELECT succeeded:', joinCars.length, 'cars');
+        
+        // Test with problematic field
+        console.log('   Test 4: SELECT with images parsing...');
+        const [imagesTest] = await db.execute('SELECT id, images FROM cars LIMIT 1');
+        console.log('   ✅ Images SELECT succeeded');
+        if (imagesTest.length > 0) {
+            console.log('   Image data type:', typeof imagesTest[0].images);
+            console.log('   Image sample:', String(imagesTest[0].images).substring(0, 50));
+        }
+        
+        res.json({
+            success: true,
+            tests: {
+                simpleSelect: 'PASS',
+                allColumns: 'PASS',
+                joinSelect: 'PASS',
+                imagesTest: 'PASS'
+            },
+            carsCount: allCars.length,
+            sample: allCars[0] || null
+        });
+    } catch (error) {
+        console.error('❌ Test failed:', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            code: error.code
+        });
+    }
+});
     try {
         console.log('🔍 Checking database tables...');
         
