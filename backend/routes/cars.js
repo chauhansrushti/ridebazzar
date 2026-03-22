@@ -267,6 +267,10 @@ router.get('/:id', async (req, res) => {
 // Create new car listing
 router.post('/', auth, async (req, res) => {
     try {
+        console.log('📋 POST /api/cars - Creating new car listing');
+        console.log('   User ID:', req.user?.userId);
+        console.log('   Username:', req.user?.username);
+        
         const {
             make,
             model,
@@ -285,15 +289,33 @@ router.post('/', auth, async (req, res) => {
             emiAmount
         } = req.body;
 
+        console.log('   Received fields:', {
+            make, model, year, price, fuelType, transmission, conditionStatus
+        });
+
         // Validate required fields
         if (!make || !model || !year || !price || !fuelType || !transmission || !conditionStatus) {
+            console.warn('❌ Missing required fields');
             return res.status(400).json({ 
                 success: false, 
                 message: 'Required fields: make, model, year, price, fuelType, transmission, conditionStatus' 
             });
         }
 
+        // Verify user exists in database
+        const [userCheck] = await db.execute('SELECT id FROM users WHERE id = ?', [req.user.userId]);
+        if (userCheck.length === 0) {
+            console.error('❌ User not found in database:', req.user.userId);
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found in database' 
+            });
+        }
+
+        console.log('✅ User verified in database');
+
         // Insert new car
+        console.log('🔄 Inserting car into database...');
         const [result] = await db.execute(`
             INSERT INTO cars (
                 seller_id, make, model, year, price, mileage, fuel_type, 
@@ -319,6 +341,8 @@ router.post('/', auth, async (req, res) => {
             emiAmount || 0
         ]);
 
+        console.log('✅ Car created successfully with ID:', result.insertId);
+
         res.status(201).json({
             success: true,
             message: 'Car listed successfully',
@@ -328,10 +352,19 @@ router.post('/', auth, async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Create car error:', error);
+        console.error('❌ Create car error:', error);
+        console.error('   Error message:', error.message);
+        console.error('   Error code:', error.code);
+        console.error('   Error stack:', error.stack);
+        
         res.status(500).json({ 
             success: false, 
-            message: 'Internal server error' 
+            message: 'Internal server error',
+            debug: process.env.NODE_ENV === 'production' ? undefined : {
+                error: error.message,
+                code: error.code,
+                sqlState: error.sqlState
+            }
         });
     }
 });
