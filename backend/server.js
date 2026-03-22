@@ -205,14 +205,12 @@ const seedTestData = async () => {
           
           if (existingCars.length > 0) {
             const car = existingCars[0];
-            // Only update if car has no images or empty images
-            if (!car.images || car.images === '[]' || car.images === '') {
-              await db.execute(
-                'UPDATE cars SET images = ? WHERE id = ?',
-                [JSON.stringify(testCar.images), car.id]
-              );
-              console.log(`  📸 Added images to ${testCar.make} ${testCar.model}`);
-            }
+            // ALWAYS update test cars with local image paths (remove old/broken images)
+            await db.execute(
+              'UPDATE cars SET images = ? WHERE id = ?',
+              [JSON.stringify(testCar.images), car.id]
+            );
+            console.log(`  📸 Updated images for ${testCar.make} ${testCar.model} to ${testCar.images[0]}`);
           }
         }
       } catch (updateErr) {
