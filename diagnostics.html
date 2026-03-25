@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Diagnostics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .status-ok {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+        .status-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .detail {
+            font-family: monospace;
+            background: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px 10px 0;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 RideBazzar System Diagnostics</h1>
+        
+        <p style="font-size: 16px; color: #666;">
+            This page checks if all components are working correctly for buying and selling cars.
+        </p>
+
+        <div class="section">
+            <h2>📋 System Status</h2>
+            <div id="status-container"></div>
+            <button onclick="runDiagnostics()">🔍 Run Full Diagnostics</button>
+            <button onclick="checkBrowser()">🌐 Check Browser Console</button>
+        </div>
+
+        <div class="section">
+            <h2>📡 API Testing</h2>
+            <button onclick="testAuthAPI()">Test Auth API</button>
+            <button onclick="testCarsAPI()">Test Cars API</button>
+            <button onclick="testBookingsAPI()">Test Bookings API</button>
+            <div id="api-results"></div>
+        </div>
+
+        <div class="section">
+            <h2>💾 Local Storage Info</h2>
+            <div id="storage-info"></div>
+        </div>
+
+        <div class="section">
+            <h2>❓ Common Issues & Solutions</h2>
+            <h3>❌ "Form won't submit"</h3>
+            <p><strong>Solution:</strong> Open browser Developer Tools (F12 or Right-click → Inspect → Console) and check for JavaScript errors. Screenshot the error and share with support.</p>
+            
+            <h3>❌ "Booking button doesn't work"</h3>
+            <p><strong>Solution:</strong> Make sure you're logged in first. Check the browser console for errors. Try refreshing the page.</p>
+            
+            <h3>❌ "Error posting car"</h3>
+            <p><strong>Solution:</strong> 
+                <ul>
+                    <li>Check all required fields are filled (Make, Model, Year, Price, Fuel Type, Transmission, Condition)</li>
+                    <li>Try posting without images first</li>
+                    <li>Check browser console (F12) for detailed error message</li>
+                </ul>
+            </p>
+
+            <h3>❌ "Page loads but nothing works"</h3>
+            <p><strong>Solution:</strong>
+                <ul>
+                    <li>Clear browser cache (Ctrl+Shift+Delete)</li>
+                    <li>Try an incognito/private window</li>
+                    <li>Try a different browser</li>
+                    <li>Check that JavaScript is enabled</li>
+                </ul>
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>🛠️ Developer Tips</h2>
+            <p><strong>To open Browser Console:</strong></p>
+            <code>F12</code> or <code>Right-click → Inspect → Console tab</code>
+            <p>Look for red errors starting with ❌</p>
+            
+            <p><strong>To test API endpoints manually:</strong> Click the buttons above under "API Testing"</p>
+            
+            <p><strong>To clear all data:</strong> 
+                <button onclick="clearAllData()">Clear Local Storage & Cache</button>
+            </p>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth-api.js"></script>
+    <script src="js/carManager-api.js"></script>
+
+    <script>
+        async function runDiagnostics() {
+            const container = document.getElementById('status-container');
+            container.innerHTML = '<p>Running diagnostics...</p>';
+            
+            let html = '';
+
+            // Check 1: CONFIG
+            try {
+                if (typeof CONFIG !== 'undefined') {
+                    html += `<div class="status status-ok">
+                        <span class="status-icon">✅</span>
+                        <span><strong>CONFIG</strong> - API configuration loaded<br>
+                        <small>API URL: ${CONFIG.API_BASE_URL}</small></span>
+                    </div>`;
+                } else {
+                    html += `<div class="status status-error">
+                        <span class="status-icon">❌</span>
+                        <span><strong>CONFIG</strong> - Failed to load configuration</span>
+                    </div>`;
+                }
+            } catch(e) {
+                html += `<div class="status status-error">
+                    <span class="status-icon">❌</span>
+                    <span><strong>CONFIG</strong> - Error: ${e.message}</span>
+                </div>`;
+            }
+
+            // Check 2: CarManager
+            try {
+                const carManager = new CarManager();
+                html += `<div class="status status-ok">
+                    <span class="status-icon">✅</span>
+                    <span><strong>CarManager</strong> - Initialized<br>
+                    <small>API URL: ${carManager.apiUrl}</small></span>
+                </div>`;
+            } catch(e) {
+                html += `<div class="status status-error">
+                    <span class="status-icon">❌</span>
+                    <span><strong>CarManager</strong> - Failed: ${e.message}</span>
+                </div>`;
+            }
+
+            // Check 3: AuthManager
+            try {
+                const authManager = new AuthManager();
+                html += `<div class="status status-ok">
+                    <span class="status-icon">✅</span>
+                    <span><strong>AuthManager</strong> - Initialized</span>
+                </div>`;
+            } catch(e) {
+                html += `<div class="status status-error">
+                    <span class="status-icon">❌</span>
+                    <span><strong>AuthManager</strong> - Failed: ${e.message}</span>
+                </div>`;
+            }
+
+            // Check 4: Authentication
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData');
+            if (token && userData) {
+                html += `<div class="status status-ok">
+                    <span class="status-icon">✅</span>
+                    <span><strong>User Authentication</strong> - Logged in</span>
+                </div>`;
+            } else {
+                html += `<div class="status status-warning">
+                    <span class="status-icon">⚠️</span>
+                    <span><strong>User Authentication</strong> - Not logged in (Required for posting/booking)</span>
+                </div>`;
+            }
+
+            // Check 5: Browser Support
+            if (typeof FileReader !== 'undefined' && typeof FormData !== 'undefined') {
+                html += `<div class="status status-ok">
+                    <span class="status-icon">✅</span>
+                    <span><strong>Browser Support</strong> - File APIs available</span>
+                </div>`;
+            } else {
+                html += `<div class="status status-error">
+                    <span class="status-icon">❌</span>
+                    <span><strong>Browser Support</strong> - Required APIs missing (Try Chrome, Firefox, or Edge)</span>
+                </div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        async function testAuthAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<p>Testing Auth API...</p>';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/health`);
+                if (response.ok) {
+                    resultsDiv.innerHTML = `<div class="status status-ok">
+                        <span class="status-icon">✅</span>
+                        <span><strong>Auth API</strong> - Server is reachable and responding</span>
+                    </div>`;
+                } else {
+                    resultsDiv.innerHTML = `<div class="status status-error">
+                        <span class="status-icon">❌</span>
+                        <span><strong>Auth API</strong> - Server responded with status ${response.status}</span>
+                    </div>`;
+                }
+            } catch(error) {
+                resultsDiv.innerHTML = `<div class="status status-error">
+                    <span class="status-icon">❌</span>
+                    <span><strong>Auth API</strong> - Connection failed: ${error.message}</span>
+                </div>`;
+            }
+        }
+
+        async function testCarsAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<p>Testing Cars API...</p>';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/cars`);
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const carCount = data.data?.cars?.length || 0;
+                    resultsDiv.innerHTML = `<div class="status status-ok">
+                        <span class="status-icon">✅</span>
+                        <span><strong>Cars API</strong> - Working. Found ${carCount} cars in database</span>
+                    </div>`;
+                } else {
+                    resultsDiv.innerHTML = `<div class="status status-error">
+                        <span class="status-icon">❌</span>
+                        <span><strong>Cars API</strong> - Error: ${data.message || 'Unknown'}</span>
+                    </div>`;
+                }
+            } catch(error) {
+                resultsDiv.innerHTML = `<div class="status status-error">
+                    <span class="status-icon">❌</span>
+                    <span><strong>Cars API</strong> - Connection failed: ${error.message}</span>
+                </div>`;
+            }
+        }
+
+        async function testBookingsAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<p>Testing Bookings API...</p>';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/bookings`);
+                if (response.ok) {
+                    resultsDiv.innerHTML = `<div class="status status-ok">
+                        <span class="status-icon">✅</span>
+                        <span><strong>Bookings API</strong> - Endpoint is reachable</span>
+                    </div>`;
+                } else {
+                    resultsDiv.innerHTML = `<div class="status status-${response.status === 401 ? 'warning' : 'error'}">
+                        <span class="status-icon">${response.status === 401 ? '⚠️' : '❌'}</span>
+                        <span><strong>Bookings API</strong> - Server responded with status ${response.status}${response.status === 401 ? ' (Not logged in)' : ''}</span>
+                    </div>`;
+                }
+            } catch(error) {
+                resultsDiv.innerHTML = `<div class="status status-error">
+                    <span class="status-icon">❌</span>
+                    <span><strong>Bookings API</strong> - Connection failed: ${error.message}</span>
+                </div>`;
+            }
+        }
+
+        function checkBrowser() {
+            alert('📋 Browser Console Instructions:\n\n' +
+                  '1. Press F12 or Right-click → Inspect\n' +
+                  '2. Click "Console" tab\n' +
+                  '3. Look for red ❌ error messages\n' +
+                  '4. Take a screenshot and share the errors\n\n' +
+                  'Common errors help us fix the issue faster!');
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ This will clear all stored data. Continue?')) {
+                localStorage.clear();
+                alert('✅ Local storage cleared. Page will reload.');
+                location.reload();
+            }
+        }
+
+        async function updateStorageInfo() {
+            const storageDiv = document.getElementById('storage-info');
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData');
+            
+            let html = '<table style="width:100%; border-collapse: collapse;">';
+            html += '<tr style="background: #f0f0f0;"><th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Key</th><th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Value</th><th style="border: 1px solid #ddd; padding: 8px;">Status</th></tr>';
+            
+            const items = [
+                { key: 'authToken', value: token, type: 'required' },
+                { key: 'userData', value: userData, type: 'required' }
+            ];
+
+            for (const item of items) {
+                const status = item.value ? '<span style="color: green;">✅ Present</span>' : '<span style="color: red;">❌ Missing</span>';
+                const displayValue = item.value ? (item.value.length > 50 ? item.value.substring(0, 50) + '...' : item.value) : 'Not set';
+                html += `<tr><td style="border: 1px solid #ddd; padding: 8px;"><code>${item.key}</code></td>
+                         <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px; font-family: monospace;">${displayValue}</td>
+                         <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${status}</td></tr>`;
+            }
+            
+            html += '</table>';
+            storageDiv.innerHTML = html;
+        }
+
+        // Run on page load
+        window.addEventListener('load', () => {
+            runDiagnostics();
+            updateStorageInfo();
+        });
+    </script>
+</body>
+</html>

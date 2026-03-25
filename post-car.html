@@ -13,6 +13,49 @@
       const nav = document.getElementById("navbarLinks");
       if (nav) nav.classList.toggle("show");
     }
+    
+    // Initialize global objects
+    let window_carManager;
+    let window_authManager;
+    
+    // Initialize on DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('✅ Page loaded, initializing...');
+      
+      // Check if CONFIG is loaded
+      if (typeof CONFIG === 'undefined') {
+        console.error('❌ CONFIG not loaded! Check config.js');
+      } else {
+        console.log('✅ CONFIG loaded:', CONFIG);
+      }
+      
+      // Initialize CarManager
+      try {
+        window.carManager = new CarManager();
+        console.log('✅ CarManager initialized');
+        console.log('   API URL:', window.carManager.apiUrl);
+      } catch (e) {
+        console.error('❌ Failed to initialize CarManager:', e);
+      }
+      
+      // Initialize AuthManager
+      try {
+        window.authManager = new AuthManager();
+        console.log('✅ AuthManager initialized');
+      } catch (e) {
+        console.error('❌ Failed to initialize AuthManager:', e);
+      }
+      
+      // Check if user is logged in
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      console.log('🔐 Auth status - Token exists:', !!token, 'UserData:', !!userData);
+      
+      if (!token) {
+        console.warn('⚠️ User not logged in - redirecting to login...');
+        // Don't force redirect, let user stay on page but show message
+      }
+    });
   </script>
   <style>
     body {
@@ -668,6 +711,16 @@
 
     function handleEnhancedPostCar() {
       try {
+        console.log('📝 handleEnhancedPostCar called');
+        
+        // Check if user is logged in
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          alert('Please log in first to post a car');
+          window.location.href = 'home.html#login';
+          return;
+        }
+        
         const form = document.getElementById('postCarForm');
         const formData = new FormData(form);
         
@@ -679,6 +732,8 @@
         const fuelType = document.getElementById('carFuelType').value;
         const transmission = document.getElementById('carTransmission').value;
         const condition = document.getElementById('carCondition').value;
+        
+        console.log('Form values:', { make, model, year, price, fuelType, transmission, condition });
         
         // Validate required fields
         if (!make) {
@@ -735,15 +790,22 @@
           images: []
         };
         
+        console.log('Car data prepared:', carData);
+        
         // Handle image files
         const imageFiles = document.getElementById('carImages').files;
+        console.log('Image files count:', imageFiles.length);
+        
         if (imageFiles.length > 0) {
+          console.log('📸 Processing', imageFiles.length, 'images...');
           handleImageUpload(imageFiles, carData);
         } else {
+          console.log('📤 Posting car without images');
           postCarToSystem(carData);
         }
         
       } catch (error) {
+        console.error('❌ Error in handleEnhancedPostCar:', error);
         alert('Error: ' + error.message);
       }
     }
@@ -768,15 +830,29 @@
     
     async function postCarToSystem(carData) {
       try {
-        const result = await carManager.postCar(carData);
-        if (result.success) {
-          alert('Car posted successfully!');
+        console.log('🚀 Posting car to system...');
+        console.log('CarManager initialized:', window.carManager !== undefined);
+        console.log('API URL:', window.carManager?.apiUrl);
+        
+        if (!window.carManager) {
+          throw new Error('CarManager not initialized');
+        }
+        
+        const result = await window.carManager.postCar(carData);
+        console.log('✅ Server response:', result);
+        
+        if (result && result.success) {
+          alert('✅ Car posted successfully! Redirecting to all cars...');
           window.location.href = 'all-cars.html';
         } else {
-          alert('Error posting car: ' + (result.message || 'Unknown error'));
+          const errorMsg = result?.message || result?.error || 'Unknown error';
+          console.error('❌ Server error:', errorMsg);
+          alert('❌ Error posting car:\n' + errorMsg);
         }
       } catch (error) {
-        alert('Error posting car: ' + error.message);
+        console.error('❌ Network/Exception error:', error);
+        console.error('Error details:', error.message);
+        alert('❌ Error posting car:\n' + error.message + '\n\nMake sure you are logged in and have internet connection.');
       }
     }
 
