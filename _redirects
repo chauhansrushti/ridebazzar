@@ -1,4 +1,9 @@
-# Proxy API requests to the Railway backend
+
+# Map public car browsing endpoints to backend public route
+/api/cars/*   https://ridebazzar.up.railway.app/api/public/cars/:splat   200
+/api/cars   https://ridebazzar.up.railway.app/api/public/cars   200
+
+# Proxy API requests to the Railway backend (general)
 /api/*   https://ridebazzar.up.railway.app/:splat   200
 
 # Proxy uploads to the Railway backend (for uploaded images)
