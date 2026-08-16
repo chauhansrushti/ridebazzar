@@ -63,11 +63,24 @@ class CarManager {
             const response = await fetch(`${this.apiUrl}/${carId}`);
 
             const contentType = response.headers.get('content-type') || '';
-            if (!contentType.includes('application/json')) {
-                // Fallback: search static data
+
+            // If API response is not JSON or status not OK, try the static fallback
+            if (!contentType.includes('application/json') || !response.ok) {
                 const fallback = await fetch('/data/cars.json').then(r => r.json()).catch(() => []);
                 const cars = Array.isArray(fallback) ? fallback : (fallback.cars || []);
-                return cars.find(c => String(c.id) === String(carId)) || null;
+                const found = cars.find(c => String(c.id) === String(carId));
+                if (found) return found;
+
+                // As a last resort, call getAllCars() and search the combined source
+                try {
+                    const all = await this.getAllCars();
+                    const found2 = Array.isArray(all) ? all.find(c => String(c.id) === String(carId)) : null;
+                    if (found2) return found2;
+                } catch (e) {
+                    // ignore
+                }
+
+                return null;
             }
 
             const result = await response.json();
@@ -77,7 +90,11 @@ class CarManager {
             }
             // If API returns the car object directly
             if (result && result.id) return result;
-            return null;
+
+            // Fallback to static data if API returned unexpected payload
+            const fallback2 = await fetch('/data/cars.json').then(r => r.json()).catch(() => []);
+            const cars2 = Array.isArray(fallback2) ? fallback2 : (fallback2.cars || []);
+            return cars2.find(c => String(c.id) === String(carId)) || null;
         } catch (error) {
             console.error('Error fetching car:', error);
             return null;
