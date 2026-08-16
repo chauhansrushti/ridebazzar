@@ -607,6 +607,9 @@
               ? CONFIG.CARS_API.replace('/api/cars', '')
               : (window.location.protocol === 'file:' ? 'http://localhost:5000' : window.location.origin);
             imgSrc = apiBase + '/' + imagePath;
+          } else if (imagePath.startsWith('uploads/')) {
+            // Uploaded images require a backend; fallback to local placeholder on static Netlify site
+            imgSrc = 'images/default-car.jpg';
           } else {
             imgSrc = imagePath; // Use external URLs as-is
           }

@@ -560,6 +560,9 @@
                   : (window.location.protocol === 'file:' ? 'http://localhost:5000' : window.location.origin);
                 return apiBase + '/' + imagePath;
               }
+              if (imagePath.startsWith('uploads/')) {
+                return 'images/default-car.jpg';
+              }
               return imagePath;
             };
             
