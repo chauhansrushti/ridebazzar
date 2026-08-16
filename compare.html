@@ -616,7 +616,7 @@
         try {
           console.log(`📡 Fetching car from API...`);
           // Use CONFIG API base URL or fallback to localhost
-          const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : 'http://localhost:5000';
+            const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : 'http://localhost:5000';
           const response = await fetch(`${apiBase}/api/cars/${carId}`);
           
           if (response.ok) {
@@ -679,7 +679,7 @@
           // Helper function to get full image URL
           const getImageUrl = (imagePath) => {
             if (imagePath.startsWith('images/')) {
-              const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : `${window.location.origin}:5000`;
+              const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : `${window.location.origin}:5000`;
               return apiBase + '/' + imagePath;
             }
             return imagePath;
