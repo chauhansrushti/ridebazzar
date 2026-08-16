@@ -3,7 +3,14 @@
 
 class CarManager {
     constructor() {
-        this.apiUrl = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API : 'http://localhost:5000/api/cars';
+        // Use public cars endpoint for frontend read operations.
+        if (typeof CONFIG !== 'undefined' && CONFIG.CARS_API) {
+            this.apiUrl = CONFIG.CARS_API.includes('/api/cars')
+                ? CONFIG.CARS_API.replace('/api/cars', '/api/public/cars')
+                : CONFIG.CARS_API;
+        } else {
+            this.apiUrl = 'http://localhost:5000/api/public/cars';
+        }
         this.authManager = new AuthManager();
     }
 
@@ -170,6 +177,7 @@ class CarManager {
         try {
             const token = localStorage.getItem('authToken');
             const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000' : 'https://ridebazzar.up.railway.app';
+            // mark-as-sold is an update; backend may expect /api/cars/:id for admin actions — try that path
             const response = await fetch(`${apiUrl}/api/cars/${carId}`, {
                 method: 'PUT',
                 headers: {
