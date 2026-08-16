@@ -1,3 +1,10 @@
+# Proxy API requests to the Railway backend
+/api/*   https://ridebazzar.up.railway.app/:splat   200
+
+# Proxy uploads to the Railway backend (for uploaded images)
+/uploads/*   https://ridebazzar.up.railway.app/:splat   200
+
+# Fallback: serve index for SPA routes
 /*    /index.html   200
 # Redirect root to home.html
 /    /home.html   200
