@@ -1,6 +1,14 @@
 [
-  { "id": 1, "make": "Maruti", "model": "Swift", "year": 2022, "price": 650000, "status": "available", "images": ["images/maruti-swift.jpg"] },
-  { "id": 2, "make": "Hyundai", "model": "Creta", "year": 2021, "price": 1200000, "status": "sold", "images": ["images/hyundai-creta.jpg"] },
-  { "id": 3, "make": "Honda", "model": "City", "year": 2023, "price": 1100000, "status": "available", "images": ["images/honda-city.jpg"] },
-  { "id": 4, "make": "Tata", "model": "Nexon", "year": 2020, "price": 950000, "status": "available", "images": ["images/tata-nexon.jpg"] }
+  { "id": 1, "make": "Maruti", "model": "Swift", "year": 2022, "price": 650000, "status": "available", "images": ["images/bmw.jpg"] , "fuel_type":"Petrol","transmission":"Manual","description":"Well maintained Swift"},
+  { "id": 2, "make": "Hyundai", "model": "Creta", "year": 2021, "price": 1200000, "status": "sold", "images": ["images/honda-city.png"] , "fuel_type":"Diesel","transmission":"Automatic","description":"Excellent Creta with low mileage"},
+  { "id": 3, "make": "Honda", "model": "City", "year": 2023, "price": 1100000, "status": "available", "images": ["images/honda-city.png"] , "fuel_type":"Petrol","transmission":"Automatic","description":"Brand new Honda City"},
+  { "id": 4, "make": "Tata", "model": "Nexon", "year": 2020, "price": 950000, "status": "available", "images": ["images/volkswagen1.webp"] , "fuel_type":"Petrol","transmission":"Manual","description":"Reliable Nexon"},
+  { "id": 5, "make": "Mahindra", "model": "XUV700", "year": 2022, "price": 1700000, "status": "sold", "images": ["images/volkswagen2.jpg"] , "fuel_type":"Diesel","transmission":"Automatic","description":"Premium XUV700"},
+  { "id": 6, "make": "Toyota", "model": "Corolla", "year": 2019, "price": 850000, "status": "available", "images": ["images/toyota.avif"] , "fuel_type":"Petrol","transmission":"Automatic","description":"Reliable daily driver"},
+  { "id": 7, "make": "BMW", "model": "3 Series", "year": 2018, "price": 2200000, "status": "available", "images": ["images/bmw.jpg"] , "fuel_type":"Diesel","transmission":"Automatic","description":"Well maintained BMW"},
+  { "id": 8, "make": "Volkswagen", "model": "Polo", "year": 2017, "price": 450000, "status": "available", "images": ["images/volkswagen.avif"] , "fuel_type":"Petrol","transmission":"Manual","description":"Compact and efficient"},
+  { "id": 9, "make": "Tata", "model": "Harrier", "year": 2021, "price": 1400000, "status": "available", "images": ["images/Hyderabad1.webp"] , "fuel_type":"Diesel","transmission":"Automatic","description":"Comfortable SUV"},
+  { "id": 10, "make": "Hyundai", "model": "Venue", "year": 2020, "price": 780000, "status": "available", "images": ["images/Hyderabad2.avif"] , "fuel_type":"Petrol","transmission":"Manual","description":"City-friendly SUV"},
+  { "id": 11, "make": "Audi", "model": "A4", "year": 2016, "price": 1800000, "status": "sold", "images": ["images/amd.jpg"] , "fuel_type":"Diesel","transmission":"Automatic","description":"Luxury sedan"},
+  { "id": 12, "make": "Ford", "model": "Mustang", "year": 2015, "price": 2500000, "status": "sold", "images": ["images/banglore1.webp"] , "fuel_type":"Petrol","transmission":"Manual","description":"Sporty classic"}
 ]
