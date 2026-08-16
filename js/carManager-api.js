@@ -28,20 +28,29 @@ class CarManager {
 
             // If API returned HTML (Netlify static site) or non-JSON, fall back to local static data
             const contentType = response.headers.get('content-type') || '';
+            // If response is not JSON, fallback to static data
             if (!contentType.includes('application/json')) {
                 console.warn('API returned non-JSON response; falling back to static data');
                 const fallback = await fetch('/data/cars.json').then(r => r.json()).catch(() => []);
                 return Array.isArray(fallback) ? fallback : (fallback.cars || []);
             }
 
-            const result = await response.json();
+            // If backend returns JSON but with a non-OK status (Railway fallback JSON), use static fallback
+            if (!response.ok) {
+                console.warn(`API returned HTTP ${response.status}; falling back to static data`);
+                const fallback = await fetch('/data/cars.json').then(r => r.json()).catch(() => []);
+                return Array.isArray(fallback) ? fallback : (fallback.cars || []);
+            }
 
+            const result = await response.json();
             if (result && result.success) {
                 return result.data.cars;
             }
             // Some APIs may return an array directly
             if (Array.isArray(result)) return result;
-            return [];
+            // Otherwise fallback to static
+            const fallback = await fetch('/data/cars.json').then(r => r.json()).catch(() => []);
+            return Array.isArray(fallback) ? fallback : (fallback.cars || []);
         } catch (error) {
             console.error('Error fetching cars:', error);
             return [];
