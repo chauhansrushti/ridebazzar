@@ -1,0 +1,7 @@
+/api/*   https://ridebazzar.up.railway.app/:splat   200
+
+# Optional: proxy uploads and other endpoints if needed
+/uploads/*   https://ridebazzar.up.railway.app/:splat   200
+
+# Redirect root to home.html
+/    /home.html   200
