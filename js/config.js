@@ -20,7 +20,7 @@ const getRideBazzarConfig = () => {
     
     // API Endpoints
     AUTH_API: `${API_BASE_URL}/api/auth`,
-    CARS_API: `${API_BASE_URL}/api/cars`,
+    CARS_API: `${API_BASE_URL}/api/public/cars`,
     BOOKINGS_API: `${API_BASE_URL}/api/bookings`,
     PAYMENTS_API: `${API_BASE_URL}/api/payments`,
     INQUIRIES_API: `${API_BASE_URL}/api/inquiries`,
