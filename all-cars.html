@@ -630,8 +630,8 @@
         card.innerHTML = `
           <div style="position:relative; overflow:hidden; background:${bgColor}; min-height:${imgHeight};">
             <img src="${imgSrc}" alt="Car Image" id="car-img-${car.id}" style="width:100%;height:${imgHeight};object-fit:cover;display:block;" onerror="(function(el){el.style.display='none'; var p=document.getElementById('placeholder-${car.id}'); if(p) p.style.display='flex';})(this);">
-            <div id="placeholder-${car.id}" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:80px; background:${bgColor}; ${(!imgSrc || imgSrc.includes('logo.png')) ? '' : 'display:none;'}">
-              🚗
+            <div id="placeholder-${car.id}" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:${bgColor}; ${(!imgSrc || imgSrc.includes('logo.png')) ? '' : 'display:none;'}">
+              <img src="images/default-car.jpg" alt="Default car" style="max-width:70%; max-height:70%; object-fit:contain;">
             </div>
             <button onclick="event.stopPropagation(); toggleFavoriteFromCard('${car.id}')" 
                     style="position:absolute; top:12px; right:12px; width:40px; height:40px; border-radius:50%; border:none; background:rgba(255,255,255,0.95); cursor:pointer; font-size:20px; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:10;">
