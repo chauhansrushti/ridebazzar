@@ -603,7 +603,9 @@
           const imagePath = car.images[0];
           // If it's a local path (starts with images/), prepend API URL
           if (imagePath.startsWith('images/')) {
-            const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : `${window.location.origin}:5000`;
+            const apiBase = typeof CONFIG !== 'undefined'
+              ? CONFIG.CARS_API.replace('/api/cars', '')
+              : (window.location.protocol === 'file:' ? 'http://localhost:5000' : window.location.origin);
             imgSrc = apiBase + '/' + imagePath;
           } else {
             imgSrc = imagePath; // Use external URLs as-is

@@ -649,7 +649,9 @@
     function getImageUrl(imagePath) {
       if (!imagePath) return '';
       if (imagePath.startsWith('images/')) {
-        const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : `${window.location.origin}:5000`;
+        const apiBase = typeof CONFIG !== 'undefined'
+          ? CONFIG.CARS_API.replace('/api/cars', '')
+          : (window.location.protocol === 'file:' ? 'http://localhost:5000' : window.location.origin);
         return apiBase + '/' + imagePath;
       }
       return imagePath;
