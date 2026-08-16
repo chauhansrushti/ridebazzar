@@ -1,0 +1,6 @@
+[
+  { "id": 1, "make": "Maruti", "model": "Swift", "year": 2022, "price": 650000, "status": "available", "images": ["images/maruti-swift.jpg"] },
+  { "id": 2, "make": "Hyundai", "model": "Creta", "year": 2021, "price": 1200000, "status": "sold", "images": ["images/hyundai-creta.jpg"] },
+  { "id": 3, "make": "Honda", "model": "City", "year": 2023, "price": 1100000, "status": "available", "images": ["images/honda-city.jpg"] },
+  { "id": 4, "make": "Tata", "model": "Nexon", "year": 2020, "price": 950000, "status": "available", "images": ["images/tata-nexon.jpg"] }
+]

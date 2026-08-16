@@ -18,11 +18,22 @@ class CarManager {
         try {
             const queryParams = new URLSearchParams(filters);
             const response = await fetch(`${this.apiUrl}?${queryParams}`);
+
+            // If API returned HTML (Netlify static site) or non-JSON, fall back to local static data
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                console.warn('API returned non-JSON response; falling back to static data');
+                const fallback = await fetch('/data/cars.json').then(r => r.json()).catch(() => []);
+                return Array.isArray(fallback) ? fallback : (fallback.cars || []);
+            }
+
             const result = await response.json();
-            
-            if (result.success) {
+
+            if (result && result.success) {
                 return result.data.cars;
             }
+            // Some APIs may return an array directly
+            if (Array.isArray(result)) return result;
             return [];
         } catch (error) {
             console.error('Error fetching cars:', error);
@@ -34,11 +45,22 @@ class CarManager {
     async getCarById(carId) {
         try {
             const response = await fetch(`${this.apiUrl}/${carId}`);
+
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                // Fallback: search static data
+                const fallback = await fetch('/data/cars.json').then(r => r.json()).catch(() => []);
+                const cars = Array.isArray(fallback) ? fallback : (fallback.cars || []);
+                return cars.find(c => String(c.id) === String(carId)) || null;
+            }
+
             const result = await response.json();
-            
-            if (result.success) {
+
+            if (result && result.success) {
                 return result.data;
             }
+            // If API returns the car object directly
+            if (result && result.id) return result;
             return null;
         } catch (error) {
             console.error('Error fetching car:', error);
