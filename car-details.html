@@ -645,6 +645,16 @@
     let currentCar = null;
     let currentImageIndex = 0;
 
+    // Global helper to convert stored image paths to full URLs
+    function getImageUrl(imagePath) {
+      if (!imagePath) return '';
+      if (imagePath.startsWith('images/')) {
+        const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : `${window.location.origin}:5000`;
+        return apiBase + '/' + imagePath;
+      }
+      return imagePath;
+    }
+
     // Helper function for formatting currency
     function formatCurrency(amount) {
       if (!amount) return '₹0';
@@ -801,16 +811,7 @@
       const mainImage = document.getElementById('mainImage');
       const thumbnailGallery = document.getElementById('thumbnailGallery');
 
-      // Helper function to get full image URL
-      const getImageUrl = (imagePath) => {
-        if (imagePath.startsWith('images/')) {
-          const apiBase = typeof CONFIG !== 'undefined' ? CONFIG.CARS_API.replace('/api/cars', '') : `${window.location.origin}:5000`;
-          return apiBase + '/' + imagePath;
-        }
-        return imagePath;
-      };
-
-      // Set main image
+      // Set main image (use global helper)
       mainImage.src = getImageUrl(images[0]);
       currentImageIndex = 0;
 
@@ -838,8 +839,7 @@
     function switchMainImage(index) {
       const images = currentCar.images && currentCar.images.length > 0 ? 
         currentCar.images : ['images/default-car.jpg'];
-      
-      document.getElementById('mainImage').src = images[index];
+      document.getElementById('mainImage').src = getImageUrl(images[index]);
       currentImageIndex = index;
 
       // Update thumbnail active state
@@ -854,8 +854,7 @@
       const galleryImage = document.getElementById('galleryImage');
       const images = currentCar.images && currentCar.images.length > 0 ? 
         currentCar.images : ['images/default-car.jpg'];
-      
-      galleryImage.src = images[currentImageIndex];
+      galleryImage.src = getImageUrl(images[currentImageIndex]);
       updateGalleryCounter();
       modal.style.display = 'block';
       document.body.style.overflow = 'hidden'; // Prevent background scrolling
@@ -872,7 +871,7 @@
         currentCar.images : ['images/default-car.jpg'];
       
       currentImageIndex = (currentImageIndex + 1) % images.length;
-      document.getElementById('galleryImage').src = images[currentImageIndex];
+      document.getElementById('galleryImage').src = getImageUrl(images[currentImageIndex]);
       updateGalleryCounter();
       switchMainImage(currentImageIndex);
     }
@@ -882,7 +881,7 @@
         currentCar.images : ['images/default-car.jpg'];
       
       currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
-      document.getElementById('galleryImage').src = images[currentImageIndex];
+      document.getElementById('galleryImage').src = getImageUrl(images[currentImageIndex]);
       updateGalleryCounter();
       switchMainImage(currentImageIndex);
     }
@@ -1297,7 +1296,7 @@
       // Car summary for test drive
       document.getElementById('testDriveCarSummary').innerHTML = `
         <div style="display:flex; align-items:center; gap:15px;">
-          <img src="${currentCar.images && currentCar.images[0] ? currentCar.images[0] : 'images/default-car.jpg'}" 
+          <img src="${getImageUrl(currentCar.images && currentCar.images[0] ? currentCar.images[0] : 'images/default-car.jpg')}" 
                style="width:80px; height:60px; object-fit:cover; border-radius:6px;">
           <div>
             <h4 style="margin:0; font-size:16px;">${currentCar.make} ${currentCar.model} ${currentCar.year}</h4>
